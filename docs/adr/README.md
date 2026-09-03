@@ -53,3 +53,4 @@ If an accepted ADR changes a certified architecture contract, the same logical c
 
 - `ADR-0001_CONTROL_PLANE_AND_VENDOR_NEUTRAL_IDENTITY.md` — TDLA owns canonical automation identity/audit; Prefect is an initial replaceable runtime.
 - `ADR-0002_TRANSPORT_NEUTRAL_SPORT_ADAPTER_PROTOCOL.md` — Sport Automation Adapter is a versioned transport-neutral protocol boundary; TDLA does not canonically depend on sport Python imports, HTTP, or Prefect-specific integration semantics.
+- `ADR-0003_IMMUTABLE_PLAN_FRAGMENTS_AND_EXPLICIT_COMPOSITION.md` — sport/platform plan fragments remain immutable and separately owned; cross-fragment bindings are explicit and typed; conflicts fail closed; the immutable `ResolvedAutomationPlan` is the canonical executable plan authority.
