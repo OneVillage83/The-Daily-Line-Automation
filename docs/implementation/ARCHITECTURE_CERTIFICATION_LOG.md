@@ -17,11 +17,11 @@ Authority: **This file is the authoritative status record for architecture and i
 
 | Section | Topic | Status | Authority document | Notes |
 |---|---|---|---|---|
-| A-0 | Mission, principles, system boundary | DOCUMENTED — REVIEW PENDING | `docs/architecture/A00-A04_AUTOMATION_FOUNDATION_V1.md` | Initial V1 foundation created 2026-09-02. |
-| A-1 | Ownership / cross-repository authority | DOCUMENTED — REVIEW PENDING | same | DDC / sport / TDLA / website boundaries explicitly separated. |
-| A-2 | Canonical automation domain model | DOCUMENTED — REVIEW PENDING | same | Plan/run/stage/attempt/trigger/artifact/publication/operator/incident concepts established. |
-| A-3 | Run identity / execution lifecycle | DOCUMENTED — REVIEW PENDING | same | Logical run vs attempt, replay/backfill/reprocess/supersession distinctions established. |
-| A-4 | Configuration / environment model | DOCUMENTED — REVIEW PENDING | same | typed/versioned non-secret config + secret references + effective digest established. |
+| A-0 | Mission, principles, system boundary | **ARCHITECTURE-CERTIFIED** | `docs/architecture/A00-A04_AUTOMATION_FOUNDATION_V1.md` + V1.1 addendum | Certified after 2026-09-02 cross-repository review. |
+| A-1 | Ownership / cross-repository authority | **ARCHITECTURE-CERTIFIED** | foundation V1 + `A00-A04_FOUNDATION_ADDENDUM_V1_1.md` | Nested DDC/sport/TDLA lifecycle distinction explicitly resolved. |
+| A-2 | Canonical automation domain model | **ARCHITECTURE-CERTIFIED** | foundation V1 + V1.1 addendum | Plan/run/stage/attempt/trigger/artifact/publication/operator/incident concepts certified. |
+| A-3 | Run identity / execution lifecycle | **ARCHITECTURE-CERTIFIED** | foundation V1 + V1.1 addendum | Logical run vs attempt, nested child jobs, replay/backfill/reprocess/supersession certified. |
+| A-4 | Configuration / environment model | **ARCHITECTURE-CERTIFIED** | foundation V1 | Typed/versioned non-secret config + secret references + effective digest certified. |
 | A-5 | Sport Automation Adapter | PLANNED — NEXT | TBD | Next architecture checkpoint. |
 | A-6 | Pipeline-plan / stage contracts | PLANNED | TBD | |
 | A-7 | Trigger architecture | PLANNED | TBD | |
@@ -47,7 +47,7 @@ Authority: **This file is the authoritative status record for architecture and i
 
 | Milestone | Topic | Status | Evidence |
 |---|---|---|---|
-| M0 | Repository Bootstrap / Engineering Constitution | PLANNED | Architecture/doc seed exists; implementation bootstrap not yet started. |
+| M0 | Repository Bootstrap / Engineering Constitution | PLANNED | Architecture/documentation seed exists; implementation bootstrap not yet started. |
 | M1 | Canonical Automation Domain Contracts | PLANNED | |
 | M2 | PostgreSQL Persistence & Migration Foundation | PLANNED | |
 | M3 | Prefect Runtime Foundation | PLANNED | |
@@ -75,12 +75,32 @@ Authority: **This file is the authoritative status record for architecture and i
 
 Decision:
 - A-0 through A-4 were documented as V1 but intentionally **not self-certified in the same act that created them**.
-- A review pass is required to test the foundation for contradictions, missing identities, ownership leakage, and compatibility with DDC / Daily-MLB / Daily-NFL direction.
-- A-5 is the next design target after that review.
+- A review pass was required to test the foundation for contradictions, missing identities, ownership leakage, and compatibility with DDC / Daily-MLB / Daily-NFL direction.
 
 Documentation-memory policy:
 - `AGENTS.md` establishes a mandatory detailed change record for every material repository modification.
 - `CHANGE_JOURNAL.md` is the chronological history.
 - `CURRENT_RESUME_POINT.md` is the single exact next-step authority for unfinished work.
 
-No production or implementation authority is granted by this entry.
+No production or implementation authority was granted by this initial entry.
+
+### 2026-09-02 — A-0 through A-4 architecture certified
+
+Evidence:
+- `docs/implementation/A00-A04_ARCHITECTURE_CONFORMANCE_REVIEW_20260902.md`
+- `docs/architecture/A00-A04_FOUNDATION_ADDENDUM_V1_1.md`
+- `docs/adr/ADR-0001_CONTROL_PLANE_AND_VENDOR_NEUTRAL_IDENTITY.md`
+
+Review result:
+- DDC ownership boundary: PASS after clarifying the distinction between DDC internal acquisition/provider run lifecycle and TDLA outer automation workflow lifecycle.
+- Daily-MLB manual/service boundary: PASS.
+- Daily-NFL/NCAAF event-relative compatibility: PASS at foundation scope.
+- logical run / physical attempt / replay / reprocess / backfill / supersession semantics: PASS at foundation scope.
+- configuration/environment/secrets boundary: PASS.
+- orchestration-runtime/vendor independence: PASS.
+- documentation/project-memory discipline: PASS.
+
+Decision:
+- **A-0 through A-4 are ARCHITECTURE-CERTIFIED as Foundation V1 governed together with the V1.1 nested-lifecycle addendum.**
+- This certification grants architecture authority only. It does not certify any runtime implementation.
+- A-5 Sport Automation Adapter Contract is the next architecture checkpoint.
