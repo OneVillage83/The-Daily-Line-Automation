@@ -30,17 +30,26 @@ It does **not** own sport intelligence and it does **not** replace Daily-Data-Co
 14. Retry `attempt_id` is not child deduplication identity. The stable logical idempotency identity remains constant across attempts of the same logical operation.
 15. Adapter capability support does not grant production authorization; certification/environment/plan/release/side-effect policy must all permit the operation.
 16. Unknown async child state or lost acknowledgement is not permission for blind redispatch.
+17. V1 automation plans are declarative DAGs; repeated readiness checks/retries/rescheduling are evaluations/attempts, not graph cycles.
+18. Sport and TDLA platform stages remain in immutable separately owned plan fragments; cross-fragment connections use explicit typed bindings and conflicts fail closed.
+19. The immutable `ResolvedAutomationPlan` is canonical executable plan authority; runtime flow objects are implementation cross-references only.
+20. Dynamic fan-out membership remains sport-owned and revision/digest-bound; TDLA cannot infer game membership from names, dates, or provider IDs.
+21. Stage definitions, stage materializations, logical StageRuns, and physical RunAttempts are distinct identity layers.
+22. `OPTIONAL`, `NO_OP`, `NOT_APPLICABLE`, and degraded outcomes satisfy only dependency/output contracts that explicitly permit them.
+23. Production resolved plans pin immutable execution targets and execution-affecting policy versions/digests.
+24. Plan identity is deterministic from schema-controlled semantic canonicalization and SHA-256; presentation-only metadata does not silently alter execution identity.
 
 ## Current status
 
 - Repository created and architecture-first policy established.
 - A-0 through A-4 architecture foundation: **ARCHITECTURE-CERTIFIED**.
 - A-5 Sport Automation Adapter contract: **ARCHITECTURE-CERTIFIED**.
-- A-5 certification evidence: `docs/implementation/A05_ARCHITECTURE_CONFORMANCE_REVIEW_20260903.md`.
-- A-6 Pipeline Plan / Stage Contracts: **NEXT**.
+- A-6 Pipeline Plan / Stage Contracts: **ARCHITECTURE-CERTIFIED**.
+- A-6 certification evidence: `docs/implementation/A06_ARCHITECTURE_CONFORMANCE_REVIEW_20260903.md`.
+- A-7 Trigger Architecture: **NEXT**.
 - No production automation implementation is authoritative yet.
 - Daily-MLB remains manual-first until its production pipeline is certified and later proves automation equivalence in shadow/supervised modes.
-- The existing Daily-MLB starter job-service shape is compatible in principle with A-5, but it is not assumed production-conforming; production async onboarding must prove caller-stable idempotent dispatch/reconciliation.
+- The existing Daily-MLB starter job-service shape is compatible in principle with A-5/A-6 wrapping, but it is not assumed production-conforming; future onboarding targets the certified final manual MLB pipeline and must prove stable idempotent async dispatch/reconciliation plus A-6 plan/output contracts.
 
 ## Governing documents
 
@@ -50,8 +59,11 @@ It does **not** own sport intelligence and it does **not** replace Daily-Data-Co
 - `docs/architecture/A00-A04_FOUNDATION_ADDENDUM_V1_1.md` — certified nested lifecycle/cross-repository clarification.
 - `docs/implementation/A00-A04_ARCHITECTURE_CONFORMANCE_REVIEW_20260902.md` — A-0 through A-4 certification review/evidence.
 - `docs/architecture/A05_SPORT_AUTOMATION_ADAPTER_V1.md` — A-5 base adapter architecture.
-- `docs/architecture/A05_SPORT_AUTOMATION_ADAPTER_ADDENDUM_V1_1.md` — A-5 certification clarifications for logical idempotency, manual/automation authority, capability vs authorization, and acknowledgement-loss recovery.
+- `docs/architecture/A05_SPORT_AUTOMATION_ADAPTER_ADDENDUM_V1_1.md` — A-5 certification clarifications.
 - `docs/implementation/A05_ARCHITECTURE_CONFORMANCE_REVIEW_20260903.md` — A-5 certification review/evidence.
+- `docs/architecture/A06_PIPELINE_PLAN_STAGE_CONTRACTS_V1.md` — A-6 base plan/stage graph architecture.
+- `docs/architecture/A06_PIPELINE_PLAN_STAGE_CONTRACTS_ADDENDUM_V1_1.md` — A-6 certification clarifications for scope-set binding, digest participation, schedule-slot identity, and immutable policy binding.
+- `docs/implementation/A06_ARCHITECTURE_CONFORMANCE_REVIEW_20260903.md` — A-6 certification review/evidence and 30-case stress matrix.
 - `docs/implementation/IMPLEMENTATION_ROADMAP_V1.md` — milestone implementation/certification sequence.
 - `docs/implementation/ARCHITECTURE_CERTIFICATION_LOG.md` — authoritative architecture/milestone status.
 - `docs/implementation/CHANGE_JOURNAL.md` — chronological durable change record and resume history.
@@ -59,6 +71,7 @@ It does **not** own sport intelligence and it does **not** replace Daily-Data-Co
 - `docs/adr/README.md` — Architecture Decision Record policy/index.
 - `docs/adr/ADR-0001_CONTROL_PLANE_AND_VENDOR_NEUTRAL_IDENTITY.md` — TDLA canonical identity / replaceable orchestrator decision.
 - `docs/adr/ADR-0002_TRANSPORT_NEUTRAL_SPORT_ADAPTER_PROTOCOL.md` — transport-neutral sport adapter protocol decision.
+- `docs/adr/ADR-0003_IMMUTABLE_PLAN_FRAGMENTS_AND_EXPLICIT_COMPOSITION.md` — immutable fragment, explicit composition, resolved-plan authority decision.
 
 ## Planned technical baseline
 
