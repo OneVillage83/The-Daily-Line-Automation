@@ -21,8 +21,8 @@ Architecture is intentionally defined before production implementation so TDLA c
 | A-3 | Run identity / execution lifecycle | foundation V1 + V1.1 addendum | **ARCHITECTURE-CERTIFIED** |
 | A-4 | Configuration / environment model | `A00-A04_AUTOMATION_FOUNDATION_V1.md` | **ARCHITECTURE-CERTIFIED** |
 | A-5 | Sport Automation Adapter contract | `A05_SPORT_AUTOMATION_ADAPTER_V1.md` + `A05_SPORT_AUTOMATION_ADAPTER_ADDENDUM_V1_1.md` | **ARCHITECTURE-CERTIFIED** |
-| A-6 | Pipeline plan / stage contracts | TBD | **NEXT** |
-| A-7 | Trigger architecture | TBD | Planned |
+| A-6 | Pipeline plan / stage contracts | `A06_PIPELINE_PLAN_STAGE_CONTRACTS_V1.md` + `A06_PIPELINE_PLAN_STAGE_CONTRACTS_ADDENDUM_V1_1.md` | **ARCHITECTURE-CERTIFIED** |
+| A-7 | Trigger architecture | TBD | **NEXT** |
 | A-8 | Event-relative scheduling | TBD | Planned |
 | A-9 | Dependency / readiness engine | TBD | Planned |
 | A-10 | Worker / execution backends | TBD | Planned |
@@ -67,7 +67,25 @@ Important A-5 certified clarifications:
 - asynchronous production integration must recover the lost-acknowledgement case by logical idempotency identity/equivalent durable deduplication handle;
 - the adapter is a transport-neutral protocol, not a Python-import/HTTP/Prefect-specific contract.
 
-## Certified foundation + adapter invariants
+## Certification evidence for A-6
+
+- `A06_PIPELINE_PLAN_STAGE_CONTRACTS_V1.md`
+- `A06_PIPELINE_PLAN_STAGE_CONTRACTS_ADDENDUM_V1_1.md`
+- `docs/implementation/A06_ARCHITECTURE_CONFORMANCE_REVIEW_20260903.md`
+- `docs/adr/ADR-0003_IMMUTABLE_PLAN_FRAGMENTS_AND_EXPLICIT_COMPOSITION.md`
+
+A-6 establishes a declarative DAG-based plan model with immutable sport/platform fragments, explicit typed composition, deterministic stage materialization, sport-owned dynamic scope membership, fan-out/fan-in barriers, typed timing/readiness/input/output declarations, immutable target/policy binding, side-effect classification, and deterministic semantic plan digests.
+
+Important A-6 certified clarifications:
+
+- sport child membership is represented through a neutral `ScopeSetBinding` over exact sport-owned `SportScopeRef` values; TDLA does not invent membership;
+- semantic plan digests exclude schema-declared presentation-only/audit metadata but include all execution-affecting fields;
+- repeated snapshots use stable logical `ScheduleSlotRef` identity rather than wall-clock timestamp identity;
+- production resolved plans pin immutable execution-affecting policy versions/digests rather than mutable policy aliases;
+- cross-fragment composition has no silent precedence; conflicts and incompatible port bindings fail closed;
+- the `ResolvedAutomationPlan`, not a Prefect flow definition, is the executable plan authority.
+
+## Certified foundation + adapter + plan invariants
 
 - TDLA is a control plane, not a sports model repository.
 - DDC remains authority for certified shared sport-agnostic acquisition/facts.
@@ -83,8 +101,13 @@ Important A-5 certified clarifications:
 - sport scope identity is opaque/sport-owned; TDLA stores references and neutral scheduling metadata.
 - unknown child state is not permission to duplicate dispatch.
 - shadow/supervised/production side-effect authority is explicit and fail-closed.
+- V1 executable plans are declarative DAGs assembled from immutable fragments with explicit typed bindings.
+- stage definition, stage materialization, logical StageRun, and physical RunAttempt remain distinct identities.
+- dynamic fan-out membership is revision/digest bound and sport-owned.
+- optional/conditional/no-op/degraded outcomes satisfy only explicitly compatible dependency/output contracts.
+- production resolved plans use immutable execution targets and immutable execution-affecting policy bindings.
+- semantic plan identity uses deterministic canonical normalization + SHA-256.
 - PostgreSQL is intended as TDLA authoritative persistence.
-- production workloads must use immutable release identities/digests.
 - non-secret effective configuration is schema-validated and hashable.
 - every material change must produce detailed durable documentation and an exact resume point.
 
