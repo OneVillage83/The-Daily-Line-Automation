@@ -8,7 +8,8 @@ It does **not** own sport intelligence and it does **not** replace Daily-Data-Co
 
 - **Daily-Data-Core (DDC)** owns sport-agnostic shared acquisition/facts and generic provider/provenance infrastructure.
 - **Daily-MLB, Daily-NFL, Daily-NCAAF, and future Daily-* repositories** own sport-specific identity, state, features, models, simulation, prediction, recommendation, settlement interpretation, and sport-specific report content.
-- **The-Daily-Line-Automation (TDLA)** owns orchestration, scheduling, trigger evaluation, execution lifecycle, retries, idempotency, operational audit, worker/resource coordination, publication coordination, and operator-facing automation state.
+- **The-Daily-Line-Automation (TDLA)** owns the **outer automation/orchestration lifecycle**: planning, scheduling, trigger evaluation, workflow/stage state, worker dispatch, retries, idempotency, operational audit, publication coordination, and operator-facing automation state.
+- **Sport services and DDC may retain nested child job/acquisition lifecycles** under their own certified contracts. TDLA links those identities through provenance rather than replacing them.
 - **The Daily Line website/app** owns presentation/product state and receives publication packages through explicit versioned contracts rather than direct automation writes into application tables.
 
 ## Non-negotiable architecture rules
@@ -23,11 +24,15 @@ It does **not** own sport intelligence and it does **not** replace Daily-Data-Co
 8. UTC is the canonical internal time basis; source/event IANA timezone context must be retained where meaningful.
 9. Sport repositories declare sport-specific readiness, required/optional inputs, failure/degradation policies, and event-relative stage plans. Automation enforces those contracts without inventing sports meaning.
 10. Every material repository change must create or update durable documentation explaining what changed, why, validation performed, architecture/operational impact, and the exact resume point.
+11. TDLA canonical identity is independent of Prefect or any future orchestration runtime.
+12. TDLA outer run/attempt identity must never silently replace child sport-job, DDC-acquisition, or provider-attempt identity.
 
 ## Current status
 
 - Repository created and architecture-first policy established.
-- A-0 through A-4 architecture foundation: **DOCUMENTED — certification pending implementation-independent review**.
+- A-0 through A-4 architecture foundation: **ARCHITECTURE-CERTIFIED**.
+- A-0 through A-4 certification evidence: `docs/implementation/A00-A04_ARCHITECTURE_CONFORMANCE_REVIEW_20260902.md`.
+- Nested lifecycle clarification: `docs/architecture/A00-A04_FOUNDATION_ADDENDUM_V1_1.md`.
 - A-5 Sport Automation Adapter contract: **NEXT**.
 - No production automation implementation is authoritative yet.
 - Daily-MLB remains manual-first until its production pipeline is certified and later proves automation equivalence in shadow/supervised modes.
@@ -36,12 +41,15 @@ It does **not** own sport intelligence and it does **not** replace Daily-Data-Co
 
 - `AGENTS.md` — repository operating constitution and mandatory documentation/change-record rules.
 - `docs/architecture/README.md` — architecture index and status.
-- `docs/architecture/A00-A04_AUTOMATION_FOUNDATION_V1.md` — A-0 through A-4 architecture contract.
+- `docs/architecture/A00-A04_AUTOMATION_FOUNDATION_V1.md` — A-0 through A-4 base architecture contract.
+- `docs/architecture/A00-A04_FOUNDATION_ADDENDUM_V1_1.md` — certified nested lifecycle/cross-repository clarification.
+- `docs/implementation/A00-A04_ARCHITECTURE_CONFORMANCE_REVIEW_20260902.md` — certification review/evidence.
 - `docs/implementation/IMPLEMENTATION_ROADMAP_V1.md` — milestone implementation/certification sequence.
 - `docs/implementation/ARCHITECTURE_CERTIFICATION_LOG.md` — authoritative architecture/milestone status.
 - `docs/implementation/CHANGE_JOURNAL.md` — chronological durable change record and resume history.
 - `docs/implementation/CURRENT_RESUME_POINT.md` — exact current continuation point.
 - `docs/adr/README.md` — Architecture Decision Record policy/index.
+- `docs/adr/ADR-0001_CONTROL_PLANE_AND_VENDOR_NEUTRAL_IDENTITY.md` — TDLA canonical identity / replaceable orchestrator decision.
 
 ## Planned technical baseline
 
