@@ -23,8 +23,8 @@ Authority: **This file is the authoritative status record for architecture and i
 | A-3 | Run identity / execution lifecycle | **ARCHITECTURE-CERTIFIED** | foundation V1 + V1.1 addendum | Logical run vs attempt, nested child jobs, replay/backfill/reprocess/supersession certified. |
 | A-4 | Configuration / environment model | **ARCHITECTURE-CERTIFIED** | foundation V1 | Typed/versioned non-secret config + secret references + effective digest certified. |
 | A-5 | Sport Automation Adapter | **ARCHITECTURE-CERTIFIED** | `docs/architecture/A05_SPORT_AUTOMATION_ADAPTER_V1.md` + `A05_SPORT_AUTOMATION_ADAPTER_ADDENDUM_V1_1.md` | Certified 2026-09-03 after cross-repository and distributed-failure stress review. |
-| A-6 | Pipeline-plan / stage contracts | PLANNED — NEXT | TBD | Next architecture checkpoint. |
-| A-7 | Trigger architecture | PLANNED | TBD | |
+| A-6 | Pipeline-plan / stage contracts | **ARCHITECTURE-CERTIFIED** | `docs/architecture/A06_PIPELINE_PLAN_STAGE_CONTRACTS_V1.md` + `A06_PIPELINE_PLAN_STAGE_CONTRACTS_ADDENDUM_V1_1.md` | Certified 2026-09-03 after graph/composition/identity/canonicalization stress review. |
+| A-7 | Trigger architecture | PLANNED — NEXT | TBD | Next architecture checkpoint. |
 | A-8 | Event-relative scheduling | PLANNED | TBD | |
 | A-9 | Dependency / readiness | PLANNED | TBD | |
 | A-10 | Worker / execution backend | PLANNED | TBD | |
@@ -48,7 +48,7 @@ Authority: **This file is the authoritative status record for architecture and i
 | Milestone | Topic | Status | Evidence |
 |---|---|---|---|
 | M0 | Repository Bootstrap / Engineering Constitution | PLANNED | Architecture/documentation seed exists; implementation bootstrap not yet started. |
-| M1 | Canonical Automation Domain Contracts | PLANNED | |
+| M1 | Canonical Automation Domain Contracts | PLANNED | A-6 architecture now certifies plan/stage contract semantics and required canonical digest test vectors; implementation remains unstarted. |
 | M2 | PostgreSQL Persistence & Migration Foundation | PLANNED | |
 | M3 | Prefect Runtime Foundation | PLANNED | |
 | M4 | Scheduling / Trigger Engine | PLANNED | |
@@ -60,7 +60,7 @@ Authority: **This file is the authoritative status record for architecture and i
 | M10 | Observability / Alerts / Incidents | PLANNED | |
 | M11 | Publication Subsystem | PLANNED | |
 | M12 | Security / Service Identity | PLANNED | |
-| M13 | Daily-MLB Adapter | PLANNED | Requires certified manual MLB pipeline. Current starter service shape is compatible in principle but is not A-5 production-certified. |
+| M13 | Daily-MLB Adapter | PLANNED | Requires certified manual MLB pipeline. Current starter service shape is compatible in principle but is not A-5/A-6 production-certified. |
 | M14 | Daily-MLB Shadow Automation | PLANNED | |
 | M15 | Daily-MLB Production Automation Certification | PLANNED | |
 | M16 | Daily-NFL Integration | PLANNED | |
@@ -136,4 +136,39 @@ Important compatibility note:
 Decision:
 - **A-5 is ARCHITECTURE-CERTIFIED as V1 governed together with the V1.1 certification addendum and ADR-0002.**
 - No real sport adapter implementation or production automation authority is certified by this decision.
-- **A-6 Pipeline Plan / Stage Contracts is NEXT.**
+- A-6 Pipeline Plan / Stage Contracts became the next architecture checkpoint.
+
+### 2026-09-03 — A-6 Pipeline Plan / Stage Contracts architecture certified
+
+Evidence:
+- `docs/architecture/A06_PIPELINE_PLAN_STAGE_CONTRACTS_V1.md`
+- `docs/architecture/A06_PIPELINE_PLAN_STAGE_CONTRACTS_ADDENDUM_V1_1.md`
+- `docs/implementation/A06_ARCHITECTURE_CONFORMANCE_REVIEW_20260903.md`
+- `docs/adr/ADR-0003_IMMUTABLE_PLAN_FRAGMENTS_AND_EXPLICIT_COMPOSITION.md`
+
+Review result:
+- sport/DDC/TDLA ownership boundary: PASS.
+- V1 DAG-only graph model and cycle rejection: PASS.
+- stage definition vs concrete materialization identity: PASS.
+- dynamic scope-set fan-out/fan-in without TDLA sport identity inference: PASS after V1.1 `ScopeSetBinding` clarification.
+- repeated pre-event snapshot identity: PASS after V1.1 stable `ScheduleSlotRef` clarification.
+- explicit dependency/output satisfaction semantics: PASS.
+- `OPTIONAL`, `CONDITIONAL`, `NOT_APPLICABLE`, `NO_OP`, and `SUCCEEDED_DEGRADED` behavior: PASS at A-6 scope.
+- explicit fragment ownership/typed port composition/no override precedence: PASS.
+- immutable execution target binding: PASS.
+- side-effect classification vs shadow/supervised/production modes: PASS.
+- deterministic semantic canonicalization + SHA-256 identity: PASS after V1.1 digest-participation clarification.
+- immutable execution-affecting policy bindings: PASS after V1.1 clarification.
+- plan/scope revision and completed-history immutability: PASS.
+- Daily-MLB no-games/multi-game/doubleheader/readiness patterns: PASS at architecture level.
+- Daily-NFL/NCAAF multiple pre-kickoff snapshots and event-time changes: PASS without sport-specific TDLA branches.
+- later A-7 through A-20 algorithm/DDL boundaries remain correctly deferred: PASS.
+
+Stress review:
+- `A06_ARCHITECTURE_CONFORMANCE_REVIEW_20260903.md` records 30 primary plan/graph/materialization/canonicalization stress cases plus additional failure-path checks.
+
+Decision:
+- **A-6 is ARCHITECTURE-CERTIFIED as V1 governed together with the V1.1 certification addendum and ADR-0003.**
+- The canonical executable authority is the immutable `ResolvedAutomationPlan`, not a Prefect flow/runtime object.
+- No Pydantic implementation, canonical serializer code, Prefect flow, PostgreSQL schema, or real sport adapter is certified by this decision.
+- **A-7 Trigger Architecture is NEXT.**
