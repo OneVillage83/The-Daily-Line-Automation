@@ -1,71 +1,156 @@
 # The Daily Line Automation — Current Resume Point
 
-Last updated: 2026-09-02  
+Last updated: 2026-09-02 (America/Los_Angeles)  
 Authority: This file is the single exact continuation point for unfinished TDLA work. It does not override architecture/certification authority; it tells the next session where to resume.
 
 ## Current project state
 
-- Repository exists and is no longer empty.
-- Repository constitution/documentation-memory policy is established in `AGENTS.md`.
-- A-0 through A-4 architecture is documented in `docs/architecture/A00-A04_AUTOMATION_FOUNDATION_V1.md`.
-- A-0 through A-4 are **DOCUMENTED — REVIEW PENDING**, not yet architecture-certified.
+- Repository exists and the architecture/documentation foundation is established.
+- Repository constitution/documentation-memory policy is authoritative in `AGENTS.md`.
+- A-0 through A-4 base architecture is in `docs/architecture/A00-A04_AUTOMATION_FOUNDATION_V1.md`.
+- Nested lifecycle/cross-repository clarification is in `docs/architecture/A00-A04_FOUNDATION_ADDENDUM_V1_1.md`.
+- A-0 through A-4 are **ARCHITECTURE-CERTIFIED**.
+- Certification evidence: `docs/implementation/A00-A04_ARCHITECTURE_CONFORMANCE_REVIEW_20260902.md`.
+- ADR-0001 establishes TDLA canonical automation identity and a replaceable orchestration runtime.
 - No production implementation milestone is certified.
 - No TDLA automation is production-authoritative.
 - Daily-MLB remains manual-first; later automation must prove equivalence after its manual production architecture is certified.
 
-## Exact next step
+## Resolved finding from A-0 through A-4 review
 
-### Step 1 — Review A-0 through A-4 before certification
+The review identified one important terminology ambiguity: DDC/sport repositories may already have internal acquisition/job lifecycles, while TDLA owns orchestration lifecycle.
 
-Perform a conformance/consistency review focused on:
+Certified resolution:
 
-1. **DDC boundary:** confirm TDLA does not duplicate provider acquisition, raw-evidence, generic market/weather/venue/travel functions that belong to Daily-Data-Core.
-2. **Daily-MLB boundary:** confirm TDLA does not absorb MLB-specific readiness, lineup/pitcher semantics, model logic, recommendation logic, or settlement/report interpretation.
-3. **Daily-NFL / NCAAF boundary:** confirm the generic contracts can support event-relative football workflows without introducing football-specific branches into TDLA.
-4. **Identity review:** stress-test logical run vs attempt vs replay vs reprocess vs backfill vs supersession semantics for duplicate triggers, schedule changes, process loss, and intentional reruns.
-5. **Configuration review:** verify environment/config precedence, non-secret digest rules, runtime override audit, and secret-reference treatment are sufficient.
-6. **Vendor independence:** verify no canonical TDLA identity depends on Prefect-specific IDs/state.
-7. **Documentation memory:** verify the mandated change-journal + resume-point + certification-log process is sufficient to prevent future rediscovery/rework.
+```text
+TDLA WorkflowRun
+    -> TDLA StageRun / RunAttempt
+        -> sport child job/service reference
+            -> DDC acquisition run(s)
+                -> provider request/attempt evidence
+```
 
-### Step 2 — Resolve findings
+TDLA does not collapse or replace child identities. It links them through provenance.
 
-If review finds defects:
-- update A-0 through A-4;
-- add/update ADR(s) when the fix reflects a durable decision/tradeoff;
-- append `CHANGE_JOURNAL.md`;
-- keep status as review pending until clean.
+## Exact next step — A-5 Sport Automation Adapter Contract
 
-### Step 3 — Certify A-0 through A-4 if clean
+Design and document the precise sport-neutral interface by which Daily-MLB, Daily-NFL, Daily-NCAAF, and future Daily-* repositories expose automation capabilities to TDLA without moving sport logic into TDLA.
 
-Create an architecture-conformance review record and update:
-- `docs/implementation/ARCHITECTURE_CERTIFICATION_LOG.md`;
-- `docs/architecture/README.md`;
-- `CHANGE_JOURNAL.md`;
-- this resume point.
+### A-5 must define at minimum
 
-### Step 4 — Begin A-5 Sport Automation Adapter Contract
+1. **Adapter identity/version**
+   - adapter contract version;
+   - sport implementation version;
+   - capability negotiation/compatibility;
+   - fail-closed behavior for incompatible versions.
 
-A-5 must define the precise sport-neutral boundary by which Daily-* repositories expose automation capabilities. At minimum test the design against:
+2. **Sport scope references**
+   - event/game reference;
+   - slate/day/batch reference;
+   - schedule revision/reference fields;
+   - TDLA stores sport-owned references without becoming permanent sport identity authority.
 
-- MLB probable-pitcher/lineup timing;
-- postponements/reschedules/doubleheaders;
-- NFL/NCAAF injury/inactive/weather timing;
-- one-event and whole-slate workflows;
-- optional vs required data/stages;
-- no-games days;
-- settlement/evaluation workflows;
-- shadow/supervised/production modes;
-- partial provider degradation;
-- deadline-driven final prediction/publication stages.
+3. **Planning interface**
+   - obtain/validate an automation plan or plan fragment;
+   - event-relative timing declarations;
+   - required/optional stages;
+   - deadlines/cutoffs;
+   - dependencies;
+   - execution mode (`MANUAL_*`, `AUTOMATION_SHADOW`, `AUTOMATION_SUPERVISED`, `AUTOMATION_PRODUCTION`).
+
+4. **Readiness interface**
+   - `READY`, `WAITING`, `BLOCKED`, or equivalent contract result;
+   - sport-defined reason codes;
+   - next-check hints where valid;
+   - evidence/freshness references;
+   - no TDLA interpretation of MLB/NFL-specific meaning.
+
+5. **Execution interface**
+   - immutable release/executable reference;
+   - structured invocation request;
+   - stable outer idempotency/execution reference propagation;
+   - child/external execution reference returned by sport service where applicable;
+   - synchronous vs asynchronous execution capability.
+
+6. **Child reconciliation**
+   - inspect a previously-dispatched child job after TDLA restart/loss;
+   - determine running/succeeded/failed/cancelled/unknown;
+   - avoid blind duplicate redispatch;
+   - retain child diagnostics without redefining sport meaning.
+
+7. **Cancellation / timeout contract**
+   - whether cancellation is supported;
+   - cancellation acknowledgement semantics;
+   - what TDLA timeout means vs child-service timeout;
+   - orphaned-child behavior.
+
+8. **Result contract**
+   - sport semantic success/degradation/failure result;
+   - required output/artifact manifest identity;
+   - sport-provided model/config/version metadata;
+   - structured failure/degradation reason codes;
+   - TDLA independently validates generic outer output requirements.
+
+9. **Artifact contract**
+   - manifest schema/version;
+   - content hashes;
+   - artifact locations/handles;
+   - required vs optional artifacts;
+   - immutable evidence references;
+   - ownership of retention/storage metadata.
+
+10. **Settlement/evaluation hooks**
+    - generic orchestration invocation only;
+    - sport owns settlement interpretation and evaluation semantics;
+    - same adapter framework should support postgame workflows without TDLA sports logic.
+
+11. **Security boundary**
+    - service identity/auth capability declaration;
+    - no raw sport/provider secrets returned in adapter results;
+    - safe diagnostics.
+
+12. **Observability/provenance handoff**
+    - trace/correlation ID propagation;
+    - child execution references;
+    - output/input provenance handles;
+    - TDLA vs sport/DDC authority clearly separable.
+
+### A-5 stress cases that must be used before certification
+
+- MLB probable-pitcher or lineup not ready at one check and ready later;
+- MLB postponement/reschedule/doubleheader;
+- NFL/NCAAF late inactive/injury/weather update before kickoff;
+- no-games day;
+- slate-level execution plus game-level child work;
+- partial optional-provider degradation;
+- child job continues after TDLA worker dies;
+- duplicate readiness/trigger events;
+- shadow mode must produce no production publication side effect;
+- supervised mode pauses for operator approval;
+- production mode can auto-continue only under explicit policy;
+- settlement/evaluation runs after event completion;
+- incompatible adapter/TDLA contract versions fail closed.
+
+## Immediate documentation outputs for A-5
+
+Create:
+
+- `docs/architecture/A05_SPORT_AUTOMATION_ADAPTER_V1.md`
+- architecture review/certification evidence for A-5 after stress testing;
+- ADR only if A-5 introduces a durable new tradeoff not already covered;
+- detailed `CHANGE_JOURNAL.md` entry;
+- updated `ARCHITECTURE_CERTIFICATION_LOG.md`;
+- updated architecture index;
+- updated resume point.
 
 ## Do not do yet
 
-Until A-0 through A-4 review is complete and A-5/A-6 contracts are defined:
+Until A-5 and A-6 are certified:
 
-- do not build sport-specific adapters;
-- do not add MLB/NFL conditional branches to generic code;
-- do not create production Prefect flows and treat them as authority;
-- do not design database DDL prematurely around Prefect objects;
+- do not build real MLB/NFL/NCAAF adapters;
+- do not add sport-specific conditionals to generic TDLA code;
+- do not create production Prefect flows and treat runtime IDs as canonical authority;
+- do not design final PostgreSQL DDL around unreviewed adapter/run contracts;
 - do not enable production publishing;
 - do not automate around unfinished Daily-MLB manual architecture.
 
@@ -76,4 +161,7 @@ Until A-0 through A-4 review is complete and A-5/A-6 contracts are defined:
 3. this file
 4. `docs/implementation/ARCHITECTURE_CERTIFICATION_LOG.md`
 5. `docs/architecture/A00-A04_AUTOMATION_FOUNDATION_V1.md`
-6. relevant DDC / Daily-MLB / Daily-NFL governing architecture before certifying cross-repository boundaries.
+6. `docs/architecture/A00-A04_FOUNDATION_ADDENDUM_V1_1.md`
+7. `docs/implementation/A00-A04_ARCHITECTURE_CONFORMANCE_REVIEW_20260902.md`
+8. `docs/adr/ADR-0001_CONTROL_PLANE_AND_VENDOR_NEUTRAL_IDENTITY.md`
+9. relevant current DDC / Daily-MLB / Daily-NFL governing contracts while designing A-5.
