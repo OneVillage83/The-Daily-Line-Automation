@@ -22,8 +22,8 @@ Authority: **This file is the authoritative status record for architecture and i
 | A-2 | Canonical automation domain model | **ARCHITECTURE-CERTIFIED** | foundation V1 + V1.1 addendum | Plan/run/stage/attempt/trigger/artifact/publication/operator/incident concepts certified. |
 | A-3 | Run identity / execution lifecycle | **ARCHITECTURE-CERTIFIED** | foundation V1 + V1.1 addendum | Logical run vs attempt, nested child jobs, replay/backfill/reprocess/supersession certified. |
 | A-4 | Configuration / environment model | **ARCHITECTURE-CERTIFIED** | foundation V1 | Typed/versioned non-secret config + secret references + effective digest certified. |
-| A-5 | Sport Automation Adapter | PLANNED — NEXT | TBD | Next architecture checkpoint. |
-| A-6 | Pipeline-plan / stage contracts | PLANNED | TBD | |
+| A-5 | Sport Automation Adapter | **ARCHITECTURE-CERTIFIED** | `docs/architecture/A05_SPORT_AUTOMATION_ADAPTER_V1.md` + `A05_SPORT_AUTOMATION_ADAPTER_ADDENDUM_V1_1.md` | Certified 2026-09-03 after cross-repository and distributed-failure stress review. |
+| A-6 | Pipeline-plan / stage contracts | PLANNED — NEXT | TBD | Next architecture checkpoint. |
 | A-7 | Trigger architecture | PLANNED | TBD | |
 | A-8 | Event-relative scheduling | PLANNED | TBD | |
 | A-9 | Dependency / readiness | PLANNED | TBD | |
@@ -53,14 +53,14 @@ Authority: **This file is the authoritative status record for architecture and i
 | M3 | Prefect Runtime Foundation | PLANNED | |
 | M4 | Scheduling / Trigger Engine | PLANNED | |
 | M5 | Worker / Execution Backend | PLANNED | |
-| M6 | Sport Automation Adapter Framework | PLANNED | |
+| M6 | Sport Automation Adapter Framework | PLANNED | A-5 architecture is certified; implementation awaits architecture sequence/implementation start. |
 | M7 | Idempotency / Retry / Recovery | PLANNED | |
 | M8 | Provenance / Immutable Run Ledger | PLANNED | |
 | M9 | Artifact / Replay / Backfill / Reprocess | PLANNED | |
 | M10 | Observability / Alerts / Incidents | PLANNED | |
 | M11 | Publication Subsystem | PLANNED | |
 | M12 | Security / Service Identity | PLANNED | |
-| M13 | Daily-MLB Adapter | PLANNED | Requires certified manual MLB pipeline. |
+| M13 | Daily-MLB Adapter | PLANNED | Requires certified manual MLB pipeline. Current starter service shape is compatible in principle but is not A-5 production-certified. |
 | M14 | Daily-MLB Shadow Automation | PLANNED | |
 | M15 | Daily-MLB Production Automation Certification | PLANNED | |
 | M16 | Daily-NFL Integration | PLANNED | |
@@ -103,4 +103,37 @@ Review result:
 Decision:
 - **A-0 through A-4 are ARCHITECTURE-CERTIFIED as Foundation V1 governed together with the V1.1 nested-lifecycle addendum.**
 - This certification grants architecture authority only. It does not certify any runtime implementation.
-- A-5 Sport Automation Adapter Contract is the next architecture checkpoint.
+- A-5 Sport Automation Adapter Contract became the next architecture checkpoint.
+
+### 2026-09-03 — A-5 Sport Automation Adapter architecture certified
+
+Evidence:
+- `docs/architecture/A05_SPORT_AUTOMATION_ADAPTER_V1.md`
+- `docs/architecture/A05_SPORT_AUTOMATION_ADAPTER_ADDENDUM_V1_1.md`
+- `docs/implementation/A05_ARCHITECTURE_CONFORMANCE_REVIEW_20260903.md`
+- `docs/adr/ADR-0002_TRANSPORT_NEUTRAL_SPORT_ADAPTER_PROTOCOL.md`
+
+Review result:
+- DDC ownership boundary: PASS.
+- Daily-MLB service/manual boundary: PASS at architecture level; current starter service is not assumed production-conforming.
+- Daily-NFL/NCAAF event-relative/readiness compatibility: PASS.
+- sport-neutral scope/reference contract: PASS.
+- version/capability fail-closed behavior: PASS.
+- transport/orchestrator independence: PASS.
+- logical idempotency vs retry-attempt identity: PASS after V1.1 clarification.
+- asynchronous child reconciliation after TDLA loss: PASS.
+- lost acknowledgement before child-reference persistence: PASS after making logical-key reconciliation production-critical.
+- cancellation/timeout distinction: PASS.
+- shadow/supervised/production side-effect authority: PASS after V1.1 clarification.
+- semantic result/artifact/provenance boundary: PASS.
+- settlement/evaluation generic invocation boundary: PASS.
+- security/secrets boundary: PASS at A-5 scope.
+
+Important compatibility note:
+- Daily-MLB's documented starter service generates a child run ID and supports polling/artifact retrieval, which fits the nested adapter shape.
+- Its current documented invocation does not by itself establish caller-supplied idempotent create / lookup-by-logical-idempotency-key. The eventual M13 adapter/wrapper must add or prove that property before asynchronous production certification.
+
+Decision:
+- **A-5 is ARCHITECTURE-CERTIFIED as V1 governed together with the V1.1 certification addendum and ADR-0002.**
+- No real sport adapter implementation or production automation authority is certified by this decision.
+- **A-6 Pipeline Plan / Stage Contracts is NEXT.**
