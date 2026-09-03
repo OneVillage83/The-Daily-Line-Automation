@@ -1,7 +1,8 @@
 # ADR-0001 — TDLA Control Plane Owns Canonical Identity; Orchestrator Runtime Is Replaceable
 
 Date: 2026-09-02  
-Status: **ACCEPTED as foundation direction; subject to A-0 through A-4 certification review**
+Status: **ACCEPTED**  
+Certification linkage: A-0 through A-4 architecture certified 2026-09-02; see `docs/implementation/A00-A04_ARCHITECTURE_CONFORMANCE_REVIEW_20260902.md`.
 
 ## Context
 
@@ -18,6 +19,7 @@ The platform also needs to answer long-lived questions after infrastructure chan
 5. TDLA persistence—not Prefect's internal database alone—is the authoritative long-lived business/audit record for TDLA execution state.
 6. A later migration to another orchestrator must be possible without renumbering/redefining historical TDLA runs or losing their lineage.
 7. Runtime-specific status must be translated into TDLA's canonical lifecycle rather than leaking vendor state throughout sport adapters and product integrations.
+8. Sport-service and DDC acquisition job/run IDs are nested child references and retain their own domain authority; TDLA does not replace them with its outer run ID.
 
 ## Alternatives considered
 
@@ -67,13 +69,14 @@ TDLA should own the domain/control contract while delegating generic workflow ex
 - Prefect can evolve or be replaced independently;
 - sport adapters integrate with stable TDLA contracts;
 - operator/product APIs do not depend directly on Prefect object models;
-- history can preserve domain semantics richer than runtime-native state.
+- history can preserve domain semantics richer than runtime-native state;
+- nested sport/DDC identities remain traceable without ownership collapse.
 
 ### Costs
 
 - TDLA must maintain a persistence/state synchronization layer;
 - runtime reconciliation is required after crashes/network partitions;
-- developers must understand canonical vs runtime identity;
+- developers must understand canonical vs runtime vs child identity;
 - tests must verify mapping and recovery behavior.
 
 These costs are accepted because automation history and production reproducibility are core platform requirements.
@@ -86,6 +89,7 @@ Future orchestration-runtime replacement must:
 - preserve TDLA primary IDs;
 - preserve existing execution envelopes/history;
 - add new runtime cross-reference types rather than mutating old records;
+- preserve sport/DDC child reference lineage;
 - prove state/retry/recovery equivalence before production cutover.
 
 ## Security / operational impact
@@ -94,18 +98,21 @@ TDLA's own control API/database becomes security-sensitive because it contains a
 
 ## Validation required
 
-During A-0 through A-4 review and later M3 implementation, prove that:
+During M3 implementation, prove that:
 
 - no canonical TDLA key requires a Prefect ID;
 - a TDLA run can be reconstructed from TDLA state plus referenced immutable artifacts;
 - runtime state reconciliation does not silently overwrite immutable TDLA history;
-- replacing/mocking the Prefect integration does not change sport adapter contracts.
+- replacing/mocking the Prefect integration does not change sport adapter contracts;
+- child sport/DDC job references survive outer runtime restart/reconciliation without being re-keyed.
 
 ## Related architecture
 
 - A-0 Mission / replaceable infrastructure
+- A-1 ownership and nested lifecycle boundary
 - A-2 Canonical automation domain
 - A-3 Run identity and lifecycle
+- `docs/architecture/A00-A04_FOUNDATION_ADDENDUM_V1_1.md`
 - future A-10 Worker/execution architecture
 - future A-13 Persistence/audit/provenance
 - future A-21 Deployment/recovery
