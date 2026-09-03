@@ -15,11 +15,11 @@ Architecture is intentionally defined before production implementation so TDLA c
 
 | Section | Topic | Document | Status |
 |---|---|---|---|
-| A-0 | Mission, principles, system boundary | `A00-A04_AUTOMATION_FOUNDATION_V1.md` | Documented; review pending |
-| A-1 | Ownership / cross-repository authority | `A00-A04_AUTOMATION_FOUNDATION_V1.md` | Documented; review pending |
-| A-2 | Canonical automation domain model | `A00-A04_AUTOMATION_FOUNDATION_V1.md` | Documented; review pending |
-| A-3 | Run identity / execution lifecycle | `A00-A04_AUTOMATION_FOUNDATION_V1.md` | Documented; review pending |
-| A-4 | Configuration / environment model | `A00-A04_AUTOMATION_FOUNDATION_V1.md` | Documented; review pending |
+| A-0 | Mission, principles, system boundary | `A00-A04_AUTOMATION_FOUNDATION_V1.md` + V1.1 addendum | **ARCHITECTURE-CERTIFIED** |
+| A-1 | Ownership / cross-repository authority | foundation V1 + `A00-A04_FOUNDATION_ADDENDUM_V1_1.md` | **ARCHITECTURE-CERTIFIED** |
+| A-2 | Canonical automation domain model | foundation V1 + V1.1 addendum | **ARCHITECTURE-CERTIFIED** |
+| A-3 | Run identity / execution lifecycle | foundation V1 + V1.1 addendum | **ARCHITECTURE-CERTIFIED** |
+| A-4 | Configuration / environment model | `A00-A04_AUTOMATION_FOUNDATION_V1.md` | **ARCHITECTURE-CERTIFIED** |
 | A-5 | Sport Automation Adapter contract | TBD | **NEXT** |
 | A-6 | Pipeline plan / stage contracts | TBD | Planned |
 | A-7 | Trigger architecture | TBD | Planned |
@@ -41,9 +41,15 @@ Architecture is intentionally defined before production implementation so TDLA c
 | A-23 | Multi-sport scaling / isolation | TBD | Planned |
 | A-24 | Future adaptive/intelligent automation | TBD | Planned |
 
-## Locked directional decisions already established
+## Certification evidence for A-0 through A-4
 
-The foundation currently establishes these intended invariants, subject to certification review:
+- `docs/implementation/A00-A04_ARCHITECTURE_CONFORMANCE_REVIEW_20260902.md`
+- `A00-A04_FOUNDATION_ADDENDUM_V1_1.md`
+- `docs/adr/ADR-0001_CONTROL_PLANE_AND_VENDOR_NEUTRAL_IDENTITY.md`
+
+The review identified and resolved one lifecycle-boundary ambiguity. TDLA owns the **outer automation lifecycle**; sport services and DDC may retain their own nested child job/acquisition lifecycle identities. These IDs are linked through provenance rather than collapsed into a single authority.
+
+## Certified foundation invariants
 
 - TDLA is a control plane, not a sports model repository.
 - DDC remains authority for certified shared sport-agnostic acquisition/facts.
@@ -51,6 +57,7 @@ The foundation currently establishes these intended invariants, subject to certi
 - website/app state remains owned by the product surface and receives explicit publication contracts.
 - production automation authority follows manual pipeline certification and equivalence proof.
 - logical run identity differs from physical execution attempts.
+- nested sport/DDC child execution identities remain separate from TDLA outer identity.
 - retries, replay, backfill, reprocess, and supersession remain explicitly distinct.
 - completed operational history is immutable/auditable.
 - Prefect 3 is the intended initial runtime but cannot become TDLA permanent identity authority.
