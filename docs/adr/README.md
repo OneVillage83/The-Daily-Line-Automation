@@ -52,3 +52,4 @@ If an accepted ADR changes a certified architecture contract, the same logical c
 ## Index
 
 - `ADR-0001_CONTROL_PLANE_AND_VENDOR_NEUTRAL_IDENTITY.md` — TDLA owns canonical automation identity/audit; Prefect is an initial replaceable runtime.
+- `ADR-0002_TRANSPORT_NEUTRAL_SPORT_ADAPTER_PROTOCOL.md` — Sport Automation Adapter is a versioned transport-neutral protocol boundary; TDLA does not canonically depend on sport Python imports, HTTP, or Prefect-specific integration semantics.
