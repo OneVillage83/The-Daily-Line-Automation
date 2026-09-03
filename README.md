@@ -26,16 +26,21 @@ It does **not** own sport intelligence and it does **not** replace Daily-Data-Co
 10. Every material repository change must create or update durable documentation explaining what changed, why, validation performed, architecture/operational impact, and the exact resume point.
 11. TDLA canonical identity is independent of Prefect or any future orchestration runtime.
 12. TDLA outer run/attempt identity must never silently replace child sport-job, DDC-acquisition, or provider-attempt identity.
+13. The Sport Automation Adapter is a versioned **transport-neutral protocol boundary**; TDLA does not canonically import sport-domain packages or depend on HTTP/Prefect semantics.
+14. Retry `attempt_id` is not child deduplication identity. The stable logical idempotency identity remains constant across attempts of the same logical operation.
+15. Adapter capability support does not grant production authorization; certification/environment/plan/release/side-effect policy must all permit the operation.
+16. Unknown async child state or lost acknowledgement is not permission for blind redispatch.
 
 ## Current status
 
 - Repository created and architecture-first policy established.
 - A-0 through A-4 architecture foundation: **ARCHITECTURE-CERTIFIED**.
-- A-0 through A-4 certification evidence: `docs/implementation/A00-A04_ARCHITECTURE_CONFORMANCE_REVIEW_20260902.md`.
-- Nested lifecycle clarification: `docs/architecture/A00-A04_FOUNDATION_ADDENDUM_V1_1.md`.
-- A-5 Sport Automation Adapter contract: **NEXT**.
+- A-5 Sport Automation Adapter contract: **ARCHITECTURE-CERTIFIED**.
+- A-5 certification evidence: `docs/implementation/A05_ARCHITECTURE_CONFORMANCE_REVIEW_20260903.md`.
+- A-6 Pipeline Plan / Stage Contracts: **NEXT**.
 - No production automation implementation is authoritative yet.
 - Daily-MLB remains manual-first until its production pipeline is certified and later proves automation equivalence in shadow/supervised modes.
+- The existing Daily-MLB starter job-service shape is compatible in principle with A-5, but it is not assumed production-conforming; production async onboarding must prove caller-stable idempotent dispatch/reconciliation.
 
 ## Governing documents
 
@@ -43,13 +48,17 @@ It does **not** own sport intelligence and it does **not** replace Daily-Data-Co
 - `docs/architecture/README.md` — architecture index and status.
 - `docs/architecture/A00-A04_AUTOMATION_FOUNDATION_V1.md` — A-0 through A-4 base architecture contract.
 - `docs/architecture/A00-A04_FOUNDATION_ADDENDUM_V1_1.md` — certified nested lifecycle/cross-repository clarification.
-- `docs/implementation/A00-A04_ARCHITECTURE_CONFORMANCE_REVIEW_20260902.md` — certification review/evidence.
+- `docs/implementation/A00-A04_ARCHITECTURE_CONFORMANCE_REVIEW_20260902.md` — A-0 through A-4 certification review/evidence.
+- `docs/architecture/A05_SPORT_AUTOMATION_ADAPTER_V1.md` — A-5 base adapter architecture.
+- `docs/architecture/A05_SPORT_AUTOMATION_ADAPTER_ADDENDUM_V1_1.md` — A-5 certification clarifications for logical idempotency, manual/automation authority, capability vs authorization, and acknowledgement-loss recovery.
+- `docs/implementation/A05_ARCHITECTURE_CONFORMANCE_REVIEW_20260903.md` — A-5 certification review/evidence.
 - `docs/implementation/IMPLEMENTATION_ROADMAP_V1.md` — milestone implementation/certification sequence.
 - `docs/implementation/ARCHITECTURE_CERTIFICATION_LOG.md` — authoritative architecture/milestone status.
 - `docs/implementation/CHANGE_JOURNAL.md` — chronological durable change record and resume history.
 - `docs/implementation/CURRENT_RESUME_POINT.md` — exact current continuation point.
 - `docs/adr/README.md` — Architecture Decision Record policy/index.
 - `docs/adr/ADR-0001_CONTROL_PLANE_AND_VENDOR_NEUTRAL_IDENTITY.md` — TDLA canonical identity / replaceable orchestrator decision.
+- `docs/adr/ADR-0002_TRANSPORT_NEUTRAL_SPORT_ADAPTER_PROTOCOL.md` — transport-neutral sport adapter protocol decision.
 
 ## Planned technical baseline
 
@@ -69,7 +78,7 @@ The initial intended production baseline is:
 - GitHub Actions CI/CD
 - pytest, Ruff, and strict mypy
 
-These technology choices remain subordinate to TDLA's own contracts. Prefect, databases, deployment backends, or telemetry vendors must be replaceable without invalidating TDLA execution identity or audit history.
+These technology choices remain subordinate to TDLA's own contracts. Prefect, databases, deployment backends, transport mechanisms, or telemetry vendors must be replaceable without invalidating TDLA execution identity or audit history.
 
 ## Architecture sequence
 
