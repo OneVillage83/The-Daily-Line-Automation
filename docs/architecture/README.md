@@ -22,8 +22,8 @@ Architecture is intentionally defined before production implementation so TDLA c
 | A-4 | Configuration / environment model | `A00-A04_AUTOMATION_FOUNDATION_V1.md` | **ARCHITECTURE-CERTIFIED** |
 | A-5 | Sport Automation Adapter contract | `A05_SPORT_AUTOMATION_ADAPTER_V1.md` + `A05_SPORT_AUTOMATION_ADAPTER_ADDENDUM_V1_1.md` | **ARCHITECTURE-CERTIFIED** |
 | A-6 | Pipeline plan / stage contracts | `A06_PIPELINE_PLAN_STAGE_CONTRACTS_V1.md` + `A06_PIPELINE_PLAN_STAGE_CONTRACTS_ADDENDUM_V1_1.md` | **ARCHITECTURE-CERTIFIED** |
-| A-7 | Trigger architecture | TBD | **NEXT** |
-| A-8 | Event-relative scheduling | TBD | Planned |
+| A-7 | Trigger architecture | `A07_TRIGGER_ARCHITECTURE_V1.md` + `A07_TRIGGER_ARCHITECTURE_ADDENDUM_V1_1.md` | **ARCHITECTURE-CERTIFIED** |
+| A-8 | Event-relative scheduling | TBD | **NEXT** |
 | A-9 | Dependency / readiness engine | TBD | Planned |
 | A-10 | Worker / execution backends | TBD | Planned |
 | A-11 | Retry / timeout / idempotency | TBD | Planned |
@@ -85,7 +85,34 @@ Important A-6 certified clarifications:
 - cross-fragment composition has no silent precedence; conflicts and incompatible port bindings fail closed;
 - the `ResolvedAutomationPlan`, not a Prefect flow definition, is the executable plan authority.
 
-## Certified foundation + adapter + plan invariants
+## Certification evidence for A-7
+
+- `A07_TRIGGER_ARCHITECTURE_V1.md`
+- `A07_TRIGGER_ARCHITECTURE_ADDENDUM_V1_1.md`
+- `docs/implementation/A07_ARCHITECTURE_CONFORMANCE_REVIEW_20260904.md`
+- `docs/adr/ADR-0004_DURABLE_TRIGGER_EVIDENCE_AND_REEVALUATION_ONLY_AUTHORITY.md`
+
+A-7 establishes a durable event architecture where physical trigger deliveries, immutable semantic source-event revisions, plan-bound trigger bindings, trigger evaluations, and logical eligibility-reevaluation requests are separate identities.
+
+Important A-7 certified rules:
+
+- a trigger requests eligibility reevaluation only; it never grants execution or side-effect authority;
+- accepted trigger evidence and causal reevaluation intent are durable before downstream irreversible action;
+- physical delivery identity is separate from semantic source occurrence/revision identity;
+- corrections/retractions are immutable revisions/lineage, not mutation of prior evidence;
+- same occurrence+revision with conflicting semantic payload fails closed as an identity conflict;
+- logical eligibility reevaluation identity is separate from physical processing attempts;
+- trigger deduplication and A-11 stage idempotency are separate defenses;
+- stale/out-of-order events and timer occurrences cannot roll authority backward or revive superseded work;
+- sport-change signals remain opaque hints; A-5 readiness remains authoritative when required;
+- raw burst evidence is retained even when reevaluation causes are coalesced;
+- coalescing cannot silently cross incompatible plan/stage/scope/binding/environment revisions;
+- untrusted deliveries cannot create authoritative `TriggerEvent` objects;
+- replay/test ingress is explicitly labeled and restricted;
+- source silence/outage is not evidence that domain state did not change;
+- there is no direct webhook/timer/operator-trigger-to-publication/destructive-action path.
+
+## Certified foundation + adapter + plan + trigger invariants
 
 - TDLA is a control plane, not a sports model repository.
 - DDC remains authority for certified shared sport-agnostic acquisition/facts.
@@ -107,6 +134,9 @@ Important A-6 certified clarifications:
 - optional/conditional/no-op/degraded outcomes satisfy only explicitly compatible dependency/output contracts.
 - production resolved plans use immutable execution targets and immutable execution-affecting policy bindings.
 - semantic plan identity uses deterministic canonical normalization + SHA-256.
+- trigger delivery, semantic source event, reevaluation request, StageRun, and RunAttempt remain separate identities.
+- trigger evidence is durable and append-only; corrections/retractions preserve lineage.
+- trigger-source duplicates/out-of-order events do not become direct execution authority.
 - PostgreSQL is intended as TDLA authoritative persistence.
 - non-secret effective configuration is schema-validated and hashable.
 - every material change must produce detailed durable documentation and an exact resume point.
