@@ -25,8 +25,8 @@ Authority: **This file is the authoritative status record for architecture and i
 | A-5 | Sport Automation Adapter | **ARCHITECTURE-CERTIFIED** | `docs/architecture/A05_SPORT_AUTOMATION_ADAPTER_V1.md` + `A05_SPORT_AUTOMATION_ADAPTER_ADDENDUM_V1_1.md` | Certified 2026-09-03 after cross-repository and distributed-failure stress review. |
 | A-6 | Pipeline-plan / stage contracts | **ARCHITECTURE-CERTIFIED** | `docs/architecture/A06_PIPELINE_PLAN_STAGE_CONTRACTS_V1.md` + `A06_PIPELINE_PLAN_STAGE_CONTRACTS_ADDENDUM_V1_1.md` | Certified 2026-09-03 after graph/composition/identity/canonicalization stress review. |
 | A-7 | Trigger architecture | **ARCHITECTURE-CERTIFIED** | `docs/architecture/A07_TRIGGER_ARCHITECTURE_V1.md` + `A07_TRIGGER_ARCHITECTURE_ADDENDUM_V1_1.md` | Certified 2026-09-04 after duplicate/order/revision/recovery/trust stress review. |
-| A-8 | Event-relative scheduling | PLANNED — NEXT | TBD | Next architecture checkpoint. |
-| A-9 | Dependency / readiness | PLANNED | TBD | |
+| A-8 | Event-relative scheduling | **ARCHITECTURE-CERTIFIED** | `docs/architecture/A08_EVENT_RELATIVE_SCHEDULING_ENGINE_V1.md` + `A08_EVENT_RELATIVE_SCHEDULING_ENGINE_ADDENDUM_V1_1.md` | Certified 2026-09-04 after reschedule/missed-window/recovery/clock/DST stress review. |
+| A-9 | Dependency / readiness | PLANNED — NEXT | TBD | Next architecture checkpoint. |
 | A-10 | Worker / execution backend | PLANNED | TBD | |
 | A-11 | Retry / timeout / idempotency | PLANNED | TBD | |
 | A-12 | Failure / degradation / recovery | PLANNED | TBD | |
@@ -48,10 +48,10 @@ Authority: **This file is the authoritative status record for architecture and i
 | Milestone | Topic | Status | Evidence |
 |---|---|---|---|
 | M0 | Repository Bootstrap / Engineering Constitution | PLANNED | Architecture/documentation seed exists; implementation bootstrap not yet started. |
-| M1 | Canonical Automation Domain Contracts | PLANNED | A-6/A-7 now certify plan/stage and trigger contract semantics; implementation remains unstarted. |
+| M1 | Canonical Automation Domain Contracts | PLANNED | A-6/A-7/A-8 now certify plan/stage, trigger, and schedule identity semantics; implementation remains unstarted. |
 | M2 | PostgreSQL Persistence & Migration Foundation | PLANNED | |
 | M3 | Prefect Runtime Foundation | PLANNED | |
-| M4 | Scheduling / Trigger Engine | PLANNED | A-7 trigger architecture is certified; A-8/A-9 remain required before implementation authority. |
+| M4 | Scheduling / Trigger Engine | PLANNED | A-7/A-8 architecture is certified; A-9 remains required before implementation authority. |
 | M5 | Worker / Execution Backend | PLANNED | |
 | M6 | Sport Automation Adapter Framework | PLANNED | A-5 architecture is certified; implementation awaits architecture sequence/implementation start. |
 | M7 | Idempotency / Retry / Recovery | PLANNED | |
@@ -60,7 +60,7 @@ Authority: **This file is the authoritative status record for architecture and i
 | M10 | Observability / Alerts / Incidents | PLANNED | |
 | M11 | Publication Subsystem | PLANNED | |
 | M12 | Security / Service Identity | PLANNED | |
-| M13 | Daily-MLB Adapter | PLANNED | Requires certified manual MLB pipeline. Current starter service shape is compatible in principle but is not A-5/A-6/A-7 production-certified. |
+| M13 | Daily-MLB Adapter | PLANNED | Requires certified manual MLB pipeline. Current starter service shape is compatible in principle but is not A-5/A-6/A-7/A-8 production-certified. |
 | M14 | Daily-MLB Shadow Automation | PLANNED | |
 | M15 | Daily-MLB Production Automation Certification | PLANNED | |
 | M16 | Daily-NFL Integration | PLANNED | |
@@ -210,4 +210,47 @@ Decision:
 - A trigger is durable evidence requesting eligibility reevaluation only; it is never direct execution or side-effect authority.
 - `TriggerDelivery`, semantic `TriggerEvent`, `TriggerBinding`, `TriggerEvaluation`, logical `EligibilityReevaluationRequest`, and physical processing attempts remain distinct identity layers.
 - No trigger endpoint, broker, timer worker, Pydantic model, PostgreSQL schema, Prefect event integration, signature verification code, or live sport trigger integration is certified by this decision.
-- **A-8 Event-Relative Scheduling Engine is NEXT.**
+- A-8 Event-Relative Scheduling Engine became the next architecture checkpoint.
+
+### 2026-09-04 — A-8 Event-Relative Scheduling Engine certified
+
+Evidence:
+- `docs/architecture/A08_EVENT_RELATIVE_SCHEDULING_ENGINE_V1.md`
+- `docs/architecture/A08_EVENT_RELATIVE_SCHEDULING_ENGINE_ADDENDUM_V1_1.md`
+- `docs/implementation/A08_ARCHITECTURE_CONFORMANCE_REVIEW_20260904.md`
+- `docs/adr/ADR-0005_STABLE_SCHEDULE_SLOTS_AND_RESOLVED_TIME_AUTHORITY.md`
+
+Review result:
+- stable `ScheduleSlotRef` identity vs resolved wall-clock time: PASS.
+- exact plan/stage/scope/schedule/anchor/timing-policy authority binding: PASS.
+- immutable `ScheduleResolution` and supersession lineage: PASS.
+- logical `ScheduleOccurrence` vs physical scheduler callback identity: PASS.
+- event moves later/earlier/multiple times/TBD/cancelled: PASS.
+- earlier reschedule crossing already-missed slots: PASS with explicit immutable missed-window policy.
+- missed-window policy naming/authority: PASS after V1.1 reevaluation-only clarification.
+- one canonical semantic A-7 `TIME_DUE` event per logical occurrence: PASS after V1.1 clarification.
+- scheduler crash before/after A-7 persistence: PASS with reconciliation semantics.
+- multiple scheduler replicas / duplicate physical callbacks: PASS.
+- stale timer callback after supersession: PASS.
+- old already-emitted `TIME_DUE` after later reschedule: PASS after V1.1 current-authority revalidation clarification.
+- same UTC event instant under new sport schedule revision: PASS after V1.1 authority/provenance clarification.
+- explicit due-boundary selection when target is absent: PASS after V1.1 clarification.
+- UTC/event-relative elapsed arithmetic: PASS.
+- DST/local-calendar recurrence ambiguity: PASS after V1.1 civil-time disambiguation clarification.
+- restart/downtime/catch-up behavior: PASS.
+- plan timing revision/add/remove slot behavior: PASS.
+- no-games/doubleheader/multi-scope behavior: PASS.
+- customer-visible/destructive late-window safety: PASS.
+- scheduler-vendor neutrality: PASS.
+- no direct scheduler-to-executor path: PASS.
+
+Stress review:
+- `A08_ARCHITECTURE_CONFORMANCE_REVIEW_20260904.md` records 50 event-relative timing, reschedule, missed-window, restart/HA, clock/DST, recurrence, plan/scope revision, side-effect, and stale-authority scenarios plus additional failure-path checks.
+
+Decision:
+- **A-8 is ARCHITECTURE-CERTIFIED as V1 governed together with the V1.1 certification addendum and ADR-0005.**
+- A wall-clock time is a resolution of stable scheduling intent, not sport snapshot identity.
+- A due occurrence creates durable A-7 `TIME_DUE` reevaluation evidence only; it never directly dispatches sport work.
+- Historical schedule resolutions/occurrences remain immutable and superseded rather than rewritten.
+- No scheduler implementation, Prefect schedule, timer worker, PostgreSQL schema, live sport schedule integration, or production catch-up/publication behavior is certified by this decision.
+- **A-9 Dependency / Readiness Engine is NEXT.**
