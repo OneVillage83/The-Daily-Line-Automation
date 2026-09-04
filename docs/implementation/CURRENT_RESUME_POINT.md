@@ -10,16 +10,18 @@ Authority: This file is the single exact continuation point for unfinished TDLA 
 - A-5 Sport Automation Adapter V1 + V1.1 are **ARCHITECTURE-CERTIFIED**.
 - A-6 Pipeline Plan / Stage Contracts V1 + V1.1 are **ARCHITECTURE-CERTIFIED**.
 - A-7 Trigger Architecture V1 + V1.1 are **ARCHITECTURE-CERTIFIED**.
-- A-7 review evidence: `docs/implementation/A07_ARCHITECTURE_CONFORMANCE_REVIEW_20260904.md`.
-- ADR-0001 establishes TDLA canonical identity and replaceable orchestration runtime.
-- ADR-0002 establishes transport-neutral Sport Automation Adapter protocol.
-- ADR-0003 establishes immutable plan fragments, explicit typed composition, and `ResolvedAutomationPlan` authority.
-- ADR-0004 establishes durable trigger evidence and reevaluation-only trigger authority.
+- A-8 Event-Relative Scheduling Engine V1 + V1.1 are **ARCHITECTURE-CERTIFIED**.
+- A-8 review evidence: `docs/implementation/A08_ARCHITECTURE_CONFORMANCE_REVIEW_20260904.md`.
+- ADR-0001: TDLA canonical identity / replaceable orchestration runtime.
+- ADR-0002: transport-neutral Sport Automation Adapter protocol.
+- ADR-0003: immutable plan fragments / explicit composition / resolved-plan authority.
+- ADR-0004: durable trigger evidence / reevaluation-only trigger authority.
+- ADR-0005: stable schedule slots / immutable resolved-time authority / reevaluation-only due events.
 - No production implementation milestone is certified.
 - No TDLA automation is production-authoritative.
 - Daily-MLB remains manual-first; later automation must prove equivalence after its final manual production pipeline is certified.
 
-## Certified nested architecture through A-7
+## Certified nested architecture through A-8
 
 ```text
 sport-owned scope/discovery/plan fragment
@@ -35,537 +37,634 @@ immutable ResolvedAutomationPlan
         v
 StageDefinition / StageMaterialization
         |
-        +-----------------------------+
-        |                             |
-        v                             v
-A-6 TimingDeclaration            A-7 TriggerBinding
-        |                             |
-        |                     TriggerDelivery
-        |                             |
-        |                     immutable TriggerEvent
-        |                             |
-        |                     TriggerEvaluation
-        |                             |
-        +--------------------> EligibilityReevaluationRequest
-                                      |
-                                      v
-                           A-8/A-9 eligibility gates
-                                      |
-                                      v
-                             StageRun / RunAttempt
-                                      |
-                                      v
-                        A-5 Sport Automation Adapter
-                                      |
-                                      v
-                           sport child job/service
-                                      |
-                                      v
+        +------------------------------+
+        |                              |
+        v                              v
+A-6 TimingDeclaration             A-7 TriggerBinding
+        |                              |
+        v                              v
+A-8 ScheduleResolution        TriggerDelivery
+        |                              |
+        v                              v
+A-8 ScheduleOccurrence        immutable TriggerEvent
+        |                              |
+        +------ TIME_DUE ------------> TriggerEvaluation
+                                       |
+                              EligibilityReevaluationRequest
+                                       |
+                                       v
+                           A-9 dependency/readiness/current-
+                              authority eligibility engine
+                                       |
+                                       v
+                              later StageRun / RunAttempt
+                                       |
+                                       v
+                         A-5 Sport Automation Adapter
+                                       |
+                                       v
+                            sport child job/service
+                                       |
+                                       v
                          DDC/provider evidence where used
 ```
 
 ## Important locked A-7 rules
 
 1. A trigger requests eligibility reevaluation only; it never grants execution or side-effect authority.
-2. Physical `TriggerDelivery` and semantic `TriggerEvent` identity are separate.
-3. A source occurrence family and an immutable event revision are separate identities.
-4. Redelivery of the same occurrence/revision remains one semantic event with multiple delivery evidence records.
-5. Same occurrence/revision with a different semantic payload digest is an identity conflict and fails closed.
-6. Corrections/retractions create new immutable event revisions/lineage; prior evidence is never overwritten/deleted.
-7. `TriggerBinding` is immutable/versioned/digested and tied to exact resolved-plan/stage/scope authority.
-8. `TriggerEvaluation` and logical `EligibilityReevaluationRequest` are distinct from physical processing attempts.
-9. Accepted trigger evidence and reevaluation intent must be durable before downstream irreversible execution can occur.
-10. Trigger deduplication and A-11 stage logical idempotency are separate defenses.
-11. There is no global source-event ordering assumption based on receipt time or source wall clock.
-12. Stale/out-of-order schedule/scope revisions cannot roll current authority backward.
-13. A-7 time triggers represent A-8 due occurrences; A-7 does not calculate event-relative due times.
-14. Stale old timer callbacks cannot revive superseded schedule work.
-15. Sport-change/readiness events remain opaque hints; generic TDLA cannot interpret MLB/NFL/NCAAF event meaning.
-16. A-5 readiness remains authoritative when a stage declares readiness is required.
-17. Raw trigger events remain auditable even when burst events are coalesced.
-18. Coalescing cannot silently cross incompatible resolved-plan/stage/scope/binding/environment authority revisions.
-19. Valid triggers may match zero, one, or multiple bindings; each result is explicit/deterministic.
-20. Late trigger arrival cannot bypass deadline/missed-window policy.
-21. Ordinary authenticated operator triggers request reevaluation; overrides are separate A-19 actions.
-22. Trigger replay/test ingress is explicitly labeled and environment/mode restricted.
-23. Trigger source silence/outage is not proof that no domain change occurred.
-24. Untrusted/signature-failed external delivery cannot create an authoritative semantic `TriggerEvent`.
-25. Secret-bearing/malformed payloads are sanitized/rejected rather than persisted as normal event data.
-26. No webhook, timer, callback, or ordinary operator trigger can directly publish, dispatch, or execute a destructive side effect.
+2. Physical `TriggerDelivery`, semantic `TriggerEvent`, source occurrence/revision, `TriggerEvaluation`, logical `EligibilityReevaluationRequest`, StageRun, and RunAttempt are separate identities.
+3. Corrections/retractions are immutable linked revisions; same source occurrence/revision with conflicting semantic payload fails closed.
+4. Accepted trigger evidence and causal reevaluation intent must be durable before downstream irreversible action.
+5. Trigger deduplication and A-11 final StageRun idempotency are separate defenses.
+6. Stale/out-of-order trigger evidence cannot roll plan/scope/schedule authority backward.
+7. Sport-change hints remain opaque; A-5 sport readiness remains authoritative when required.
+8. No timer/webhook/callback/operator trigger can directly execute or publish.
+
+## Important locked A-8 rules
+
+1. `ScheduleSlotRef` is stable logical scheduling intent; resolved wall-clock timestamp is not snapshot/stage identity.
+2. Production `ScheduleResolution` binds exact plan, stage materialization, timing declaration, sport scope/schedule revision, anchor value/revision, resolved window, missed-policy, environment, and mode authority.
+3. Event/schedule changes create new immutable schedule resolutions and supersede pending old authority rather than mutate history.
+4. A new sport schedule revision remains new authority even if the absolute UTC start instant is unchanged; runtime timer wakeups may be reused without collapsing provenance.
+5. `ScheduleOccurrence` is logical due identity; physical scheduler callback/scan/claim IDs are not canonical.
+6. One logical `ScheduleOccurrence` maps to at most one canonical semantic A-7 `TIME_DUE` TriggerEvent for that exact authority.
+7. Due-time boundary selection is explicit. A declaration cannot silently guess between earliest/target/anchor/recurrence time.
+8. Earlier reschedules that make slots overdue are classified independently through immutable missed-window policy; there is no "run every missed stage immediately" behavior.
+9. Normative missed-window policy families are reevaluation-only: `SKIP_MISSED`, `REQUEST_REEVALUATION_IF_WITHIN_GRACE`, `REQUEST_IMMEDIATE_REEVALUATION`, `SUPERSEDE_NO_ACTION`, `REQUIRE_OPERATOR_REVIEW`.
+10. Missed/grace handling never directly executes sport work.
+11. TBD/unresolved event anchors receive no invented placeholder time.
+12. Stale old timer callbacks cannot revive superseded work.
+13. An old already-emitted `TIME_DUE` event remains historical evidence but must be revalidated against current schedule authority before later dispatch.
+14. Scheduler restart/downtime/multiple replicas must converge on the same logical occurrence/event evidence.
+15. Event-relative duration arithmetic uses resolved UTC instants; local recurring schedules explicitly handle DST ambiguous/nonexistent civil times.
+16. Customer-visible/destructive late work gets no generic catch-up permission.
+17. Prefect/APScheduler/CronJob/queue/cron IDs are runtime cross-references only.
+18. No direct scheduler-to-executor path exists.
 
 ## Daily-MLB / football compatibility note that must not be forgotten
 
-Future sport integration can emit generic signals such as:
+Future sport integrations remain responsible for canonical event/schedule identity and readiness meaning.
+
+TDLA must not implement:
 
 ```text
-SPORT_CHANGE_HINT(scope_ref, revision, opaque metadata)
-PLAN_SCOPE_REVISION(scope_ref, revision)
-READINESS_HINT(scope_ref, stage_ref)
-```
-
-TDLA records/routes the signal and asks the A-5 sport adapter for readiness/plan information where required.
-
-TDLA must never implement:
-
-```text
-if MLB lineup posted -> run
+if MLB lineup posted -> READY
 if probable pitcher changed -> rerun
-if NFL inactives final -> publish
+if NFL inactive list final -> READY
+if weather changed enough -> rerun
 ```
 
-Those meanings remain sport-owned.
+A future sport adapter instead provides opaque sport scope/revision, readiness disposition/evidence, and plan/output contracts. A-8 handles only generic time authority.
 
-Current Daily-MLB remains manual-first and is **not** production event-driven merely because A-7 is certified.
+Current Daily-MLB remains manual-first and is **not** production scheduled merely because A-8 is certified.
 
 ---
 
-# Exact next step — A-8 Event-Relative Scheduling Engine
+# Exact next step — A-9 Dependency / Readiness Engine
 
-Design the generic scheduler that resolves A-6 timing declarations and stable `ScheduleSlotRef` identities against authoritative sport scope/event timing, produces durable schedule-occurrence authority, recalculates safely when event times change, classifies missed/late windows, and emits A-7 `TIME_DUE` trigger occurrences without creating duplicate logical work.
+Design the deterministic eligibility engine that combines:
 
-The central A-8 rule should be:
+- A-6 dependency/input/output graph contracts;
+- A-5 sport-provided readiness evaluations;
+- A-7 logical eligibility-reevaluation causes;
+- A-8 current schedule/time authority;
+- current plan/stage/scope/materialization authority;
 
-> **A scheduled wall-clock time is a resolution of a stable logical schedule slot under a specific scope/schedule revision. The clock timestamp is not the stage/snapshot identity, and changing the authoritative event time must supersede/recalculate pending occurrences rather than create uncontrolled duplicate logical stages.**
+into one auditable answer to:
 
-## A-8 must define at minimum
+> **Is this exact stage materialization currently eligible to proceed toward dispatch, and if not, precisely what generic gate is holding it?**
 
-### 1. Scheduling authority entities
+The central A-9 rule should be:
 
-Define clear identity/contracts for concepts such as:
+> **`READY` is a derived, versioned eligibility result over exact current authority and evidence—not a permanent mutable flag. Any execution-affecting authority/evidence change can invalidate it before dispatch, so stale eligibility evidence must fail closed or be reevaluated.**
 
-- `TimingDeclaration` (from A-6);
-- stable `ScheduleSlotRef` (from A-6);
-- `ScheduleAnchorRef` / anchor authority;
-- `ScheduleResolution`;
-- `ScheduleOccurrence` / due occurrence;
-- occurrence revision/version/digest;
-- missed-window evaluation/result;
-- supersession lineage;
-- actual A-7 `TIME_DUE` TriggerEvent handoff.
+A-9 must not interpret sport meaning and must not itself execute the stage.
 
-Exact names may change during design, but logical identities must remain separate.
+## A-9 must define at minimum
 
-### 2. Schedule anchor model
+### 1. Eligibility authority entities
 
-Support generic anchors without sport semantics, including at least:
+Define clear identities/contracts for concepts such as:
 
-- absolute UTC instant;
-- A-5 sport event/scope start time;
-- scope effective start/end when declared;
-- stable plan-defined anchor references supplied by sport/platform contracts;
-- potentially calendar/local recurring anchor for generic maintenance/publication operations.
+- `EligibilityEvaluation` / immutable evaluation result;
+- `DependencyEvaluation`;
+- `ReadinessEvaluationRef` / A-5 readiness evidence binding;
+- `TimeEligibilityRef` / current A-8 schedule authority binding;
+- `CurrentAuthorityCheck`;
+- `EligibilityDisposition`;
+- logical reevaluation request identity from A-7;
+- physical evaluation attempt identity;
+- eligibility result digest/version;
+- optional short-lived `DispatchEligibilityGrant` or equivalent current-authority handoff if architecture review supports it.
 
-TDLA must not invent a baseball/football-specific anchor such as “lineups posted.” Domain milestones that are not predictable times belong to trigger/readiness/dependency mechanisms rather than fake clock anchors.
+Exact names may change, but immutable evaluation identity and physical attempt identity must remain separate.
 
-### 3. Event-relative offset semantics
+### 2. Current-authority gate first
 
-Define exact behavior for declarations such as:
+Before evaluating readiness/dependencies for dispatch authority, confirm the evaluation targets the current allowed:
 
-```text
-T-24h
-T-8h
-T-120m
-T-30m
-T-20m
-T+post-event offset when a real time anchor exists
-```
-
-Relative duration arithmetic should be unambiguous and canonical. For event-relative elapsed durations, use absolute UTC instants/durations so DST/local-zone transitions do not distort a 60-minute offset.
-
-### 4. Window model
-
-A resolved slot must distinguish, where declared:
-
-- earliest eligible time;
-- target/due time;
-- hard deadline/cutoff;
-- validity/end time;
-- optional grace interval;
-- no-earlier-than/not-before semantics;
-- exact policy reference for missed/late resolution.
-
-Do not collapse all of these into one `scheduled_at` timestamp.
-
-### 5. Stable slot identity vs resolved clock time
-
-Preserve A-6 rule:
-
-```text
-ScheduleSlotRef = stable logical intent
-resolved_at      = one clock resolution under a specific scope/schedule revision
-```
-
-Example:
-
-```text
-final_snapshot
-  old kickoff 13:00 -> due 12:40
-  new kickoff 16:00 -> due 15:40
-```
-
-The slot remains `final_snapshot`; the old occurrence is superseded and the pending new occurrence is a new schedule resolution/revision, not a brand-new sport-stage meaning.
-
-### 6. Scope/schedule revision binding
-
-Every event-relative resolution must bind to exact A-5/A-6 authority:
-
-- `SportScopeRef`;
-- scope/schedule revision;
-- `StageMaterialization`;
-- `ScheduleSlotRef`;
 - resolved plan digest;
-- timing-policy digest;
-- event/anchor value used.
+- stage definition/materialization;
+- sport scope/scope revision;
+- schedule resolution/occurrence when time-bound;
+- execution mode/environment;
+- policy/config references relevant to eligibility.
 
-A stale occurrence cannot be evaluated as though it belonged to the newest schedule revision.
+A superseded plan/scope/schedule/materialization cannot become current simply because old dependencies/readiness were once satisfied.
 
-### 7. Reschedule recalculation
+### 3. Generic eligibility dispositions
 
-Define generic behavior when an authoritative event time moves:
+Define a state/result vocabulary that distinguishes at minimum conceptually:
 
-- later;
-- earlier;
-- multiple times;
-- to unknown/TBD;
-- postponed to a later date;
-- cancelled/no-longer-applicable;
-- split/changed scope membership where the sport adapter supplies new refs.
+- `NOT_CURRENT` / superseded authority;
+- `NOT_APPLICABLE`;
+- `WAITING_TIME` / not yet time-eligible;
+- `MISSED_TIME_WINDOW` / late policy says no normal proceed;
+- `WAITING_DEPENDENCY`;
+- `WAITING_READINESS`;
+- `BLOCKED_DEPENDENCY`;
+- `BLOCKED_READINESS`;
+- `BLOCKED_POLICY` / generic contract/policy gate where appropriate;
+- `READY_FOR_DISPATCH`;
+- `TERMINAL_NO_ACTION` where plan semantics resolve no work;
+- evaluation error/retryable/terminal states without conflating them with domain blocked states.
 
-Pending schedule occurrences may be superseded/replaced. Completed StageRuns remain immutable and attached to the authority they actually used.
+Exact enum names can be refined, but reasons must remain distinguishable.
 
-### 8. Earlier reschedule crossing already-passed slots
+### 4. Dependency edge evaluation
 
-Critical scenario:
+Implement the semantics already declared by A-6, including generic edge/input requirements such as:
+
+- upstream terminal success;
+- required logical output exists and validates;
+- specific accepted terminal disposition when intentionally consumed;
+- fan-in exact membership completion;
+- declared optional/conditional behavior;
+- `NO_OP` satisfaction only where explicitly permitted;
+- `SUCCEEDED_DEGRADED` satisfaction only for validated outputs/dependencies allowed by policy.
+
+Do not treat `OPTIONAL` as automatically ignorable.
+
+### 5. Exact upstream revision/output binding
+
+Dependency satisfaction must bind the exact upstream StageRun/materialization/output manifest/schema/digest required by the resolved plan.
+
+A downstream stage cannot silently consume:
+
+- an artifact from a superseded plan;
+- the wrong event/scope revision;
+- a stale output from an older schedule slot;
+- a similarly named file from another run;
+- an output whose schema/digest contract no longer matches.
+
+### 6. Fan-in/barrier semantics
+
+For slate/aggregate stages, bind exact A-6 `ScopeSetBinding` membership revision/digest.
+
+Define how barrier satisfaction treats each declared child disposition:
+
+- succeeded;
+- degraded;
+- no-op;
+- not applicable;
+- failed terminal;
+- cancelled/superseded;
+- missing/unmaterialized.
+
+TDLA cannot guess "all games are done" by parsing sport IDs or current date.
+
+### 7. A-5 readiness evaluation
+
+When the plan declares readiness is required, A-9 requests/uses A-5 `ReadinessResult`:
+
+- `READY`;
+- `WAITING`;
+- `BLOCKED`;
+- `NOT_APPLICABLE`.
+
+The sport-provided reason code remains opaque except for declared generic routing/diagnostic use.
+
+TDLA must not encode sport reason branches.
+
+### 8. Readiness freshness / validity
+
+A readiness result can expire or become stale.
+
+A-9 must respect:
+
+- evaluated_at;
+- readiness_valid_until when supplied;
+- max acceptable age from A-6 declaration;
+- scope/schedule/readiness evidence revision;
+- required input freshness/provenance references.
+
+A once-`READY` result is not permanent permission.
+
+### 9. Readiness revision/change invalidation
+
+If new sport scope/state/readiness authority arrives after an evaluation:
+
+- old readiness remains historical evidence;
+- current eligibility may require reevaluation;
+- no mutable `ready=true` flag is silently carried forward;
+- if the stage already dispatched, later A-12/reprocess/correction policy decides what follows.
+
+### 10. Time gate from A-8
+
+A-9 validates current time authority rather than trusting that an old `TIME_DUE` trigger exists.
+
+Confirm as applicable:
+
+- correct current schedule resolution;
+- slot is time-eligible;
+- deadline/validity/grace policy permits reevaluation/proceeding;
+- old superseded `TIME_DUE` is not current authority;
+- stage did not become no-longer-applicable after reschedule.
+
+### 11. Dependency vs readiness ordering
+
+Choose a deterministic evaluation order optimized for correctness and avoiding unnecessary external sport calls.
+
+Likely generic order:
+
+1. current authority/applicability;
+2. time/window eligibility;
+3. static/known dependency satisfaction;
+4. readiness freshness/cache eligibility;
+5. call/refresh A-5 readiness if required;
+6. final authority recheck before granting dispatch eligibility.
+
+Review whether this order is normative or policy-controlled, but the final result must not depend nondeterministically on worker timing.
+
+### 12. TOCTOU / final revalidation
+
+Critical boundary:
 
 ```text
-kickoff moves from 20:00 to 16:00 at 15:30
-T-4h and T-2h are now already missed
-T-20m is still ahead
+A-9 evaluates READY at 12:40:00
+sport schedule revision changes at 12:40:01
+worker attempts dispatch at 12:40:02
 ```
 
-A-8 must deterministically classify each slot using its declared missed-window policy rather than firing every overdue stage blindly.
+A stale eligibility result cannot be treated as permanent permission.
 
-### 9. Missed-window policy model
+Define a final current-authority check or a short-lived/version-bound dispatch eligibility handoff so plan/scope/schedule/dependency/readiness authority cannot silently change between evaluation and dispatch.
 
-Define generic, versioned behavior for missed targets/windows. Candidate policy outcomes may include:
+A-10/A-11 implementation will consume this contract.
 
-- `SKIP_MISSED`;
-- `EXECUTE_IF_WITHIN_GRACE`;
-- `REQUEST_IMMEDIATE_REEVALUATION`;
-- `SUPERSEDE_NO_ACTION`;
-- `REQUIRE_OPERATOR_REVIEW` where appropriate.
+### 13. Eligibility result identity/digest
 
-Exact enum names can be refined, but production behavior must be explicit, immutable/policy-bound, and side-effect aware.
+An immutable evaluation should bind at least:
 
-A missed target is never automatically permission to execute late.
-
-### 10. Unresolved/TBD event time
-
-If the sport's authoritative event time is unknown or not yet reliable:
-
-- do not invent a due clock;
-- keep schedule resolution explicitly unresolved/waiting;
-- re-resolve when the sport scope revision supplies an authoritative time;
-- preserve prior revisions if a time was withdrawn/TBD after previously being set.
-
-### 11. Timer occurrence identity
-
-Define a durable logical timer/due occurrence identity sufficient for A-7 dedup and stale-fire detection.
-
-It should bind at least:
-
-- `StageMaterialization`;
-- `ScheduleSlotRef`;
-- schedule resolution/revision;
-- target/due instant;
-- plan/scope revisions;
-- environment/mode.
-
-A physical scheduler callback/worker attempt is not the logical due-occurrence identity.
-
-### 12. A-7 TIME_DUE handoff
-
-A-8 creates/resolves a due occurrence; A-7 records the resulting durable trigger event/delivery/evaluation.
-
-A-8 must not call the sport stage directly.
-
-```text
-ScheduleOccurrence becomes due
-    -> A-7 TIME_DUE TriggerEvent
-        -> eligibility reevaluation
-            -> A-9 readiness/dependencies
-                -> later execution authority
-```
-
-### 13. Scheduler restart/recovery
-
-No production correctness may depend solely on in-memory timers.
-
-After restart, TDLA must be able to reconstruct/reconcile:
-
-- pending future occurrences;
-- overdue unresolved occurrences;
-- already-emitted logical due occurrences;
-- superseded schedule revisions;
-- occurrences whose physical timer callback status is unknown.
-
-Exact DDL/leases/outbox mechanics remain A-13/A-21, but the semantic recovery behavior belongs here.
-
-### 14. Multiple scheduler instances / HA boundary
-
-Architecture must tolerate two scheduler workers noticing the same logical due occurrence.
-
-Physical duplicate fire may occur, but:
-
-- both refer to the same logical `ScheduleOccurrence`/TIME_DUE semantic occurrence;
-- A-7 delivery/event dedup handles repeated trigger delivery;
-- A-11 still protects final StageRun logical idempotency.
-
-Do not rely solely on “only one scheduler process will ever run.”
-
-### 15. Clock model
-
-Define authoritative clock semantics:
-
-- durable timestamps are UTC;
-- event/source IANA timezone retained for provenance/presentation;
-- no naive datetimes;
-- wall-clock UTC used for persistent due instants;
-- monotonic process time may be used for local waits but never as persistent schedule identity;
-- system clock skew/adjustment cannot silently change historical due identity.
-
-Concrete NTP/infrastructure monitoring belongs later, but the architecture must account for clock correction/jump behavior.
-
-### 16. DST/local calendar schedules
-
-For any schedule defined in local civil time:
-
-- retain IANA timezone;
-- explicitly define ambiguous/nonexistent local-time handling during DST changes;
-- never silently guess between duplicate local times;
-- normalize resolved durable instants to UTC.
-
-Event-relative offsets from an already resolved UTC event instant should use elapsed-duration arithmetic and not be distorted by DST.
-
-### 17. Calendar/recurring scheduling boundary
-
-A-8 should support generic periodic/operational schedules without making cron strings the canonical identity.
-
-Define:
-
-- recurrence rule/version identity;
-- occurrence identity;
-- timezone/calendar context;
-- skip/catch-up semantics;
-- plan validity interval.
-
-A raw cron expression may be one implementation/serialization form, not permanent TDLA business identity.
-
-### 18. Catch-up / overdue processing
-
-When TDLA was down while due times passed:
-
-- one logical due occurrence per schedule occurrence remains authoritative;
-- recovery evaluates lateness/missed-window policy;
-- it does not emit one duplicate for every restart scan;
-- overdue side-effect stages remain subject to mode/deadline/approval policy.
-
-### 19. Schedule resolution canonicalization/digest
-
-Production resolution must deterministically capture execution-semantic scheduling inputs:
-
-- declaration version/digest;
-- slot identity;
-- anchor identity/value;
+- resolved plan digest;
+- stage materialization;
 - scope/schedule revision;
-- resolved window;
-- missed-window policy binding;
-- recurrence/occurrence identity where applicable.
+- current schedule resolution/time evaluation where applicable;
+- dependency evaluations/upstream result refs;
+- readiness result ref/digest/freshness;
+- relevant policy/config digests;
+- trigger/reevaluation causal refs;
+- evaluated_at;
+- disposition/reason set;
+- schema/version/digest.
 
-Cosmetic display metadata cannot alter semantic schedule identity unless declared semantic by schema.
+Presentation text does not affect semantic identity unless schema declares it semantic.
 
-### 20. No-games / empty-scope behavior
+### 14. Cause vs result separation
 
-A zero-game sport day should produce no fake per-event timers.
+A-7 `EligibilityReevaluationRequest` is a cause to evaluate, not the eligibility result itself.
 
-Slate-level/daily stages may still have their own declared schedule slots if the resolved plan includes them.
+Many trigger events may coalesce into one current evaluation when authority permits, while all raw causes remain linked/auditable.
 
-### 21. Doubleheaders/multiple event scopes
+Repeated evaluation attempts do not create new sport work by themselves.
 
-Each sport-owned event scope has its own event-time anchor and schedule occurrences.
+### 15. Dependency state changes as reevaluation causes
 
-TDLA never infers which event is “game 1” or “game 2” from names/times; it uses A-5 refs supplied by the sport.
+When an upstream stage changes terminal/output state, affected downstream materializations may receive an A-7 dependency-change reevaluation cause.
 
-### 22. Completed stage vs later reschedule
+A-9 evaluates current graph authority; it does not rely solely on push delivery correctness. Recovery/scans can reconstruct current dependency status.
 
-If a stage already completed under the old event time:
+### 16. Terminal upstream failure behavior boundary
 
-- do not erase or silently move that completed StageRun;
-- later schedule revision may materialize/supersede only work allowed by plan/reprocess policy;
-- whether a new prediction snapshot is required is determined by the plan/sport contract, not by mutating old history.
+A-9 decides generic dependency satisfaction from the resolved contract.
 
-### 23. Dependency/readiness independence
+It does not invent generalized recovery action.
 
-Being due does not mean ready.
+Examples:
 
-A `TIME_DUE` trigger only causes eligibility reevaluation. A-9 may still hold the stage because:
+- required success edge + upstream terminal failure -> blocked/unsatisfied;
+- terminal-evidence-consuming edge may be satisfied if explicitly declared;
+- optional branch may allow continuation if no required downstream output depends on it.
 
-- dependency missing;
-- readiness `WAITING`/`BLOCKED`;
-- required input stale;
-- prior required stage failed;
-- stage no longer applicable.
+A-12 owns broader failure/degradation/recovery policy.
 
-### 24. Side-effect/deadline safety
+### 17. `NO_OP` / `NOT_APPLICABLE`
 
-Customer-visible/destructive stages require especially explicit missed-window behavior.
+Preserve distinct meanings:
 
-A publication slot that is late after kickoff, for example, must not “catch up” automatically unless the resolved certified policy explicitly permits the exact side effect.
+- plan/materialization `NOT_APPLICABLE` means no dispatch for that stage authority;
+- successful `NO_OP` can satisfy only edge/output contracts that explicitly permit it;
+- a `NO_OP` cannot fabricate an absent required output.
 
-### 25. Plan revision vs schedule revision
+### 18. Degraded success
+
+`SUCCEEDED_DEGRADED` may satisfy only the exact downstream requirements whose validated outputs/policy allow degradation.
+
+A generic downstream stage cannot assume all degraded upstream outputs are usable.
+
+### 19. Input freshness / PIT boundary
+
+When resolved contracts require input freshness/cutoff constraints, A-9 must validate the declared generic metadata/provenance requirements.
+
+Sport interpretation remains sport-owned.
+
+For pregame predictions, nothing in A-9 may allow information with defensible availability after the applicable prediction cutoff to satisfy a PIT-bound input contract.
+
+Exact sport PIT semantics remain in sport repos; A-9 enforces the declared contract metadata.
+
+### 20. Readiness source failure
 
 Distinguish:
 
-- same plan, sport event time changed;
-- new resolved plan version with different timing declaration;
-- same logical slot with changed schedule anchor;
-- different logical slot added/removed.
+- sport readiness returns `WAITING`/`BLOCKED` as domain result;
+- adapter/readiness call fails technically;
+- cached prior readiness is still valid;
+- cached prior readiness expired;
+- adapter capability unavailable/incompatible.
 
-Each requires explicit lineage/supersession rather than mutation.
+Do not convert a technical readiness failure into `READY` or a sport-defined `BLOCKED` silently.
 
-### 26. Scheduler evaluation status model
+A-12 owns broader retry/recovery classification.
 
-Define auditable states/dispositions such as conceptually:
+### 21. Multiple readiness dimensions
 
-- `UNRESOLVED_ANCHOR`;
-- `SCHEDULED`;
-- `DUE`;
-- `EMITTED`;
-- `SUPERSEDED`;
-- `MISSED_SKIPPED`;
-- `MISSED_WITHIN_GRACE`;
-- `WAITING_REEVALUATION`;
-- `CANCELLED_NOT_APPLICABLE`;
-- `ERROR_RETRYABLE` / `ERROR_TERMINAL`.
+If a stage requires more than one readiness predicate/service result, define an explicit composite contract rather than hardcoded sport logic.
 
-Names can be refined, but history must distinguish them.
+Possible generic composition:
 
-### 27. No direct scheduler-to-executor path
+- `ALL_REQUIRED`;
+- declared optional readiness dimensions;
+- versioned named predicates/ports supplied by sport adapter.
+
+Do not invent implicit boolean precedence.
+
+### 22. Readiness caching
+
+Caching can reduce sport-service calls but cache identity must bind:
+
+- stage/scope/revision;
+- readiness contract version;
+- evidence/result digest;
+- validity/freshness boundary.
+
+A cache hit cannot cross incompatible authority revisions.
+
+### 23. Concurrency / simultaneous reevaluations
+
+Two trigger causes or workers may evaluate the same stage concurrently.
+
+Both may produce equivalent evaluation evidence, but they must not create duplicate StageRuns.
+
+A-11 remains final logical execution idempotency defense.
+
+Determine whether A-9 should deduplicate/coalesce equivalent current eligibility evaluations for efficiency while retaining causal links.
+
+### 24. READY does not equal dispatched
+
+`READY_FOR_DISPATCH` means all A-9 gates pass under exact recorded authority at evaluation time.
+
+It does not mean:
+
+- a worker is available;
+- resource budgets permit immediate start;
+- A-10 dispatch succeeded;
+- A-11 idempotency/retry gate passed;
+- side effect executed.
+
+Keep these lifecycle stages separate.
+
+### 25. Current-authority handoff to A-10/A-11
+
+Define what evidence A-10/A-11 must receive to prove that dispatch corresponds to the exact A-9 evaluation authority.
+
+Potential contract:
+
+```text
+DispatchEligibilityGrant
+- eligibility evaluation id/digest
+- stage materialization
+- plan/scope/schedule revisions
+- readiness/dependency authority digests
+- issued_at
+- expires_at or revalidation requirement
+- environment/mode
+```
+
+Review whether a grant object is best or whether dispatch performs inline final revalidation. Whichever approach is certified must fail closed on stale authority.
+
+### 26. Supersession after READY but before dispatch
+
+If plan/scope/schedule/materialization becomes superseded after READY:
+
+- old eligibility remains audit evidence;
+- old grant/evaluation cannot authorize new dispatch;
+- current reevaluation happens under new authority;
+- no mutation of old evidence.
+
+### 27. Stage already terminal
+
+A reevaluation request for a stage already terminal should generally resolve to explicit no-current-action/terminal disposition rather than launch duplicate work.
+
+Replay/reprocess are separate explicitly lineaged operations under A-14.
+
+### 28. No-games / empty-set behavior
+
+A zero-game slate may have no event StageMaterializations.
+
+Do not fabricate dependency work.
+
+A declared aggregate/platform stage may evaluate against the explicit empty `ScopeSetBinding` behavior certified in A-6.
+
+### 29. Shadow / supervised / production
+
+A-9 includes execution mode/current plan authority in eligibility.
+
+- shadow readiness can become ready only for shadow-safe path;
+- supervised customer-visible downstream stage may remain policy/approval-blocked even when sport readiness is ready;
+- production eligibility requires production-authorized current plan/integration policy.
+
+A-19 owns explicit approval action mechanics.
+
+### 30. Post-event settlement/evaluation
+
+The same dependency/readiness engine supports postgame work:
+
+- event completion/timing condition;
+- required final result inputs;
+- sport-owned settlement readiness;
+- upstream artifact dependencies.
+
+TDLA still does not interpret sport settlement rules.
+
+### 31. Deterministic reason sets
+
+Eligibility should retain structured generic blocking/satisfaction reasons.
+
+Multiple gates may be unsatisfied simultaneously. Decide whether evaluation reports:
+
+- first blocking gate only; or
+- complete deterministic reason set.
+
+Preference for review: complete deterministic reason set when safely available, while preserving deterministic ordering/canonicalization.
+
+### 32. Error vs domain waiting distinction
+
+Do not conflate:
+
+- `WAITING_READINESS` because sport says not ready;
+- technical adapter timeout/error;
+- malformed readiness result;
+- stale cache;
+- missing capability.
+
+Operational failures are evidence for later retry/incident behavior, not sport-state facts.
+
+### 33. Evaluation recovery after crash
+
+Durable reevaluation cause/evidence must allow evaluation to retry after process loss.
+
+If the evaluation result was already durably recorded but acknowledgement/state update was lost, recovery should find/reuse equivalent immutable evidence where appropriate rather than create contradictory current states.
+
+A-13 will define transaction/unique-key mechanics.
+
+### 34. Technology neutrality
+
+Do not make eligibility identity/state depend canonically on:
+
+- Prefect task state;
+- Celery result state;
+- queue acknowledgement;
+- process-local booleans;
+- Redis lock identity.
+
+These may be runtime cross-references only.
+
+### 35. No direct readiness-to-execution path
 
 Prohibit:
 
 ```text
-timer fires -> worker runs sport command
+sport adapter returns READY -> run model immediately
 ```
 
 Require:
 
 ```text
-schedule occurrence due
--> A-7 TIME_DUE evidence
--> eligibility reevaluation
--> A-9 dependency/readiness/timing validation
--> A-11 idempotent execution
+A-5 readiness evidence
+    + A-6 dependency/output contracts
+    + A-8 current time authority
+    + current plan/scope/materialization authority
+        -> A-9 eligibility result
+            -> A-10/A-11 dispatch/idempotency path
 ```
-
-### 28. Technology neutrality
-
-Do not make canonical schedule identity depend on:
-
-- Prefect schedule/deployment ID;
-- APScheduler job ID;
-- cron daemon entry;
-- Kubernetes CronJob UID;
-- queue delayed-message ID.
-
-These may be runtime cross-references only.
 
 ---
 
-# A-8 stress cases before certification
+# A-9 stress cases before certification
 
 At minimum test:
 
-1. MLB game at 19:10 with T-24h, T-4h, T-120m, T-30m, T-20m slots.
-2. Same MLB game moves two hours later before any slot fires.
-3. Same game moves earlier and some formerly-future slots are now missed.
-4. Game time changes multiple times in one day.
-5. Game becomes postponed with no new start time (`TBD`).
-6. Previously-TBD event receives authoritative start time.
-7. Game is cancelled/no-longer-applicable.
-8. MLB doubleheader has two opaque event refs/times and separate schedules.
-9. Zero-game day creates no fake event timers.
-10. NFL kickoff time moves because of flex/reschedule.
-11. NCAAF event time initially incomplete then becomes authoritative.
-12. Stable `final_snapshot` slot keeps identity when kickoff moves.
-13. Old stale timer callback fires after new schedule resolution exists.
-14. Duplicate physical scheduler callbacks for the same logical occurrence.
-15. Two scheduler replicas race on one due occurrence.
-16. TDLA restarts before a future due time.
-17. TDLA is down across the due time and restarts afterward.
-18. TDLA crashes after marking occurrence due but before A-7 trigger persistence.
-19. TDLA crashes after A-7 trigger persistence but before schedule occurrence is marked emitted/reconciled.
-20. Due slot is still blocked by readiness.
-21. Due slot is still blocked by dependency.
-22. Late data trigger arrives after deadline; scheduler timing authority still blocks unauthorized execution.
-23. Target time passed but still within declared grace interval.
-24. Target and deadline both passed; `SKIP_MISSED` policy.
-25. Missed customer-visible publication slot requiring manual review rather than catch-up.
-26. Event-relative T-60m calculation crosses a DST boundary.
-27. Local recurring schedule falls into nonexistent spring-forward local time.
-28. Local recurring schedule falls into duplicated fall-back local time.
-29. System wall clock jumps forward.
-30. System wall clock jumps backward.
-31. Event source timezone changes/correction but absolute UTC event instant remains same.
-32. Sport event UTC instant changes but display timezone metadata does not.
-33. Plan revision changes T-20m slot to T-15m before execution.
-34. Plan revision removes a pending slot.
-35. Plan revision adds a new future slot.
-36. Event time changes after an earlier snapshot already completed.
-37. Event time changes after final snapshot completed but before kickoff.
-38. Recurring daily maintenance schedule skipped during TDLA outage and catch-up policy says no retroactive run.
-39. Recurring evaluation schedule permits one catch-up occurrence.
-40. Same recurrence definition serializes differently but canonical occurrence identity remains deterministic.
-41. Schedule declaration references missing/unresolvable anchor.
-42. Naive datetime appears in schedule input.
-43. Impossible window: earliest start after deadline.
-44. Mutable/unversioned missed-window policy in production resolution.
-45. Schedule occurrence belongs to superseded plan digest.
-46. Scope-set membership changes while slate-level aggregate schedule remains.
-47. Event scope is replaced by new sport-owned scope ref; TDLA does not infer identity continuity.
-48. Due occurrence matches shadow mode and must not reach production side effects.
-49. Supervised customer-visible slot becomes due but stops at operator approval boundary.
-50. Production slot becomes due; every downstream gate still must pass.
+1. Time due, dependencies satisfied, readiness `READY` -> `READY_FOR_DISPATCH` under current authority.
+2. Time not yet eligible but readiness already `READY` -> `WAITING_TIME`.
+3. Time due, required upstream still running -> `WAITING_DEPENDENCY`.
+4. Time due/dependencies satisfied, readiness `WAITING` -> `WAITING_READINESS`.
+5. Readiness `BLOCKED` with sport-defined opaque reason -> generic blocked disposition without sport branching.
+6. Readiness `NOT_APPLICABLE` -> no dispatch, explicit applicability result.
+7. A readiness result was `READY` but `readiness_valid_until` expired one second before dispatch.
+8. Readiness max-age from A-6 is stricter than adapter's own validity interval.
+9. New sport scope/readiness revision arrives after prior `READY` evaluation.
+10. Event reschedule supersedes old A-8 resolution after `TIME_DUE` emitted but before dispatch.
+11. Plan revision supersedes a previously `READY` stage.
+12. Stage materialization becomes `NOT_APPLICABLE` after previous waiting state.
+13. Required upstream succeeds but required output manifest is missing.
+14. Required output exists but schema version incompatible.
+15. Required output exists but digest/provenance reference mismatches plan contract.
+16. Upstream `SUCCEEDED_DEGRADED` produces required output that policy explicitly accepts.
+17. Upstream degraded result lacks one downstream-required output.
+18. Upstream successful `NO_OP` where downstream edge permits no-op.
+19. Upstream `NO_OP` but downstream requires an output not produced.
+20. Optional upstream fails but downstream has no dependency on its output.
+21. Optional upstream fails but downstream explicitly requires its output.
+22. Required upstream terminal failure blocks dependent stage.
+23. Downstream stage intentionally consumes upstream terminal-failure evidence under explicit edge contract.
+24. Fan-in over 10 event children all successful.
+25. Fan-in child membership revision changes after 8 of 10 old children completed.
+26. Fan-in empty set with explicit empty-set success behavior.
+27. Fan-in empty set where aggregate contract forbids vacuous success.
+28. Old artifact from superseded plan has same logical output name as current artifact.
+29. Old snapshot output from prior schedule slot is accidentally presented to current slot.
+30. Two simultaneous trigger causes request reevaluation of same stage.
+31. Two evaluator workers race and both compute equivalent READY results.
+32. Stage is already `SUCCEEDED` when new trigger requests reevaluation.
+33. Stage is terminal failed and ordinary trigger arrives; no implicit replay.
+34. Historical replay/reprocess stage uses separate explicit lineage and does not reuse production eligibility blindly.
+35. Readiness adapter call times out technically.
+36. Readiness adapter returns malformed/incompatible schema.
+37. Cached readiness is valid and exact-authority compatible after adapter is temporarily unavailable.
+38. Cached readiness is expired when adapter is unavailable.
+39. Required adapter readiness capability disappears/incompatible descriptor revision.
+40. MLB opaque readiness reason changes from waiting to ready; generic TDLA never parses probable-pitcher/lineup meaning.
+41. NFL/NCAAF opaque readiness behaves the same for late inactive/weather context.
+42. PIT-bound input metadata shows availability after prediction cutoff -> dependency/input contract unsatisfied.
+43. Input freshness boundary expires while evaluation is in progress.
+44. Eligibility computed READY; current schedule resolution changes before A-10 dispatch handoff.
+45. Eligibility computed READY; upstream artifact is superseded/retracted before dispatch.
+46. Shadow path ready for computation but customer-visible stage is disabled/not applicable.
+47. Supervised compute ready but customer-visible side effect remains approval-blocked.
+48. Production path has all A-9 gates ready but A-11 later detects existing logical run; no duplicate dispatch.
+49. Postgame settlement stage time/dependencies ready but sport settlement readiness still waiting.
+50. No-games day has no event materializations and no fake readiness checks.
+51. Eligibility evaluation crash before durable result persistence.
+52. Crash after durable result persistence but before reevaluation request marked handled.
+53. Same evaluation semantic inputs serialize differently; canonical digest remains deterministic.
+54. Superseded old eligibility evidence is presented to current dispatcher; fail closed.
+55. Technical readiness failure is not mislabeled as sport `BLOCKED`.
+56. Multiple generic blocking reasons exist simultaneously; deterministic reason set/order.
+57. Dependency output becomes available, generating reevaluation, but schedule window has since closed.
+58. Readiness becomes READY before time due; later TIME_DUE reuses only still-valid readiness evidence.
+59. Time due before readiness; readiness later becomes READY under same authority and stage proceeds without duplicate materialization.
+60. Plan/scope/schedule/readiness all unchanged but duplicate reevaluation cause arrives; no duplicate logical sport work.
 
 ---
 
-# Expected A-8 outputs
+# Expected A-9 outputs
 
 Create at minimum:
 
-- `docs/architecture/A08_EVENT_RELATIVE_SCHEDULING_ENGINE_V1.md`;
-- A-8 V1.1 addendum if review exposes ambiguities;
-- A-8 architecture conformance/certification review with stress matrix;
-- ADR if clock/schedule authority or missed-window semantics introduce a durable new tradeoff;
+- `docs/architecture/A09_DEPENDENCY_READINESS_ENGINE_V1.md`;
+- A-9 V1.1 addendum if review exposes ambiguities;
+- A-9 architecture conformance/certification review with stress matrix;
+- ADR if eligibility-grant/current-authority/TOCTOU semantics introduce a durable tradeoff;
 - updated ADR index;
 - updated architecture index;
 - updated `ARCHITECTURE_CERTIFICATION_LOG.md`;
 - detailed `CHANGE_JOURNAL.md` entry;
 - updated root `README.md`;
-- updated `CURRENT_RESUME_POINT.md` pointing to A-9.
+- updated `CURRENT_RESUME_POINT.md` pointing to A-10.
 
 ## Do not do yet
 
-Until A-8 is certified:
+Until A-9 is certified:
 
-- do not implement final scheduler Pydantic models as frozen authority;
-- do not add real cron/Prefect/APScheduler/Kubernetes scheduling jobs;
-- do not design PostgreSQL scheduler DDL around guessed fields;
-- do not wire Daily-MLB/NFL/NCAAF live schedules into automation;
-- do not make clock timestamps part of sport snapshot semantic identity;
-- do not invent sport-specific reschedule logic inside TDLA;
-- do not implement A-9 dependency/readiness state machine prematurely;
-- do not enable production publication/catch-up behavior.
+- do not implement final eligibility/readiness Pydantic models as frozen authority;
+- do not add production Prefect dependency/readiness flows;
+- do not design PostgreSQL eligibility/dependency tables around guessed fields;
+- do not wire real Daily-MLB/NFL/NCAAF readiness into production automation;
+- do not hardcode sport readiness reason codes in generic TDLA;
+- do not treat `READY` as a persistent mutable boolean;
+- do not let stale readiness/schedule/dependency evidence authorize dispatch;
+- do not implement A-10 worker backend or A-11 final idempotency ahead of their architecture sections;
+- do not enable production publication.
 
 ## Required reading for next session
 
@@ -573,13 +672,17 @@ Until A-8 is certified:
 2. `AGENTS.md`
 3. this file
 4. `docs/implementation/ARCHITECTURE_CERTIFICATION_LOG.md`
-5. `docs/architecture/A06_PIPELINE_PLAN_STAGE_CONTRACTS_V1.md`
-6. `docs/architecture/A06_PIPELINE_PLAN_STAGE_CONTRACTS_ADDENDUM_V1_1.md`
-7. `docs/architecture/A07_TRIGGER_ARCHITECTURE_V1.md`
-8. `docs/architecture/A07_TRIGGER_ARCHITECTURE_ADDENDUM_V1_1.md`
-9. `docs/implementation/A07_ARCHITECTURE_CONFORMANCE_REVIEW_20260904.md`
-10. `docs/adr/ADR-0003_IMMUTABLE_PLAN_FRAGMENTS_AND_EXPLICIT_COMPOSITION.md`
-11. `docs/adr/ADR-0004_DURABLE_TRIGGER_EVIDENCE_AND_REEVALUATION_ONLY_AUTHORITY.md`
-12. current A-5 sport adapter contracts for scope/schedule revision authority.
+5. `docs/architecture/A05_SPORT_AUTOMATION_ADAPTER_V1.md`
+6. `docs/architecture/A05_SPORT_AUTOMATION_ADAPTER_ADDENDUM_V1_1.md`
+7. `docs/architecture/A06_PIPELINE_PLAN_STAGE_CONTRACTS_V1.md`
+8. `docs/architecture/A06_PIPELINE_PLAN_STAGE_CONTRACTS_ADDENDUM_V1_1.md`
+9. `docs/architecture/A07_TRIGGER_ARCHITECTURE_V1.md`
+10. `docs/architecture/A07_TRIGGER_ARCHITECTURE_ADDENDUM_V1_1.md`
+11. `docs/architecture/A08_EVENT_RELATIVE_SCHEDULING_ENGINE_V1.md`
+12. `docs/architecture/A08_EVENT_RELATIVE_SCHEDULING_ENGINE_ADDENDUM_V1_1.md`
+13. `docs/implementation/A08_ARCHITECTURE_CONFORMANCE_REVIEW_20260904.md`
+14. `docs/adr/ADR-0004_DURABLE_TRIGGER_EVIDENCE_AND_REEVALUATION_ONLY_AUTHORITY.md`
+15. `docs/adr/ADR-0005_STABLE_SCHEDULE_SLOTS_AND_RESOLVED_TIME_AUTHORITY.md`
+16. current A-5/A-6 sport readiness/dependency contracts.
 
-The next architecture checkpoint is **A-8 Event-Relative Scheduling Engine**.
+The next architecture checkpoint is **A-9 Dependency / Readiness Engine**.
