@@ -24,8 +24,8 @@ Authority: **This file is the authoritative status record for architecture and i
 | A-4 | Configuration / environment model | **ARCHITECTURE-CERTIFIED** | foundation V1 | Typed/versioned non-secret config + secret references + effective digest certified. |
 | A-5 | Sport Automation Adapter | **ARCHITECTURE-CERTIFIED** | `docs/architecture/A05_SPORT_AUTOMATION_ADAPTER_V1.md` + `A05_SPORT_AUTOMATION_ADAPTER_ADDENDUM_V1_1.md` | Certified 2026-09-03 after cross-repository and distributed-failure stress review. |
 | A-6 | Pipeline-plan / stage contracts | **ARCHITECTURE-CERTIFIED** | `docs/architecture/A06_PIPELINE_PLAN_STAGE_CONTRACTS_V1.md` + `A06_PIPELINE_PLAN_STAGE_CONTRACTS_ADDENDUM_V1_1.md` | Certified 2026-09-03 after graph/composition/identity/canonicalization stress review. |
-| A-7 | Trigger architecture | PLANNED — NEXT | TBD | Next architecture checkpoint. |
-| A-8 | Event-relative scheduling | PLANNED | TBD | |
+| A-7 | Trigger architecture | **ARCHITECTURE-CERTIFIED** | `docs/architecture/A07_TRIGGER_ARCHITECTURE_V1.md` + `A07_TRIGGER_ARCHITECTURE_ADDENDUM_V1_1.md` | Certified 2026-09-04 after duplicate/order/revision/recovery/trust stress review. |
+| A-8 | Event-relative scheduling | PLANNED — NEXT | TBD | Next architecture checkpoint. |
 | A-9 | Dependency / readiness | PLANNED | TBD | |
 | A-10 | Worker / execution backend | PLANNED | TBD | |
 | A-11 | Retry / timeout / idempotency | PLANNED | TBD | |
@@ -48,10 +48,10 @@ Authority: **This file is the authoritative status record for architecture and i
 | Milestone | Topic | Status | Evidence |
 |---|---|---|---|
 | M0 | Repository Bootstrap / Engineering Constitution | PLANNED | Architecture/documentation seed exists; implementation bootstrap not yet started. |
-| M1 | Canonical Automation Domain Contracts | PLANNED | A-6 architecture now certifies plan/stage contract semantics and required canonical digest test vectors; implementation remains unstarted. |
+| M1 | Canonical Automation Domain Contracts | PLANNED | A-6/A-7 now certify plan/stage and trigger contract semantics; implementation remains unstarted. |
 | M2 | PostgreSQL Persistence & Migration Foundation | PLANNED | |
 | M3 | Prefect Runtime Foundation | PLANNED | |
-| M4 | Scheduling / Trigger Engine | PLANNED | |
+| M4 | Scheduling / Trigger Engine | PLANNED | A-7 trigger architecture is certified; A-8/A-9 remain required before implementation authority. |
 | M5 | Worker / Execution Backend | PLANNED | |
 | M6 | Sport Automation Adapter Framework | PLANNED | A-5 architecture is certified; implementation awaits architecture sequence/implementation start. |
 | M7 | Idempotency / Retry / Recovery | PLANNED | |
@@ -60,7 +60,7 @@ Authority: **This file is the authoritative status record for architecture and i
 | M10 | Observability / Alerts / Incidents | PLANNED | |
 | M11 | Publication Subsystem | PLANNED | |
 | M12 | Security / Service Identity | PLANNED | |
-| M13 | Daily-MLB Adapter | PLANNED | Requires certified manual MLB pipeline. Current starter service shape is compatible in principle but is not A-5/A-6 production-certified. |
+| M13 | Daily-MLB Adapter | PLANNED | Requires certified manual MLB pipeline. Current starter service shape is compatible in principle but is not A-5/A-6/A-7 production-certified. |
 | M14 | Daily-MLB Shadow Automation | PLANNED | |
 | M15 | Daily-MLB Production Automation Certification | PLANNED | |
 | M16 | Daily-NFL Integration | PLANNED | |
@@ -171,4 +171,43 @@ Decision:
 - **A-6 is ARCHITECTURE-CERTIFIED as V1 governed together with the V1.1 certification addendum and ADR-0003.**
 - The canonical executable authority is the immutable `ResolvedAutomationPlan`, not a Prefect flow/runtime object.
 - No Pydantic implementation, canonical serializer code, Prefect flow, PostgreSQL schema, or real sport adapter is certified by this decision.
-- **A-7 Trigger Architecture is NEXT.**
+- A-7 Trigger Architecture became the next architecture checkpoint.
+
+### 2026-09-04 — A-7 Trigger Architecture certified
+
+Evidence:
+- `docs/architecture/A07_TRIGGER_ARCHITECTURE_V1.md`
+- `docs/architecture/A07_TRIGGER_ARCHITECTURE_ADDENDUM_V1_1.md`
+- `docs/implementation/A07_ARCHITECTURE_CONFORMANCE_REVIEW_20260904.md`
+- `docs/adr/ADR-0004_DURABLE_TRIGGER_EVIDENCE_AND_REEVALUATION_ONLY_AUTHORITY.md`
+
+Review result:
+- trigger delivery vs semantic source-event identity: PASS.
+- occurrence-family vs immutable event-revision identity: PASS after V1.1 clarification.
+- same occurrence/revision with conflicting semantic payload: PASS after fail-closed V1.1 clarification.
+- durable accepted-trigger evidence before downstream action: PASS.
+- logical eligibility-reevaluation identity vs physical processing attempts: PASS after V1.1 clarification.
+- duplicate timer/webhook/dependency delivery: PASS.
+- trigger dedup vs A-11 stage idempotency separation: PASS.
+- out-of-order/source-clock-skew behavior: PASS.
+- correction/retraction append-only lineage: PASS.
+- immutable plan-bound TriggerBinding semantics: PASS.
+- stale timer after schedule revision: PASS.
+- sport-change hints without MLB/NFL/NCAAF semantics in generic TDLA: PASS.
+- A-5 readiness remains authoritative when required: PASS.
+- burst coalescing with complete raw-event provenance: PASS after authority-revision boundary clarification.
+- replay/test ingress isolation: PASS.
+- source outage does not become negative sport evidence: PASS.
+- untrusted/signature-failed source cannot create authoritative TriggerEvent: PASS after V1.1 clarification.
+- secret-bearing/malformed payload hygiene: PASS at A-7 scope.
+- no direct trigger-to-publication/destructive action path: PASS.
+
+Stress review:
+- `A07_ARCHITECTURE_CONFORMANCE_REVIEW_20260904.md` records 40 trigger identity, duplicate, ordering, revision, crash-recovery, coalescing, replay, security, timer, callback, and stale-authority scenarios plus additional failure-path checks.
+
+Decision:
+- **A-7 is ARCHITECTURE-CERTIFIED as V1 governed together with the V1.1 certification addendum and ADR-0004.**
+- A trigger is durable evidence requesting eligibility reevaluation only; it is never direct execution or side-effect authority.
+- `TriggerDelivery`, semantic `TriggerEvent`, `TriggerBinding`, `TriggerEvaluation`, logical `EligibilityReevaluationRequest`, and physical processing attempts remain distinct identity layers.
+- No trigger endpoint, broker, timer worker, Pydantic model, PostgreSQL schema, Prefect event integration, signature verification code, or live sport trigger integration is certified by this decision.
+- **A-8 Event-Relative Scheduling Engine is NEXT.**
