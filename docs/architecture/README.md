@@ -23,8 +23,8 @@ Architecture is intentionally defined before production implementation so TDLA c
 | A-5 | Sport Automation Adapter contract | `A05_SPORT_AUTOMATION_ADAPTER_V1.md` + `A05_SPORT_AUTOMATION_ADAPTER_ADDENDUM_V1_1.md` | **ARCHITECTURE-CERTIFIED** |
 | A-6 | Pipeline plan / stage contracts | `A06_PIPELINE_PLAN_STAGE_CONTRACTS_V1.md` + `A06_PIPELINE_PLAN_STAGE_CONTRACTS_ADDENDUM_V1_1.md` | **ARCHITECTURE-CERTIFIED** |
 | A-7 | Trigger architecture | `A07_TRIGGER_ARCHITECTURE_V1.md` + `A07_TRIGGER_ARCHITECTURE_ADDENDUM_V1_1.md` | **ARCHITECTURE-CERTIFIED** |
-| A-8 | Event-relative scheduling | TBD | **NEXT** |
-| A-9 | Dependency / readiness engine | TBD | Planned |
+| A-8 | Event-relative scheduling | `A08_EVENT_RELATIVE_SCHEDULING_ENGINE_V1.md` + `A08_EVENT_RELATIVE_SCHEDULING_ENGINE_ADDENDUM_V1_1.md` | **ARCHITECTURE-CERTIFIED** |
+| A-9 | Dependency / readiness engine | TBD | **NEXT** |
 | A-10 | Worker / execution backends | TBD | Planned |
 | A-11 | Retry / timeout / idempotency | TBD | Planned |
 | A-12 | Failure / degradation / recovery | TBD | Planned |
@@ -112,7 +112,35 @@ Important A-7 certified rules:
 - source silence/outage is not evidence that domain state did not change;
 - there is no direct webhook/timer/operator-trigger-to-publication/destructive-action path.
 
-## Certified foundation + adapter + plan + trigger invariants
+## Certification evidence for A-8
+
+- `A08_EVENT_RELATIVE_SCHEDULING_ENGINE_V1.md`
+- `A08_EVENT_RELATIVE_SCHEDULING_ENGINE_ADDENDUM_V1_1.md`
+- `docs/implementation/A08_ARCHITECTURE_CONFORMANCE_REVIEW_20260904.md`
+- `docs/adr/ADR-0005_STABLE_SCHEDULE_SLOTS_AND_RESOLVED_TIME_AUTHORITY.md`
+
+A-8 establishes stable logical schedule slots, immutable schedule resolutions, logical due occurrences, explicit missed-window policy, reschedule/TBD/cancellation supersession, restart/HA recovery semantics, UTC/DST rules, recurring calendar identity, and a one-way handoff into A-7 `TIME_DUE` reevaluation evidence.
+
+Important A-8 certified rules:
+
+- a wall-clock timestamp is a resolution of stable schedule intent, not the stage/snapshot identity;
+- every production event-relative resolution binds exact plan/stage/scope/schedule/anchor/timing-policy authority;
+- event-time changes create new immutable `ScheduleResolution` authority and supersede pending old authority rather than mutating history;
+- same UTC instant under a new sport schedule revision remains new authority/provenance, though runtime timer wakeups may be reused safely;
+- one logical `ScheduleOccurrence` maps to at most one canonical semantic A-7 `TIME_DUE` event;
+- physical timer callbacks/scans/leases are not canonical schedule occurrence identity;
+- earlier reschedules that make slots overdue are classified independently using immutable missed-window policies;
+- missed-window policy can request reevaluation, skip, supersede, or require review, but the scheduler itself never executes sport work;
+- stale already-emitted old timer authority must be revalidated after later supersession before dispatch;
+- unresolved/TBD anchors never receive invented placeholder due clocks;
+- event-relative elapsed offsets use resolved UTC duration arithmetic;
+- local calendar recurrences explicitly retain DST ambiguity/nonexistent-time resolution authority;
+- restart/downtime/multiple scheduler replicas converge on the same logical occurrence/evidence;
+- customer-visible/destructive late work has no generic catch-up permission;
+- Prefect/APScheduler/CronJob/queue IDs remain runtime cross-references only;
+- there is no direct scheduler-to-executor path.
+
+## Certified foundation + adapter + plan + trigger + scheduling invariants
 
 - TDLA is a control plane, not a sports model repository.
 - DDC remains authority for certified shared sport-agnostic acquisition/facts.
@@ -137,6 +165,9 @@ Important A-7 certified rules:
 - trigger delivery, semantic source event, reevaluation request, StageRun, and RunAttempt remain separate identities.
 - trigger evidence is durable and append-only; corrections/retractions preserve lineage.
 - trigger-source duplicates/out-of-order events do not become direct execution authority.
+- schedule slot identity is stable across clock-time changes; resolutions/occurrences retain exact authority and supersession lineage.
+- time-due evidence is reevaluation-only and cannot bypass current schedule/dependency/readiness/idempotency/side-effect gates.
+- scheduler correctness does not rely on a singleton process or vendor-native timer identity.
 - PostgreSQL is intended as TDLA authoritative persistence.
 - non-secret effective configuration is schema-validated and hashable.
 - every material change must produce detailed durable documentation and an exact resume point.
