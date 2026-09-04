@@ -38,6 +38,14 @@ It does **not** own sport intelligence and it does **not** replace Daily-Data-Co
 22. `OPTIONAL`, `NO_OP`, `NOT_APPLICABLE`, and degraded outcomes satisfy only dependency/output contracts that explicitly permit them.
 23. Production resolved plans pin immutable execution targets and execution-affecting policy versions/digests.
 24. Plan identity is deterministic from schema-controlled semantic canonicalization and SHA-256; presentation-only metadata does not silently alter execution identity.
+25. A trigger is durable evidence requesting eligibility reevaluation only; it is **not** dispatch or side-effect authority.
+26. Physical `TriggerDelivery`, semantic `TriggerEvent`, immutable `TriggerBinding`, `TriggerEvaluation`, logical `EligibilityReevaluationRequest`, StageRun, and RunAttempt remain separate identity layers.
+27. Trigger duplicate suppression and A-11 stage logical idempotency are separate defenses.
+28. Trigger corrections/retractions preserve immutable lineage; stale/out-of-order evidence cannot silently roll authority backward.
+29. Stale timer callbacks cannot revive superseded schedule/plan work.
+30. Untrusted trigger delivery cannot create an authoritative semantic TriggerEvent.
+31. Trigger replay/test ingestion is explicitly labeled and environment/mode restricted.
+32. No webhook, timer, callback, or ordinary operator trigger can bypass the resolved plan, timing, readiness/dependency, immutable target, certification, idempotency, or side-effect gates.
 
 ## Current status
 
@@ -45,11 +53,12 @@ It does **not** own sport intelligence and it does **not** replace Daily-Data-Co
 - A-0 through A-4 architecture foundation: **ARCHITECTURE-CERTIFIED**.
 - A-5 Sport Automation Adapter contract: **ARCHITECTURE-CERTIFIED**.
 - A-6 Pipeline Plan / Stage Contracts: **ARCHITECTURE-CERTIFIED**.
-- A-6 certification evidence: `docs/implementation/A06_ARCHITECTURE_CONFORMANCE_REVIEW_20260903.md`.
-- A-7 Trigger Architecture: **NEXT**.
+- A-7 Trigger Architecture: **ARCHITECTURE-CERTIFIED**.
+- A-7 certification evidence: `docs/implementation/A07_ARCHITECTURE_CONFORMANCE_REVIEW_20260904.md`.
+- **A-8 Event-Relative Scheduling Engine: NEXT.**
 - No production automation implementation is authoritative yet.
 - Daily-MLB remains manual-first until its production pipeline is certified and later proves automation equivalence in shadow/supervised modes.
-- The existing Daily-MLB starter job-service shape is compatible in principle with A-5/A-6 wrapping, but it is not assumed production-conforming; future onboarding targets the certified final manual MLB pipeline and must prove stable idempotent async dispatch/reconciliation plus A-6 plan/output contracts.
+- The existing Daily-MLB starter job-service shape is compatible in principle with later wrapping, but it is not assumed production-conforming; future onboarding targets the certified final manual MLB pipeline.
 
 ## Governing documents
 
@@ -62,8 +71,11 @@ It does **not** own sport intelligence and it does **not** replace Daily-Data-Co
 - `docs/architecture/A05_SPORT_AUTOMATION_ADAPTER_ADDENDUM_V1_1.md` — A-5 certification clarifications.
 - `docs/implementation/A05_ARCHITECTURE_CONFORMANCE_REVIEW_20260903.md` — A-5 certification review/evidence.
 - `docs/architecture/A06_PIPELINE_PLAN_STAGE_CONTRACTS_V1.md` — A-6 base plan/stage graph architecture.
-- `docs/architecture/A06_PIPELINE_PLAN_STAGE_CONTRACTS_ADDENDUM_V1_1.md` — A-6 certification clarifications for scope-set binding, digest participation, schedule-slot identity, and immutable policy binding.
-- `docs/implementation/A06_ARCHITECTURE_CONFORMANCE_REVIEW_20260903.md` — A-6 certification review/evidence and 30-case stress matrix.
+- `docs/architecture/A06_PIPELINE_PLAN_STAGE_CONTRACTS_ADDENDUM_V1_1.md` — A-6 certification clarifications.
+- `docs/implementation/A06_ARCHITECTURE_CONFORMANCE_REVIEW_20260903.md` — A-6 certification review/evidence.
+- `docs/architecture/A07_TRIGGER_ARCHITECTURE_V1.md` — A-7 base trigger architecture.
+- `docs/architecture/A07_TRIGGER_ARCHITECTURE_ADDENDUM_V1_1.md` — A-7 certification clarifications for occurrence/revision identity, conflict handling, reevaluation identity, durability, trust rejection, and coalescing boundaries.
+- `docs/implementation/A07_ARCHITECTURE_CONFORMANCE_REVIEW_20260904.md` — A-7 certification review/evidence and 40-case stress matrix.
 - `docs/implementation/IMPLEMENTATION_ROADMAP_V1.md` — milestone implementation/certification sequence.
 - `docs/implementation/ARCHITECTURE_CERTIFICATION_LOG.md` — authoritative architecture/milestone status.
 - `docs/implementation/CHANGE_JOURNAL.md` — chronological durable change record and resume history.
@@ -72,6 +84,7 @@ It does **not** own sport intelligence and it does **not** replace Daily-Data-Co
 - `docs/adr/ADR-0001_CONTROL_PLANE_AND_VENDOR_NEUTRAL_IDENTITY.md` — TDLA canonical identity / replaceable orchestrator decision.
 - `docs/adr/ADR-0002_TRANSPORT_NEUTRAL_SPORT_ADAPTER_PROTOCOL.md` — transport-neutral sport adapter protocol decision.
 - `docs/adr/ADR-0003_IMMUTABLE_PLAN_FRAGMENTS_AND_EXPLICIT_COMPOSITION.md` — immutable fragment, explicit composition, resolved-plan authority decision.
+- `docs/adr/ADR-0004_DURABLE_TRIGGER_EVIDENCE_AND_REEVALUATION_ONLY_AUTHORITY.md` — durable trigger evidence / reevaluation-only authority decision.
 
 ## Planned technical baseline
 
@@ -91,7 +104,7 @@ The initial intended production baseline is:
 - GitHub Actions CI/CD
 - pytest, Ruff, and strict mypy
 
-These technology choices remain subordinate to TDLA's own contracts. Prefect, databases, deployment backends, transport mechanisms, or telemetry vendors must be replaceable without invalidating TDLA execution identity or audit history.
+These technology choices remain subordinate to TDLA's own contracts. Prefect, databases, deployment backends, transport mechanisms, trigger brokers, or telemetry vendors must be replaceable without invalidating TDLA execution identity or audit history.
 
 ## Architecture sequence
 
