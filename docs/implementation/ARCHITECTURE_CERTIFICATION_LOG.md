@@ -26,8 +26,8 @@ Authority: **This file is the authoritative status record for architecture and i
 | A-6 | Pipeline-plan / stage contracts | **ARCHITECTURE-CERTIFIED** | `docs/architecture/A06_PIPELINE_PLAN_STAGE_CONTRACTS_V1.md` + `A06_PIPELINE_PLAN_STAGE_CONTRACTS_ADDENDUM_V1_1.md` | Certified 2026-09-03 after graph/composition/identity/canonicalization stress review. |
 | A-7 | Trigger architecture | **ARCHITECTURE-CERTIFIED** | `docs/architecture/A07_TRIGGER_ARCHITECTURE_V1.md` + `A07_TRIGGER_ARCHITECTURE_ADDENDUM_V1_1.md` | Certified 2026-09-04 after duplicate/order/revision/recovery/trust stress review. |
 | A-8 | Event-relative scheduling | **ARCHITECTURE-CERTIFIED** | `docs/architecture/A08_EVENT_RELATIVE_SCHEDULING_ENGINE_V1.md` + `A08_EVENT_RELATIVE_SCHEDULING_ENGINE_ADDENDUM_V1_1.md` | Certified 2026-09-04 after reschedule/missed-window/recovery/clock/DST stress review. |
-| A-9 | Dependency / readiness | PLANNED — NEXT | TBD | Next architecture checkpoint. |
-| A-10 | Worker / execution backend | PLANNED | TBD | |
+| A-9 | Dependency / readiness | **ARCHITECTURE-CERTIFIED** | `docs/architecture/A09_DEPENDENCY_READINESS_ENGINE_V1.md` + `A09_DEPENDENCY_READINESS_ENGINE_ADDENDUM_V1_1.md` | Certified 2026-09-05 after authority/dependency/readiness/freshness/TOCTOU stress review. |
+| A-10 | Worker / execution backend | PLANNED — NEXT | TBD | Next architecture checkpoint. |
 | A-11 | Retry / timeout / idempotency | PLANNED | TBD | |
 | A-12 | Failure / degradation / recovery | PLANNED | TBD | |
 | A-13 | Persistence / immutable audit / provenance | PLANNED | TBD | |
@@ -48,11 +48,11 @@ Authority: **This file is the authoritative status record for architecture and i
 | Milestone | Topic | Status | Evidence |
 |---|---|---|---|
 | M0 | Repository Bootstrap / Engineering Constitution | PLANNED | Architecture/documentation seed exists; implementation bootstrap not yet started. |
-| M1 | Canonical Automation Domain Contracts | PLANNED | A-6/A-7/A-8 now certify plan/stage, trigger, and schedule identity semantics; implementation remains unstarted. |
+| M1 | Canonical Automation Domain Contracts | PLANNED | A-6/A-7/A-8/A-9 now certify plan/stage, trigger, schedule, and eligibility authority semantics; implementation remains unstarted. |
 | M2 | PostgreSQL Persistence & Migration Foundation | PLANNED | |
 | M3 | Prefect Runtime Foundation | PLANNED | |
-| M4 | Scheduling / Trigger Engine | PLANNED | A-7/A-8 architecture is certified; A-9 remains required before implementation authority. |
-| M5 | Worker / Execution Backend | PLANNED | |
+| M4 | Scheduling / Trigger Engine | PLANNED | A-7/A-8/A-9 architecture is certified; implementation remains unstarted. |
+| M5 | Worker / Execution Backend | PLANNED | A-10 architecture is next and must consume A-9 version-bound eligibility grants/current-authority revalidation. |
 | M6 | Sport Automation Adapter Framework | PLANNED | A-5 architecture is certified; implementation awaits architecture sequence/implementation start. |
 | M7 | Idempotency / Retry / Recovery | PLANNED | |
 | M8 | Provenance / Immutable Run Ledger | PLANNED | |
@@ -60,7 +60,7 @@ Authority: **This file is the authoritative status record for architecture and i
 | M10 | Observability / Alerts / Incidents | PLANNED | |
 | M11 | Publication Subsystem | PLANNED | |
 | M12 | Security / Service Identity | PLANNED | |
-| M13 | Daily-MLB Adapter | PLANNED | Requires certified manual MLB pipeline. Current starter service shape is compatible in principle but is not A-5/A-6/A-7/A-8 production-certified. |
+| M13 | Daily-MLB Adapter | PLANNED | Requires certified manual MLB pipeline. Current starter service shape is compatible in principle but is not A-5 through A-9 production-certified. |
 | M14 | Daily-MLB Shadow Automation | PLANNED | |
 | M15 | Daily-MLB Production Automation Certification | PLANNED | |
 | M16 | Daily-NFL Integration | PLANNED | |
@@ -253,4 +253,45 @@ Decision:
 - A due occurrence creates durable A-7 `TIME_DUE` reevaluation evidence only; it never directly dispatches sport work.
 - Historical schedule resolutions/occurrences remain immutable and superseded rather than rewritten.
 - No scheduler implementation, Prefect schedule, timer worker, PostgreSQL schema, live sport schedule integration, or production catch-up/publication behavior is certified by this decision.
-- **A-9 Dependency / Readiness Engine is NEXT.**
+- A-9 Dependency / Readiness Engine became the next architecture checkpoint.
+
+### 2026-09-05 — A-9 Dependency / Readiness Engine certified
+
+Evidence:
+- `docs/architecture/A09_DEPENDENCY_READINESS_ENGINE_V1.md`
+- `docs/architecture/A09_DEPENDENCY_READINESS_ENGINE_ADDENDUM_V1_1.md`
+- `docs/implementation/A09_ARCHITECTURE_CONFORMANCE_REVIEW_20260905.md`
+- `docs/adr/ADR-0006_VERSION_BOUND_DISPATCH_ELIGIBILITY_AND_FINAL_REVALIDATION.md`
+
+Review result:
+- sport/DDC/TDLA ownership boundary: PASS.
+- current plan/stage/materialization/scope/schedule authority gate: PASS.
+- A-6 dependency/output/no-op/degraded/terminal-evidence semantics: PASS.
+- exact upstream StageRun/manifest/schema/digest/provenance binding: PASS.
+- upstream output supersession/retraction invalidation: PASS after V1.1 clarification.
+- exact fan-in `ScopeSetBinding` membership revision/digest: PASS.
+- A-5 readiness mapping without sport reason branching: PASS.
+- readiness freshness/max-age/cache authority: PASS after V1.1 clarification.
+- composite readiness required/optional semantics: PASS after V1.1 clarification.
+- technical readiness failure vs sport waiting/blocked distinction: PASS.
+- A-8 current time/window authority vs stale `TIME_DUE`: PASS.
+- PIT/freshness generic contract enforcement: PASS.
+- complete deterministic reason sets without unnecessary external calls: PASS after V1.1 clarification.
+- eligibility semantic digest vs unique record/cause lineage: PASS after V1.1 clarification.
+- concurrent reevaluation/crash recovery semantics: PASS.
+- terminal-stage no-implicit-replay behavior: PASS.
+- shadow/supervised/production policy boundary: PASS.
+- version-bound `DispatchEligibilityGrant` handoff: PASS.
+- TOCTOU final current-authority revalidation before dispatch: PASS after V1.1 + ADR-0006.
+- technology neutrality/no direct readiness-to-executor path: PASS.
+
+Stress review:
+- `A09_ARCHITECTURE_CONFORMANCE_REVIEW_20260905.md` records 60 current-authority, dependency/output, fan-in, readiness/freshness, PIT, concurrency, crash-recovery, stale-grant, and execution-mode scenarios plus additional failure-path checks.
+
+Decision:
+- **A-9 is ARCHITECTURE-CERTIFIED as V1 governed together with the V1.1 certification addendum and ADR-0006.**
+- `READY_FOR_DISPATCH` is immutable derived evidence over exact current authority, not a persistent mutable boolean.
+- `DispatchEligibilityGrant` is version-bound, non-transferable evidence and never a bearer execution token.
+- A-10/A-11 must revalidate current plan/scope/schedule/dependency/readiness/policy witnesses before dispatch, and A-11 remains final logical execution-idempotency authority.
+- No eligibility/readiness Pydantic implementation, cache, database schema, Prefect dependency tasks, worker dispatch, or live sport readiness integration is certified by this decision.
+- **A-10 Worker / Execution Backend Architecture is NEXT.**
