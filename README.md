@@ -55,6 +55,15 @@ It does **not** own sport intelligence and it does **not** replace Daily-Data-Co
 39. Event-relative offsets use elapsed UTC duration arithmetic; local calendar recurrence must explicitly resolve DST ambiguous/nonexistent times.
 40. Prefect/APScheduler/CronJob/queue/cron timer IDs are runtime cross-references only and cannot become TDLA business schedule identity.
 41. There is no direct scheduler-to-executor path: due occurrence -> A-7 `TIME_DUE` evidence -> eligibility reevaluation -> later A-9/A-11 authorization.
+42. Eligibility is immutable derived evidence over exact current plan/stage/scope/schedule/dependency/readiness/policy authority; there is no canonical mutable `ready=true` flag.
+43. A-5 sport `READY` is only one gate and cannot by itself mean TDLA `READY_FOR_DISPATCH`.
+44. Required upstream dependencies bind exact StageRun/output manifest/schema/digest/provenance authority; same-named stale artifacts cannot satisfy current work.
+45. Readiness cache validity is bounded by the strictest freshness rule and is immediately invalidated by incompatible authority revisions.
+46. Technical readiness failure is not sport `WAITING`, `BLOCKED`, or `READY`.
+47. An A-9 `DispatchEligibilityGrant` is immutable version-bound proof of a passed evaluation, not a bearer execution token.
+48. A-10/A-11 must revalidate the grant's plan/scope/schedule/dependency/readiness/current-policy witnesses before dispatch, and stale grants fail closed.
+49. Grant validity cannot outlive readiness, schedule/window, policy, or stricter execution-authority validity.
+50. A-9 eligibility does not create StageRun identity or replace A-11 final logical execution idempotency.
 
 ## Current status
 
@@ -64,8 +73,9 @@ It does **not** own sport intelligence and it does **not** replace Daily-Data-Co
 - A-6 Pipeline Plan / Stage Contracts: **ARCHITECTURE-CERTIFIED**.
 - A-7 Trigger Architecture: **ARCHITECTURE-CERTIFIED**.
 - A-8 Event-Relative Scheduling Engine: **ARCHITECTURE-CERTIFIED**.
-- A-8 certification evidence: `docs/implementation/A08_ARCHITECTURE_CONFORMANCE_REVIEW_20260904.md`.
-- **A-9 Dependency / Readiness Engine: NEXT.**
+- A-9 Dependency / Readiness Engine: **ARCHITECTURE-CERTIFIED**.
+- A-9 certification evidence: `docs/implementation/A09_ARCHITECTURE_CONFORMANCE_REVIEW_20260905.md`.
+- **A-10 Worker / Execution Backend Architecture: NEXT.**
 - No production automation implementation is authoritative yet.
 - Daily-MLB remains manual-first until its production pipeline is certified and later proves automation equivalence in shadow/supervised modes.
 - The existing Daily-MLB starter job-service shape is compatible in principle with later wrapping, but it is not assumed production-conforming; future onboarding targets the certified final manual MLB pipeline.
@@ -87,8 +97,11 @@ It does **not** own sport intelligence and it does **not** replace Daily-Data-Co
 - `docs/architecture/A07_TRIGGER_ARCHITECTURE_ADDENDUM_V1_1.md` — A-7 certification clarifications.
 - `docs/implementation/A07_ARCHITECTURE_CONFORMANCE_REVIEW_20260904.md` — A-7 certification review/evidence and 40-case stress matrix.
 - `docs/architecture/A08_EVENT_RELATIVE_SCHEDULING_ENGINE_V1.md` — A-8 base scheduling architecture.
-- `docs/architecture/A08_EVENT_RELATIVE_SCHEDULING_ENGINE_ADDENDUM_V1_1.md` — A-8 certification clarifications for reevaluation-only missed handling, same-instant/new-revision authority, one canonical `TIME_DUE` event, explicit due boundary, stale-emitted authority revalidation, DST recurrence identity, and timer reuse boundaries.
+- `docs/architecture/A08_EVENT_RELATIVE_SCHEDULING_ENGINE_ADDENDUM_V1_1.md` — A-8 certification clarifications.
 - `docs/implementation/A08_ARCHITECTURE_CONFORMANCE_REVIEW_20260904.md` — A-8 certification review/evidence and 50-case stress matrix.
+- `docs/architecture/A09_DEPENDENCY_READINESS_ENGINE_V1.md` — A-9 base dependency/readiness/current-authority architecture.
+- `docs/architecture/A09_DEPENDENCY_READINESS_ENGINE_ADDENDUM_V1_1.md` — A-9 certification clarifications for deterministic reasons, grant semantics, cache validity, output invalidation, composite readiness, and semantic evaluation identity.
+- `docs/implementation/A09_ARCHITECTURE_CONFORMANCE_REVIEW_20260905.md` — A-9 certification review/evidence and 60-case stress matrix.
 - `docs/implementation/IMPLEMENTATION_ROADMAP_V1.md` — milestone implementation/certification sequence.
 - `docs/implementation/ARCHITECTURE_CERTIFICATION_LOG.md` — authoritative architecture/milestone status.
 - `docs/implementation/CHANGE_JOURNAL.md` — chronological durable change record and resume history.
@@ -99,6 +112,7 @@ It does **not** own sport intelligence and it does **not** replace Daily-Data-Co
 - `docs/adr/ADR-0003_IMMUTABLE_PLAN_FRAGMENTS_AND_EXPLICIT_COMPOSITION.md` — immutable fragment, explicit composition, resolved-plan authority decision.
 - `docs/adr/ADR-0004_DURABLE_TRIGGER_EVIDENCE_AND_REEVALUATION_ONLY_AUTHORITY.md` — durable trigger evidence / reevaluation-only authority decision.
 - `docs/adr/ADR-0005_STABLE_SCHEDULE_SLOTS_AND_RESOLVED_TIME_AUTHORITY.md` — stable schedule slot / immutable resolved-time authority / reevaluation-only due-event decision.
+- `docs/adr/ADR-0006_VERSION_BOUND_DISPATCH_ELIGIBILITY_AND_FINAL_REVALIDATION.md` — version-bound eligibility-grant / final current-authority revalidation decision.
 
 ## Planned technical baseline
 
@@ -118,7 +132,7 @@ The initial intended production baseline is:
 - GitHub Actions CI/CD
 - pytest, Ruff, and strict mypy
 
-These technology choices remain subordinate to TDLA's own contracts. Prefect, databases, deployment backends, transport mechanisms, trigger brokers, scheduler runtimes, or telemetry vendors must be replaceable without invalidating TDLA execution identity or audit history.
+These technology choices remain subordinate to TDLA's own contracts. Prefect, databases, deployment backends, transport mechanisms, trigger brokers, scheduler runtimes, worker runtimes, or telemetry vendors must be replaceable without invalidating TDLA execution identity or audit history.
 
 ## Architecture sequence
 
