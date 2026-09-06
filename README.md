@@ -8,7 +8,7 @@ It does **not** own sport intelligence and it does **not** replace Daily-Data-Co
 
 - **Daily-Data-Core (DDC)** owns sport-agnostic shared acquisition/facts and generic provider/provenance infrastructure.
 - **Daily-MLB, Daily-NFL, Daily-NCAAF, and future Daily-* repositories** own sport-specific identity, state, features, models, simulation, prediction, recommendation, settlement interpretation, and sport-specific report content.
-- **The-Daily-Line-Automation (TDLA)** owns the **outer automation/orchestration lifecycle**: planning, scheduling, trigger evaluation, workflow/stage state, worker dispatch, retries, idempotency, operational audit, publication coordination, and operator-facing automation state.
+- **The-Daily-Line-Automation (TDLA)** owns the **outer automation/orchestration lifecycle**: planning, scheduling, trigger evaluation, dependency/readiness evaluation, workflow/stage state, worker dispatch, retries, idempotency, operational audit, publication coordination, and operator-facing automation state.
 - **Sport services and DDC may retain nested child job/acquisition lifecycles** under their own certified contracts. TDLA links those identities through provenance rather than replacing them.
 - **The Daily Line website/app** owns presentation/product state and receives publication packages through explicit versioned contracts rather than direct automation writes into application tables.
 
@@ -54,7 +54,7 @@ It does **not** own sport intelligence and it does **not** replace Daily-Data-Co
 38. Unresolved/TBD sport event time receives no invented placeholder due clock.
 39. Event-relative offsets use elapsed UTC duration arithmetic; local calendar recurrence must explicitly resolve DST ambiguous/nonexistent times.
 40. Prefect/APScheduler/CronJob/queue/cron timer IDs are runtime cross-references only and cannot become TDLA business schedule identity.
-41. There is no direct scheduler-to-executor path: due occurrence -> A-7 `TIME_DUE` evidence -> eligibility reevaluation -> later A-9/A-11 authorization.
+41. There is no direct scheduler-to-executor path: due occurrence -> A-7 `TIME_DUE` evidence -> eligibility reevaluation -> A-9/A-11 authority.
 42. Eligibility is immutable derived evidence over exact current plan/stage/scope/schedule/dependency/readiness/policy authority; there is no canonical mutable `ready=true` flag.
 43. A-5 sport `READY` is only one gate and cannot by itself mean TDLA `READY_FOR_DISPATCH`.
 44. Required upstream dependencies bind exact StageRun/output manifest/schema/digest/provenance authority; same-named stale artifacts cannot satisfy current work.
@@ -64,6 +64,19 @@ It does **not** own sport intelligence and it does **not** replace Daily-Data-Co
 48. A-10/A-11 must revalidate the grant's plan/scope/schedule/dependency/readiness/current-policy witnesses before dispatch, and stale grants fail closed.
 49. Grant validity cannot outlive readiness, schedule/window, policy, or stricter execution-authority validity.
 50. A-9 eligibility does not create StageRun identity or replace A-11 final logical execution idempotency.
+51. A worker/backend is an execution mechanism, not workflow authority; Prefect/Docker/Kubernetes/queue/process IDs are provenance only.
+52. Every physical attempt uses an immutable versioned `ExecutionEnvelope` bound to exact StageRun/RunAttempt, eligibility, plan/stage/scope/schedule, target, adapter/config/input/output, environment/mode, and A-11 logical idempotency authority.
+53. A-10 performs final current-authority revalidation immediately before irreversible backend submission; an existing RunAttempt does not override newly stale authority.
+54. Durable TDLA dispatch intent exists before external backend submission.
+55. One RunAttempt has stable backend-submission authority for ambiguous acknowledgement recovery; transport request IDs are not new logical submissions.
+56. Backend submission ambiguity and nested A-5 sport-child ambiguity are independent and must be reconciled independently.
+57. Lease expiry, lost heartbeat, timeout, or cancellation acknowledgement does not prove the backend job or sport child stopped.
+58. Worker/backend capability and environment/mode authorization are revalidated at actual assignment/start.
+59. Backend callbacks are observations, not canonical lifecycle transitions applied blindly by receipt order.
+60. Final semantic success requires exact A-5/A-6 result/output contracts correlated to the current attempt/envelope/child; process exit 0 or backend `Completed` is insufficient.
+61. Partial or unrelated artifacts cannot masquerade as a terminal result merely because filenames or hashes look similar.
+62. Backend execution-handle and sport-child-reference roles remain logically distinct even when a direct service integration reuses one external ID.
+63. Backend replacement must preserve TDLA WorkflowRun/StageRun/RunAttempt, eligibility, idempotency, child, and audit semantics.
 
 ## Current status
 
@@ -74,8 +87,9 @@ It does **not** own sport intelligence and it does **not** replace Daily-Data-Co
 - A-7 Trigger Architecture: **ARCHITECTURE-CERTIFIED**.
 - A-8 Event-Relative Scheduling Engine: **ARCHITECTURE-CERTIFIED**.
 - A-9 Dependency / Readiness Engine: **ARCHITECTURE-CERTIFIED**.
-- A-9 certification evidence: `docs/implementation/A09_ARCHITECTURE_CONFORMANCE_REVIEW_20260905.md`.
-- **A-10 Worker / Execution Backend Architecture: NEXT.**
+- A-10 Worker / Execution Backend Architecture: **ARCHITECTURE-CERTIFIED**.
+- A-10 certification evidence: `docs/implementation/A10_ARCHITECTURE_CONFORMANCE_REVIEW_20260905.md`.
+- **A-11 Retry / Timeout / Idempotency Architecture: NEXT.**
 - No production automation implementation is authoritative yet.
 - Daily-MLB remains manual-first until its production pipeline is certified and later proves automation equivalence in shadow/supervised modes.
 - The existing Daily-MLB starter job-service shape is compatible in principle with later wrapping, but it is not assumed production-conforming; future onboarding targets the certified final manual MLB pipeline.
@@ -84,35 +98,32 @@ It does **not** own sport intelligence and it does **not** replace Daily-Data-Co
 
 - `AGENTS.md` — repository operating constitution and mandatory documentation/change-record rules.
 - `docs/architecture/README.md` — architecture index and status.
-- `docs/architecture/A00-A04_AUTOMATION_FOUNDATION_V1.md` — A-0 through A-4 base architecture contract.
-- `docs/architecture/A00-A04_FOUNDATION_ADDENDUM_V1_1.md` — certified nested lifecycle/cross-repository clarification.
-- `docs/implementation/A00-A04_ARCHITECTURE_CONFORMANCE_REVIEW_20260902.md` — A-0 through A-4 certification review/evidence.
-- `docs/architecture/A05_SPORT_AUTOMATION_ADAPTER_V1.md` — A-5 base adapter architecture.
-- `docs/architecture/A05_SPORT_AUTOMATION_ADAPTER_ADDENDUM_V1_1.md` — A-5 certification clarifications.
-- `docs/implementation/A05_ARCHITECTURE_CONFORMANCE_REVIEW_20260903.md` — A-5 certification review/evidence.
-- `docs/architecture/A06_PIPELINE_PLAN_STAGE_CONTRACTS_V1.md` — A-6 base plan/stage graph architecture.
-- `docs/architecture/A06_PIPELINE_PLAN_STAGE_CONTRACTS_ADDENDUM_V1_1.md` — A-6 certification clarifications.
-- `docs/implementation/A06_ARCHITECTURE_CONFORMANCE_REVIEW_20260903.md` — A-6 certification review/evidence.
-- `docs/architecture/A07_TRIGGER_ARCHITECTURE_V1.md` — A-7 base trigger architecture.
-- `docs/architecture/A07_TRIGGER_ARCHITECTURE_ADDENDUM_V1_1.md` — A-7 certification clarifications.
-- `docs/implementation/A07_ARCHITECTURE_CONFORMANCE_REVIEW_20260904.md` — A-7 certification review/evidence and 40-case stress matrix.
-- `docs/architecture/A08_EVENT_RELATIVE_SCHEDULING_ENGINE_V1.md` — A-8 base scheduling architecture.
-- `docs/architecture/A08_EVENT_RELATIVE_SCHEDULING_ENGINE_ADDENDUM_V1_1.md` — A-8 certification clarifications.
-- `docs/implementation/A08_ARCHITECTURE_CONFORMANCE_REVIEW_20260904.md` — A-8 certification review/evidence and 50-case stress matrix.
-- `docs/architecture/A09_DEPENDENCY_READINESS_ENGINE_V1.md` — A-9 base dependency/readiness/current-authority architecture.
-- `docs/architecture/A09_DEPENDENCY_READINESS_ENGINE_ADDENDUM_V1_1.md` — A-9 certification clarifications for deterministic reasons, grant semantics, cache validity, output invalidation, composite readiness, and semantic evaluation identity.
-- `docs/implementation/A09_ARCHITECTURE_CONFORMANCE_REVIEW_20260905.md` — A-9 certification review/evidence and 60-case stress matrix.
+- `docs/architecture/A00-A04_AUTOMATION_FOUNDATION_V1.md` + `A00-A04_FOUNDATION_ADDENDUM_V1_1.md` — certified foundation.
+- `docs/implementation/A00-A04_ARCHITECTURE_CONFORMANCE_REVIEW_20260902.md` — foundation certification review.
+- `docs/architecture/A05_SPORT_AUTOMATION_ADAPTER_V1.md` + `A05_SPORT_AUTOMATION_ADAPTER_ADDENDUM_V1_1.md` — A-5 adapter architecture.
+- `docs/implementation/A05_ARCHITECTURE_CONFORMANCE_REVIEW_20260903.md` — A-5 review.
+- `docs/architecture/A06_PIPELINE_PLAN_STAGE_CONTRACTS_V1.md` + `A06_PIPELINE_PLAN_STAGE_CONTRACTS_ADDENDUM_V1_1.md` — A-6 plan/stage architecture.
+- `docs/implementation/A06_ARCHITECTURE_CONFORMANCE_REVIEW_20260903.md` — A-6 review.
+- `docs/architecture/A07_TRIGGER_ARCHITECTURE_V1.md` + `A07_TRIGGER_ARCHITECTURE_ADDENDUM_V1_1.md` — A-7 trigger architecture.
+- `docs/implementation/A07_ARCHITECTURE_CONFORMANCE_REVIEW_20260904.md` — A-7 review.
+- `docs/architecture/A08_EVENT_RELATIVE_SCHEDULING_ENGINE_V1.md` + `A08_EVENT_RELATIVE_SCHEDULING_ENGINE_ADDENDUM_V1_1.md` — A-8 scheduling architecture.
+- `docs/implementation/A08_ARCHITECTURE_CONFORMANCE_REVIEW_20260904.md` — A-8 review.
+- `docs/architecture/A09_DEPENDENCY_READINESS_ENGINE_V1.md` + `A09_DEPENDENCY_READINESS_ENGINE_ADDENDUM_V1_1.md` — A-9 dependency/readiness architecture.
+- `docs/implementation/A09_ARCHITECTURE_CONFORMANCE_REVIEW_20260905.md` — A-9 review.
+- `docs/architecture/A10_WORKER_EXECUTION_BACKEND_V1.md` + `A10_WORKER_EXECUTION_BACKEND_ADDENDUM_V1_1.md` — A-10 worker/backend architecture.
+- `docs/implementation/A10_ARCHITECTURE_CONFORMANCE_REVIEW_20260905.md` — A-10 review and 60-case stress matrix.
 - `docs/implementation/IMPLEMENTATION_ROADMAP_V1.md` — milestone implementation/certification sequence.
 - `docs/implementation/ARCHITECTURE_CERTIFICATION_LOG.md` — authoritative architecture/milestone status.
 - `docs/implementation/CHANGE_JOURNAL.md` — chronological durable change record and resume history.
 - `docs/implementation/CURRENT_RESUME_POINT.md` — exact current continuation point.
-- `docs/adr/README.md` — Architecture Decision Record policy/index.
-- `docs/adr/ADR-0001_CONTROL_PLANE_AND_VENDOR_NEUTRAL_IDENTITY.md` — TDLA canonical identity / replaceable orchestrator decision.
-- `docs/adr/ADR-0002_TRANSPORT_NEUTRAL_SPORT_ADAPTER_PROTOCOL.md` — transport-neutral sport adapter protocol decision.
-- `docs/adr/ADR-0003_IMMUTABLE_PLAN_FRAGMENTS_AND_EXPLICIT_COMPOSITION.md` — immutable fragment, explicit composition, resolved-plan authority decision.
-- `docs/adr/ADR-0004_DURABLE_TRIGGER_EVIDENCE_AND_REEVALUATION_ONLY_AUTHORITY.md` — durable trigger evidence / reevaluation-only authority decision.
-- `docs/adr/ADR-0005_STABLE_SCHEDULE_SLOTS_AND_RESOLVED_TIME_AUTHORITY.md` — stable schedule slot / immutable resolved-time authority / reevaluation-only due-event decision.
-- `docs/adr/ADR-0006_VERSION_BOUND_DISPATCH_ELIGIBILITY_AND_FINAL_REVALIDATION.md` — version-bound eligibility-grant / final current-authority revalidation decision.
+- `docs/adr/README.md` — ADR policy/index.
+- `docs/adr/ADR-0001_CONTROL_PLANE_AND_VENDOR_NEUTRAL_IDENTITY.md`
+- `docs/adr/ADR-0002_TRANSPORT_NEUTRAL_SPORT_ADAPTER_PROTOCOL.md`
+- `docs/adr/ADR-0003_IMMUTABLE_PLAN_FRAGMENTS_AND_EXPLICIT_COMPOSITION.md`
+- `docs/adr/ADR-0004_DURABLE_TRIGGER_EVIDENCE_AND_REEVALUATION_ONLY_AUTHORITY.md`
+- `docs/adr/ADR-0005_STABLE_SCHEDULE_SLOTS_AND_RESOLVED_TIME_AUTHORITY.md`
+- `docs/adr/ADR-0006_VERSION_BOUND_DISPATCH_ELIGIBILITY_AND_FINAL_REVALIDATION.md`
+- `docs/adr/ADR-0007_IMMUTABLE_EXECUTION_ENVELOPE_AND_RECONCILABLE_BACKEND_DISPATCH.md`
 
 ## Planned technical baseline
 
