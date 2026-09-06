@@ -27,8 +27,8 @@ Authority: **This file is the authoritative status record for architecture and i
 | A-7 | Trigger architecture | **ARCHITECTURE-CERTIFIED** | `docs/architecture/A07_TRIGGER_ARCHITECTURE_V1.md` + `A07_TRIGGER_ARCHITECTURE_ADDENDUM_V1_1.md` | Certified 2026-09-04 after duplicate/order/revision/recovery/trust stress review. |
 | A-8 | Event-relative scheduling | **ARCHITECTURE-CERTIFIED** | `docs/architecture/A08_EVENT_RELATIVE_SCHEDULING_ENGINE_V1.md` + `A08_EVENT_RELATIVE_SCHEDULING_ENGINE_ADDENDUM_V1_1.md` | Certified 2026-09-04 after reschedule/missed-window/recovery/clock/DST stress review. |
 | A-9 | Dependency / readiness | **ARCHITECTURE-CERTIFIED** | `docs/architecture/A09_DEPENDENCY_READINESS_ENGINE_V1.md` + `A09_DEPENDENCY_READINESS_ENGINE_ADDENDUM_V1_1.md` | Certified 2026-09-05 after authority/dependency/readiness/freshness/TOCTOU stress review. |
-| A-10 | Worker / execution backend | PLANNED — NEXT | TBD | Next architecture checkpoint. |
-| A-11 | Retry / timeout / idempotency | PLANNED | TBD | |
+| A-10 | Worker / execution backend | **ARCHITECTURE-CERTIFIED** | `docs/architecture/A10_WORKER_EXECUTION_BACKEND_V1.md` + `A10_WORKER_EXECUTION_BACKEND_ADDENDUM_V1_1.md` | Certified 2026-09-05 after dispatch/reconciliation/worker/crash/cancellation/result stress review. |
+| A-11 | Retry / timeout / idempotency | PLANNED — NEXT | TBD | Next architecture checkpoint. |
 | A-12 | Failure / degradation / recovery | PLANNED | TBD | |
 | A-13 | Persistence / immutable audit / provenance | PLANNED | TBD | |
 | A-14 | Artifact / replay / backfill / reprocess | PLANNED | TBD | |
@@ -48,19 +48,19 @@ Authority: **This file is the authoritative status record for architecture and i
 | Milestone | Topic | Status | Evidence |
 |---|---|---|---|
 | M0 | Repository Bootstrap / Engineering Constitution | PLANNED | Architecture/documentation seed exists; implementation bootstrap not yet started. |
-| M1 | Canonical Automation Domain Contracts | PLANNED | A-6/A-7/A-8/A-9 now certify plan/stage, trigger, schedule, and eligibility authority semantics; implementation remains unstarted. |
+| M1 | Canonical Automation Domain Contracts | PLANNED | A-6 through A-10 now certify plan/stage, trigger, schedule, eligibility, and execution-plane identity semantics; implementation remains unstarted. |
 | M2 | PostgreSQL Persistence & Migration Foundation | PLANNED | |
 | M3 | Prefect Runtime Foundation | PLANNED | |
 | M4 | Scheduling / Trigger Engine | PLANNED | A-7/A-8/A-9 architecture is certified; implementation remains unstarted. |
-| M5 | Worker / Execution Backend | PLANNED | A-10 architecture is next and must consume A-9 version-bound eligibility grants/current-authority revalidation. |
+| M5 | Worker / Execution Backend | PLANNED | A-10 architecture is certified; implementation awaits A-11/A-13 contracts before production authority. |
 | M6 | Sport Automation Adapter Framework | PLANNED | A-5 architecture is certified; implementation awaits architecture sequence/implementation start. |
-| M7 | Idempotency / Retry / Recovery | PLANNED | |
+| M7 | Idempotency / Retry / Recovery | PLANNED | A-11 is next. |
 | M8 | Provenance / Immutable Run Ledger | PLANNED | |
 | M9 | Artifact / Replay / Backfill / Reprocess | PLANNED | |
 | M10 | Observability / Alerts / Incidents | PLANNED | |
 | M11 | Publication Subsystem | PLANNED | |
 | M12 | Security / Service Identity | PLANNED | |
-| M13 | Daily-MLB Adapter | PLANNED | Requires certified manual MLB pipeline. Current starter service shape is compatible in principle but is not A-5 through A-9 production-certified. |
+| M13 | Daily-MLB Adapter | PLANNED | Requires certified manual MLB pipeline. Current starter service shape is compatible in principle but is not A-5 through A-10 production-certified. |
 | M14 | Daily-MLB Shadow Automation | PLANNED | |
 | M15 | Daily-MLB Production Automation Certification | PLANNED | |
 | M16 | Daily-NFL Integration | PLANNED | |
@@ -92,10 +92,10 @@ Evidence:
 - `docs/adr/ADR-0001_CONTROL_PLANE_AND_VENDOR_NEUTRAL_IDENTITY.md`
 
 Review result:
-- DDC ownership boundary: PASS after clarifying the distinction between DDC internal acquisition/provider run lifecycle and TDLA outer automation workflow lifecycle.
+- DDC ownership boundary: PASS after clarifying nested DDC acquisition/provider lifecycle vs TDLA outer automation lifecycle.
 - Daily-MLB manual/service boundary: PASS.
 - Daily-NFL/NCAAF event-relative compatibility: PASS at foundation scope.
-- logical run / physical attempt / replay / reprocess / backfill / supersession semantics: PASS at foundation scope.
+- logical run / physical attempt / replay / reprocess / backfill / supersession semantics: PASS.
 - configuration/environment/secrets boundary: PASS.
 - orchestration-runtime/vendor independence: PASS.
 - documentation/project-memory discipline: PASS.
@@ -103,7 +103,6 @@ Review result:
 Decision:
 - **A-0 through A-4 are ARCHITECTURE-CERTIFIED as Foundation V1 governed together with the V1.1 nested-lifecycle addendum.**
 - This certification grants architecture authority only. It does not certify any runtime implementation.
-- A-5 Sport Automation Adapter Contract became the next architecture checkpoint.
 
 ### 2026-09-03 — A-5 Sport Automation Adapter architecture certified
 
@@ -114,29 +113,21 @@ Evidence:
 - `docs/adr/ADR-0002_TRANSPORT_NEUTRAL_SPORT_ADAPTER_PROTOCOL.md`
 
 Review result:
-- DDC ownership boundary: PASS.
-- Daily-MLB service/manual boundary: PASS at architecture level; current starter service is not assumed production-conforming.
-- Daily-NFL/NCAAF event-relative/readiness compatibility: PASS.
-- sport-neutral scope/reference contract: PASS.
-- version/capability fail-closed behavior: PASS.
-- transport/orchestrator independence: PASS.
-- logical idempotency vs retry-attempt identity: PASS after V1.1 clarification.
-- asynchronous child reconciliation after TDLA loss: PASS.
-- lost acknowledgement before child-reference persistence: PASS after making logical-key reconciliation production-critical.
+- DDC and sport ownership boundaries: PASS.
+- transport-neutral adapter/capability contract: PASS.
+- opaque sport scope references/readiness: PASS.
+- logical idempotency vs physical retry attempts: PASS after V1.1.
+- asynchronous child reconciliation including lost acknowledgement before child-ref persistence: PASS.
 - cancellation/timeout distinction: PASS.
-- shadow/supervised/production side-effect authority: PASS after V1.1 clarification.
-- semantic result/artifact/provenance boundary: PASS.
-- settlement/evaluation generic invocation boundary: PASS.
-- security/secrets boundary: PASS at A-5 scope.
+- shadow/supervised/production side-effect authority: PASS after V1.1.
+- semantic result/artifact/provenance and settlement/evaluation boundaries: PASS.
 
 Important compatibility note:
-- Daily-MLB's documented starter service generates a child run ID and supports polling/artifact retrieval, which fits the nested adapter shape.
-- Its current documented invocation does not by itself establish caller-supplied idempotent create / lookup-by-logical-idempotency-key. The eventual M13 adapter/wrapper must add or prove that property before asynchronous production certification.
+- Daily-MLB's current starter service shape fits A-5 in principle but does not by itself prove caller-stable idempotent child creation/lookup. Future M13/M14 must add/prove that around the certified final manual pipeline.
 
 Decision:
-- **A-5 is ARCHITECTURE-CERTIFIED as V1 governed together with the V1.1 certification addendum and ADR-0002.**
-- No real sport adapter implementation or production automation authority is certified by this decision.
-- A-6 Pipeline Plan / Stage Contracts became the next architecture checkpoint.
+- **A-5 is ARCHITECTURE-CERTIFIED as V1 + V1.1 + ADR-0002.**
+- No real sport adapter implementation or production automation authority is certified.
 
 ### 2026-09-03 — A-6 Pipeline Plan / Stage Contracts architecture certified
 
@@ -147,31 +138,25 @@ Evidence:
 - `docs/adr/ADR-0003_IMMUTABLE_PLAN_FRAGMENTS_AND_EXPLICIT_COMPOSITION.md`
 
 Review result:
-- sport/DDC/TDLA ownership boundary: PASS.
-- V1 DAG-only graph model and cycle rejection: PASS.
-- stage definition vs concrete materialization identity: PASS.
-- dynamic scope-set fan-out/fan-in without TDLA sport identity inference: PASS after V1.1 `ScopeSetBinding` clarification.
-- repeated pre-event snapshot identity: PASS after V1.1 stable `ScheduleSlotRef` clarification.
-- explicit dependency/output satisfaction semantics: PASS.
-- `OPTIONAL`, `CONDITIONAL`, `NOT_APPLICABLE`, `NO_OP`, and `SUCCEEDED_DEGRADED` behavior: PASS at A-6 scope.
-- explicit fragment ownership/typed port composition/no override precedence: PASS.
-- immutable execution target binding: PASS.
-- side-effect classification vs shadow/supervised/production modes: PASS.
-- deterministic semantic canonicalization + SHA-256 identity: PASS after V1.1 digest-participation clarification.
-- immutable execution-affecting policy bindings: PASS after V1.1 clarification.
+- sport/DDC/TDLA ownership: PASS.
+- DAG-only V1 plan model/cycle rejection: PASS.
+- stage definition/materialization identity: PASS.
+- exact sport-owned fan-out/fan-in membership: PASS after V1.1 `ScopeSetBinding` clarification.
+- stable repeated-snapshot `ScheduleSlotRef`: PASS after V1.1.
+- dependency/output/no-op/degraded semantics: PASS.
+- explicit immutable fragment composition/no override precedence: PASS.
+- immutable targets/policies: PASS.
+- side-effect classification: PASS.
+- deterministic semantic plan canonicalization/digest: PASS after V1.1.
 - plan/scope revision and completed-history immutability: PASS.
-- Daily-MLB no-games/multi-game/doubleheader/readiness patterns: PASS at architecture level.
-- Daily-NFL/NCAAF multiple pre-kickoff snapshots and event-time changes: PASS without sport-specific TDLA branches.
-- later A-7 through A-20 algorithm/DDL boundaries remain correctly deferred: PASS.
+- MLB/NFL/NCAAF workflow-shape compatibility: PASS.
 
 Stress review:
-- `A06_ARCHITECTURE_CONFORMANCE_REVIEW_20260903.md` records 30 primary plan/graph/materialization/canonicalization stress cases plus additional failure-path checks.
+- 30 primary graph/materialization/canonicalization scenarios plus additional failure-path checks passed.
 
 Decision:
-- **A-6 is ARCHITECTURE-CERTIFIED as V1 governed together with the V1.1 certification addendum and ADR-0003.**
-- The canonical executable authority is the immutable `ResolvedAutomationPlan`, not a Prefect flow/runtime object.
-- No Pydantic implementation, canonical serializer code, Prefect flow, PostgreSQL schema, or real sport adapter is certified by this decision.
-- A-7 Trigger Architecture became the next architecture checkpoint.
+- **A-6 is ARCHITECTURE-CERTIFIED as V1 + V1.1 + ADR-0003.**
+- The immutable `ResolvedAutomationPlan` is executable plan authority, not a Prefect flow object.
 
 ### 2026-09-04 — A-7 Trigger Architecture certified
 
@@ -182,35 +167,22 @@ Evidence:
 - `docs/adr/ADR-0004_DURABLE_TRIGGER_EVIDENCE_AND_REEVALUATION_ONLY_AUTHORITY.md`
 
 Review result:
-- trigger delivery vs semantic source-event identity: PASS.
-- occurrence-family vs immutable event-revision identity: PASS after V1.1 clarification.
-- same occurrence/revision with conflicting semantic payload: PASS after fail-closed V1.1 clarification.
-- durable accepted-trigger evidence before downstream action: PASS.
-- logical eligibility-reevaluation identity vs physical processing attempts: PASS after V1.1 clarification.
-- duplicate timer/webhook/dependency delivery: PASS.
-- trigger dedup vs A-11 stage idempotency separation: PASS.
-- out-of-order/source-clock-skew behavior: PASS.
-- correction/retraction append-only lineage: PASS.
-- immutable plan-bound TriggerBinding semantics: PASS.
-- stale timer after schedule revision: PASS.
-- sport-change hints without MLB/NFL/NCAAF semantics in generic TDLA: PASS.
-- A-5 readiness remains authoritative when required: PASS.
-- burst coalescing with complete raw-event provenance: PASS after authority-revision boundary clarification.
-- replay/test ingress isolation: PASS.
-- source outage does not become negative sport evidence: PASS.
-- untrusted/signature-failed source cannot create authoritative TriggerEvent: PASS after V1.1 clarification.
-- secret-bearing/malformed payload hygiene: PASS at A-7 scope.
-- no direct trigger-to-publication/destructive action path: PASS.
+- TriggerDelivery vs semantic event occurrence/revision identity: PASS.
+- immutable correction/retraction lineage and conflicting-payload fail-closed behavior: PASS after V1.1.
+- durable accepted evidence + logical reevaluation intent: PASS.
+- trigger dedup vs A-11 execution idempotency separation: PASS.
+- out-of-order/stale timer behavior: PASS.
+- sport-change hints remain opaque and A-5 readiness stays authoritative: PASS.
+- coalescing with complete provenance: PASS after V1.1.
+- replay/test isolation, source-outage semantics, trust/payload hygiene: PASS.
+- no direct trigger-to-execution/side-effect path: PASS.
 
 Stress review:
-- `A07_ARCHITECTURE_CONFORMANCE_REVIEW_20260904.md` records 40 trigger identity, duplicate, ordering, revision, crash-recovery, coalescing, replay, security, timer, callback, and stale-authority scenarios plus additional failure-path checks.
+- 40 trigger identity/duplicate/order/revision/recovery/security/timer/callback scenarios plus additional checks passed.
 
 Decision:
-- **A-7 is ARCHITECTURE-CERTIFIED as V1 governed together with the V1.1 certification addendum and ADR-0004.**
-- A trigger is durable evidence requesting eligibility reevaluation only; it is never direct execution or side-effect authority.
-- `TriggerDelivery`, semantic `TriggerEvent`, `TriggerBinding`, `TriggerEvaluation`, logical `EligibilityReevaluationRequest`, and physical processing attempts remain distinct identity layers.
-- No trigger endpoint, broker, timer worker, Pydantic model, PostgreSQL schema, Prefect event integration, signature verification code, or live sport trigger integration is certified by this decision.
-- A-8 Event-Relative Scheduling Engine became the next architecture checkpoint.
+- **A-7 is ARCHITECTURE-CERTIFIED as V1 + V1.1 + ADR-0004.**
+- A trigger is reevaluation evidence only, never direct execution authority.
 
 ### 2026-09-04 — A-8 Event-Relative Scheduling Engine certified
 
@@ -221,39 +193,25 @@ Evidence:
 - `docs/adr/ADR-0005_STABLE_SCHEDULE_SLOTS_AND_RESOLVED_TIME_AUTHORITY.md`
 
 Review result:
-- stable `ScheduleSlotRef` identity vs resolved wall-clock time: PASS.
-- exact plan/stage/scope/schedule/anchor/timing-policy authority binding: PASS.
-- immutable `ScheduleResolution` and supersession lineage: PASS.
-- logical `ScheduleOccurrence` vs physical scheduler callback identity: PASS.
-- event moves later/earlier/multiple times/TBD/cancelled: PASS.
-- earlier reschedule crossing already-missed slots: PASS with explicit immutable missed-window policy.
-- missed-window policy naming/authority: PASS after V1.1 reevaluation-only clarification.
-- one canonical semantic A-7 `TIME_DUE` event per logical occurrence: PASS after V1.1 clarification.
-- scheduler crash before/after A-7 persistence: PASS with reconciliation semantics.
-- multiple scheduler replicas / duplicate physical callbacks: PASS.
-- stale timer callback after supersession: PASS.
-- old already-emitted `TIME_DUE` after later reschedule: PASS after V1.1 current-authority revalidation clarification.
-- same UTC event instant under new sport schedule revision: PASS after V1.1 authority/provenance clarification.
-- explicit due-boundary selection when target is absent: PASS after V1.1 clarification.
-- UTC/event-relative elapsed arithmetic: PASS.
-- DST/local-calendar recurrence ambiguity: PASS after V1.1 civil-time disambiguation clarification.
-- restart/downtime/catch-up behavior: PASS.
-- plan timing revision/add/remove slot behavior: PASS.
-- no-games/doubleheader/multi-scope behavior: PASS.
-- customer-visible/destructive late-window safety: PASS.
-- scheduler-vendor neutrality: PASS.
-- no direct scheduler-to-executor path: PASS.
+- stable schedule-slot vs clock-time identity: PASS.
+- immutable exact-authority ScheduleResolution and supersession: PASS.
+- logical ScheduleOccurrence vs physical callback identity: PASS.
+- reschedule earlier/later/multiple/TBD/cancelled: PASS.
+- missed-window reevaluation-only policy: PASS after V1.1.
+- one canonical semantic A-7 TIME_DUE event per logical occurrence: PASS.
+- scheduler crash/HA duplicate callbacks/recovery: PASS.
+- stale already-emitted TIME_DUE revalidation: PASS after V1.1.
+- same UTC instant under new sport schedule revision remains new authority: PASS after V1.1.
+- UTC/DST/local recurrence semantics: PASS.
+- plan timing revisions, no-games/doubleheaders, side-effect late-window safety: PASS.
+- scheduler-vendor neutrality/no direct scheduler-to-executor path: PASS.
 
 Stress review:
-- `A08_ARCHITECTURE_CONFORMANCE_REVIEW_20260904.md` records 50 event-relative timing, reschedule, missed-window, restart/HA, clock/DST, recurrence, plan/scope revision, side-effect, and stale-authority scenarios plus additional failure-path checks.
+- 50 event-relative timing/reschedule/missed-window/recovery/clock/DST/recurrence scenarios plus additional checks passed.
 
 Decision:
-- **A-8 is ARCHITECTURE-CERTIFIED as V1 governed together with the V1.1 certification addendum and ADR-0005.**
-- A wall-clock time is a resolution of stable scheduling intent, not sport snapshot identity.
-- A due occurrence creates durable A-7 `TIME_DUE` reevaluation evidence only; it never directly dispatches sport work.
-- Historical schedule resolutions/occurrences remain immutable and superseded rather than rewritten.
-- No scheduler implementation, Prefect schedule, timer worker, PostgreSQL schema, live sport schedule integration, or production catch-up/publication behavior is certified by this decision.
-- A-9 Dependency / Readiness Engine became the next architecture checkpoint.
+- **A-8 is ARCHITECTURE-CERTIFIED as V1 + V1.1 + ADR-0005.**
+- Wall-clock time is resolved scheduling authority, not sport snapshot identity.
 
 ### 2026-09-05 — A-9 Dependency / Readiness Engine certified
 
@@ -264,34 +222,67 @@ Evidence:
 - `docs/adr/ADR-0006_VERSION_BOUND_DISPATCH_ELIGIBILITY_AND_FINAL_REVALIDATION.md`
 
 Review result:
-- sport/DDC/TDLA ownership boundary: PASS.
 - current plan/stage/materialization/scope/schedule authority gate: PASS.
-- A-6 dependency/output/no-op/degraded/terminal-evidence semantics: PASS.
-- exact upstream StageRun/manifest/schema/digest/provenance binding: PASS.
-- upstream output supersession/retraction invalidation: PASS after V1.1 clarification.
-- exact fan-in `ScopeSetBinding` membership revision/digest: PASS.
-- A-5 readiness mapping without sport reason branching: PASS.
-- readiness freshness/max-age/cache authority: PASS after V1.1 clarification.
-- composite readiness required/optional semantics: PASS after V1.1 clarification.
+- A-6 exact dependency/output/no-op/degraded/terminal-evidence semantics: PASS.
+- exact upstream manifest/schema/digest/provenance binding and output supersession/retraction invalidation: PASS.
+- exact fan-in membership: PASS.
+- A-5 readiness mapping without sport branching: PASS.
+- readiness freshness/cache/composite readiness: PASS after V1.1.
 - technical readiness failure vs sport waiting/blocked distinction: PASS.
-- A-8 current time/window authority vs stale `TIME_DUE`: PASS.
+- A-8 current window vs stale TIME_DUE: PASS.
 - PIT/freshness generic contract enforcement: PASS.
-- complete deterministic reason sets without unnecessary external calls: PASS after V1.1 clarification.
-- eligibility semantic digest vs unique record/cause lineage: PASS after V1.1 clarification.
-- concurrent reevaluation/crash recovery semantics: PASS.
-- terminal-stage no-implicit-replay behavior: PASS.
-- shadow/supervised/production policy boundary: PASS.
-- version-bound `DispatchEligibilityGrant` handoff: PASS.
-- TOCTOU final current-authority revalidation before dispatch: PASS after V1.1 + ADR-0006.
-- technology neutrality/no direct readiness-to-executor path: PASS.
+- deterministic reason sets without unnecessary external calls: PASS after V1.1.
+- semantic digest vs record/cause lineage: PASS after V1.1.
+- concurrent reevaluation/recovery/terminal-stage no-implicit-replay: PASS.
+- version-bound non-bearer DispatchEligibilityGrant + final current-authority revalidation: PASS after V1.1 + ADR-0006.
 
 Stress review:
-- `A09_ARCHITECTURE_CONFORMANCE_REVIEW_20260905.md` records 60 current-authority, dependency/output, fan-in, readiness/freshness, PIT, concurrency, crash-recovery, stale-grant, and execution-mode scenarios plus additional failure-path checks.
+- 60 current-authority/dependency/readiness/freshness/PIT/concurrency/stale-grant scenarios plus additional checks passed.
 
 Decision:
-- **A-9 is ARCHITECTURE-CERTIFIED as V1 governed together with the V1.1 certification addendum and ADR-0006.**
-- `READY_FOR_DISPATCH` is immutable derived evidence over exact current authority, not a persistent mutable boolean.
-- `DispatchEligibilityGrant` is version-bound, non-transferable evidence and never a bearer execution token.
-- A-10/A-11 must revalidate current plan/scope/schedule/dependency/readiness/policy witnesses before dispatch, and A-11 remains final logical execution-idempotency authority.
-- No eligibility/readiness Pydantic implementation, cache, database schema, Prefect dependency tasks, worker dispatch, or live sport readiness integration is certified by this decision.
-- **A-10 Worker / Execution Backend Architecture is NEXT.**
+- **A-9 is ARCHITECTURE-CERTIFIED as V1 + V1.1 + ADR-0006.**
+- `READY_FOR_DISPATCH` is immutable derived evidence, not a persistent mutable boolean.
+- A-10/A-11 must revalidate grant witnesses before dispatch.
+
+### 2026-09-05 — A-10 Worker / Execution Backend Architecture certified
+
+Evidence:
+- `docs/architecture/A10_WORKER_EXECUTION_BACKEND_V1.md`
+- `docs/architecture/A10_WORKER_EXECUTION_BACKEND_ADDENDUM_V1_1.md`
+- `docs/implementation/A10_ARCHITECTURE_CONFORMANCE_REVIEW_20260905.md`
+- `docs/adr/ADR-0007_IMMUTABLE_EXECUTION_ENVELOPE_AND_RECONCILABLE_BACKEND_DISPATCH.md`
+
+Review result:
+- TDLA/sport/DDC execution ownership boundary: PASS.
+- canonical StageRun/RunAttempt vs backend-native job/message/pod/process identity: PASS.
+- A-9 grant preflight + final pre-submission current-authority revalidation: PASS after V1.1.
+- A-11 logical-attempt boundary without premature retry/idempotency formulas: PASS.
+- immutable canonical ExecutionEnvelope: PASS.
+- durable DispatchRecord/intent before irreversible external action: PASS.
+- stable BackendSubmissionKey for one RunAttempt submission authority: PASS after V1.1.
+- backend acknowledgement loss / ambiguous submission reconciliation: PASS.
+- independent A-5 lost child acknowledgement/reference reconciliation: PASS.
+- duplicate queue/claim/lease/heartbeat ambiguity: PASS.
+- worker/backend capability matching and descriptor drift at actual start: PASS after V1.1.
+- synchronous/asynchronous A-5 invocation: PASS.
+- immutable target/config/input validation: PASS.
+- timeout/cancellation granularity and completion races: PASS after V1.1.
+- backend callbacks as observations rather than receipt-ordered canonical state: PASS after V1.1.
+- semantic result/output validation vs process/backend status: PASS.
+- final manifest correlation to exact attempt/envelope/child authority: PASS after V1.1.
+- backend-handle vs sport-child logical-role distinction even if an external ID is reused: PASS after V1.1.
+- stale queued work/current-authority rejection: PASS.
+- shadow/supervised/production environment/side-effect isolation: PASS.
+- backend replacement neutrality: PASS.
+
+Stress review:
+- `docs/implementation/A10_ARCHITECTURE_CONFORMANCE_REVIEW_20260905.md` records all 60 stored grant, worker capability, immutable target/input, crash, lost-ack, lease, cancellation, timeout, result, queue, callback, backend migration, and digest scenarios plus additional failure-path checks.
+
+Decision:
+- **A-10 is ARCHITECTURE-CERTIFIED as V1 governed together with V1.1 and ADR-0007.**
+- An immutable `ExecutionEnvelope` + durable TDLA dispatch intent precede external submission.
+- Backend-native IDs are physical provenance only and never canonical TDLA RunAttempt identity.
+- Backend submission reconciliation and A-5 sport-child reconciliation are independent mandatory ambiguity defenses.
+- Process/backend completion is not semantic sport/stage success.
+- No Prefect deployment/work pool, Docker/Kubernetes/queue production worker, worker schema, PostgreSQL dispatch/outbox/lease schema, live sport execution, or production publication is certified by this decision.
+- **A-11 Retry / Timeout / Idempotency Architecture is NEXT.**
