@@ -24,8 +24,8 @@ Architecture is intentionally defined before production implementation so TDLA c
 | A-6 | Pipeline plan / stage contracts | `A06_PIPELINE_PLAN_STAGE_CONTRACTS_V1.md` + `A06_PIPELINE_PLAN_STAGE_CONTRACTS_ADDENDUM_V1_1.md` | **ARCHITECTURE-CERTIFIED** |
 | A-7 | Trigger architecture | `A07_TRIGGER_ARCHITECTURE_V1.md` + `A07_TRIGGER_ARCHITECTURE_ADDENDUM_V1_1.md` | **ARCHITECTURE-CERTIFIED** |
 | A-8 | Event-relative scheduling | `A08_EVENT_RELATIVE_SCHEDULING_ENGINE_V1.md` + `A08_EVENT_RELATIVE_SCHEDULING_ENGINE_ADDENDUM_V1_1.md` | **ARCHITECTURE-CERTIFIED** |
-| A-9 | Dependency / readiness engine | TBD | **NEXT** |
-| A-10 | Worker / execution backends | TBD | Planned |
+| A-9 | Dependency / readiness engine | `A09_DEPENDENCY_READINESS_ENGINE_V1.md` + `A09_DEPENDENCY_READINESS_ENGINE_ADDENDUM_V1_1.md` | **ARCHITECTURE-CERTIFIED** |
+| A-10 | Worker / execution backends | TBD | **NEXT** |
 | A-11 | Retry / timeout / idempotency | TBD | Planned |
 | A-12 | Failure / degradation / recovery | TBD | Planned |
 | A-13 | Persistence / immutable audit / provenance | TBD | Planned |
@@ -140,7 +140,32 @@ Important A-8 certified rules:
 - Prefect/APScheduler/CronJob/queue IDs remain runtime cross-references only;
 - there is no direct scheduler-to-executor path.
 
-## Certified foundation + adapter + plan + trigger + scheduling invariants
+## Certification evidence for A-9
+
+- `A09_DEPENDENCY_READINESS_ENGINE_V1.md`
+- `A09_DEPENDENCY_READINESS_ENGINE_ADDENDUM_V1_1.md`
+- `docs/implementation/A09_ARCHITECTURE_CONFORMANCE_REVIEW_20260905.md`
+- `docs/adr/ADR-0006_VERSION_BOUND_DISPATCH_ELIGIBILITY_AND_FINAL_REVALIDATION.md`
+
+A-9 establishes deterministic current eligibility over exact plan/stage/scope/schedule/dependency/readiness/policy authority without turning sport `READY` into a permanent mutable flag or direct execution permission.
+
+Important A-9 certified rules:
+
+- current plan/materialization/scope/schedule authority is checked before and after evidence collection;
+- A-6 dependency satisfaction binds exact upstream StageRun/output manifest/schema/digest/provenance authority;
+- `OPTIONAL`, `NO_OP`, `NOT_APPLICABLE`, and degraded outcomes satisfy only explicitly compatible contracts;
+- fan-in uses exact `ScopeSetBinding` revision/digest and has no implicit vacuous-success rule;
+- A-5 sport reason codes remain opaque; technical readiness failure is not sport `WAITING`/`BLOCKED`/`READY`;
+- readiness cache validity is bounded by the strictest freshness rule and is immediately invalidated by incompatible authority revisions;
+- upstream output supersession/retraction invalidates dependent current eligibility;
+- deterministic reason sets do not require unnecessary external readiness calls after an earlier authoritative gate already prevents proceed;
+- eligibility semantic digest is distinct from unique evaluation-record identity and causal trigger lineage;
+- `DispatchEligibilityGrant` is immutable version-bound evidence, not a bearer token or permanent `ready=true` flag;
+- A-10/A-11 must revalidate grant witnesses/current authority before dispatch;
+- grant validity cannot outlive readiness/time/policy authority and may require immediate inline revalidation;
+- A-9 does not create StageRuns or child sport jobs, and A-11 remains final logical execution-idempotency authority.
+
+## Certified foundation + adapter + plan + trigger + scheduling + eligibility invariants
 
 - TDLA is a control plane, not a sports model repository.
 - DDC remains authority for certified shared sport-agnostic acquisition/facts.
@@ -168,6 +193,9 @@ Important A-8 certified rules:
 - schedule slot identity is stable across clock-time changes; resolutions/occurrences retain exact authority and supersession lineage.
 - time-due evidence is reevaluation-only and cannot bypass current schedule/dependency/readiness/idempotency/side-effect gates.
 - scheduler correctness does not rely on a singleton process or vendor-native timer identity.
+- eligibility is derived immutable evidence over exact current authority, never a persistent mutable boolean.
+- readiness freshness and dependency/output authority are revalidated before dispatch.
+- dispatch-eligibility grants are version-bound proof capsules and cannot bypass A-10/A-11 current-authority/idempotency gates.
 - PostgreSQL is intended as TDLA authoritative persistence.
 - non-secret effective configuration is schema-validated and hashable.
 - every material change must produce detailed durable documentation and an exact resume point.
