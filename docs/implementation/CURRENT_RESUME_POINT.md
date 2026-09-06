@@ -12,18 +12,20 @@ Authority: This file is the single exact continuation point for unfinished TDLA 
 - A-7 Trigger Architecture V1 + V1.1 are **ARCHITECTURE-CERTIFIED**.
 - A-8 Event-Relative Scheduling Engine V1 + V1.1 are **ARCHITECTURE-CERTIFIED**.
 - A-9 Dependency / Readiness Engine V1 + V1.1 are **ARCHITECTURE-CERTIFIED**.
-- A-9 review evidence: `docs/implementation/A09_ARCHITECTURE_CONFORMANCE_REVIEW_20260905.md`.
+- A-10 Worker / Execution Backend V1 + V1.1 are **ARCHITECTURE-CERTIFIED**.
+- A-10 review evidence: `docs/implementation/A10_ARCHITECTURE_CONFORMANCE_REVIEW_20260905.md`.
 - ADR-0001: TDLA canonical identity / replaceable orchestration runtime.
 - ADR-0002: transport-neutral Sport Automation Adapter protocol.
 - ADR-0003: immutable plan fragments / explicit composition / resolved-plan authority.
 - ADR-0004: durable trigger evidence / reevaluation-only trigger authority.
 - ADR-0005: stable schedule slots / immutable resolved-time authority / reevaluation-only due events.
 - ADR-0006: version-bound dispatch eligibility / mandatory final current-authority revalidation.
+- ADR-0007: immutable execution envelope / durable and reconciliable backend dispatch.
 - No production implementation milestone is certified.
 - No TDLA automation is production-authoritative.
 - Daily-MLB remains manual-first; later automation must prove equivalence after its final manual production pipeline is certified.
 
-## Certified nested architecture through A-9
+## Certified nested architecture through A-10
 
 ```text
 sport-owned scope/discovery/plan fragment
@@ -54,28 +56,40 @@ A-8 ScheduleOccurrence        TriggerEvaluation
                                        |
                                        v
                            A-9 EligibilityEvaluation
-                              current authority
-                              time/window
-                              dependencies/outputs
-                              A-5 readiness/freshness
-                              policy/mode/applicability
                                        |
                                        v
                            DispatchEligibilityGrant
                          (version-bound, non-bearer)
                                        |
                                        v
-                              A-10/A-11 NEXT:
-                        revalidate + dispatch/idempotency
+                        A-10 preflight validation
                                        |
                                        v
-                         A-5 Sport Automation Adapter
+                           A-11 logical operation /
+                             RunAttempt authority NEXT
                                        |
                                        v
-                            sport child job/service
+                         A-10 ExecutionEnvelope
                                        |
                                        v
-                         DDC/provider evidence where used
+                        A-10 FINAL authority recheck
+                                       |
+                                       v
+                     durable DispatchRecord / intent
+                                       |
+                                       v
+                   replaceable worker/backend submission
+                                       |
+                      +----------------+----------------+
+                      |                                 |
+                      v                                 v
+              backend ExecutionHandle          A-5 sport child ref
+                                                        |
+                                                        v
+                                       semantic result + manifests
+                                                        |
+                                                        v
+                                      DDC/provider evidence where used
 ```
 
 ## Important locked A-9 rules
@@ -83,606 +97,691 @@ A-8 ScheduleOccurrence        TriggerEvaluation
 1. `READY` is derived immutable evidence, not a persistent mutable boolean.
 2. A-5 sport `READY` is only one readiness gate and never direct TDLA execution authority.
 3. A-9 checks current plan/materialization/scope/schedule/mode/policy authority before and after evidence collection.
-4. A stale or superseded plan/scope/schedule/materialization cannot become current because old dependencies/readiness once passed.
-5. Dependency satisfaction binds exact upstream StageRun/materialization/output manifest/schema/digest/provenance authority.
-6. Same-named outputs from an old plan/scope/snapshot/replay cannot silently satisfy current work.
-7. Upstream output supersession/retraction invalidates dependent current eligibility/grants before dispatch.
-8. `OPTIONAL` does not mean automatically ignorable; explicit downstream dependency/output contracts decide satisfaction.
-9. `NO_OP` cannot satisfy an output dependency for output it did not produce unless the exact contract permits absent output/no-op semantics.
-10. `SUCCEEDED_DEGRADED` satisfies only exact validated outputs allowed by bound policy.
-11. Fan-in binds exact A-6 `ScopeSetBinding` membership revision/digest; no sport-ID inference or implicit empty-set success.
-12. A-5 sport reason codes stay opaque; generic TDLA never branches on pitcher/lineup/inactive/weather meaning.
-13. Technical readiness timeout/schema/capability failure is not sport `WAITING`, `BLOCKED`, or `READY`.
-14. Readiness cache validity is the intersection of sport validity, plan max-age, evidence freshness, schedule/window validity, and policy bound.
-15. Any incompatible plan/stage/scope/schedule/readiness/evidence revision invalidates cached readiness immediately even if its wall-clock TTL has not expired.
-16. Composite readiness uses explicit versioned required/optional composition; optional predicates cannot compensate for failed required predicates.
-17. PIT/freshness contracts are enforced through declared generic provenance/cutoff metadata; sport-specific PIT meaning remains sport-owned.
-18. A-7 reevaluation cause is distinct from A-9 evaluation result; multiple causes can map to one semantic current evaluation while every cause remains auditable.
-19. Eligibility semantic digest is distinct from unique evaluation-record identity and causal trigger lineage.
-20. Deterministic reason sets do not require unnecessary external readiness calls after an earlier authoritative gate already proves the stage cannot proceed.
-21. `READY_FOR_DISPATCH` does not mean worker assigned, dispatch succeeded, child started, A-11 idempotency passed, or side effect occurred.
-22. A-9 issues a `DispatchEligibilityGrant` only for an exact ready authority/evidence set.
-23. The grant is immutable, non-transferable, environment/mode/stage/scope/revision-bound, and never a bearer token.
-24. Grant validity cannot outlive the earliest applicable readiness/time/window/policy authority expiry.
-25. When no safe TTL exists, dispatch requires immediate inline current-authority revalidation.
-26. A-10/A-11 must verify current plan/scope/schedule/dependency/readiness/policy witnesses before using a grant.
-27. Superseded/expired grants remain immutable audit evidence but cannot authorize dispatch.
-28. A-9 does not create StageRun/RunAttempt child work and does not replace A-11 final logical execution idempotency.
-29. Ordinary trigger/readiness changes do not replay/reprocess already-terminal stages; A-14 later owns explicit historical lineages.
-30. Prefect/Celery/Redis/process-local readiness state can never become canonical eligibility authority.
+4. Dependency satisfaction binds exact upstream StageRun/materialization/output manifest/schema/digest/provenance authority.
+5. Upstream output supersession/retraction invalidates dependent current eligibility/grants before dispatch.
+6. `OPTIONAL`, `NO_OP`, `NOT_APPLICABLE`, and `SUCCEEDED_DEGRADED` satisfy only explicit compatible contracts.
+7. Fan-in binds exact A-6 `ScopeSetBinding` membership revision/digest.
+8. A-5 sport reason codes remain opaque; technical readiness failure is not sport waiting/blocked/ready.
+9. Readiness cache validity is the intersection of all freshness/authority bounds and is revision-sensitive.
+10. `DispatchEligibilityGrant` is immutable version-bound evidence and never a bearer execution token.
+11. Grant validity cannot outlive the strictest readiness/time/window/policy/current-authority boundary.
+12. A-10/A-11 must revalidate grant witnesses/current authority before dispatch.
+13. A-9 does not create StageRun/RunAttempt or replace A-11 final logical idempotency authority.
+
+## Important locked A-10 rules
+
+1. A worker/backend is an execution mechanism, not workflow authority.
+2. TDLA WorkflowRun/StageRun/RunAttempt identity remains separate from Prefect/Docker/Kubernetes/queue/message/process/backend identity.
+3. A-10 performs A-9 grant/current-authority preflight and a second **final** current-authority revalidation immediately before irreversible backend submission.
+4. An existing RunAttempt does not override newly stale plan/scope/schedule/dependency/readiness/policy authority.
+5. Every physical attempt uses one immutable schema-versioned `ExecutionEnvelope` with exact plan/stage/scope/grant/target/adapter/config/input/output/environment/mode/A-11 idempotency authority.
+6. Durable TDLA `DispatchRecord`/intent exists before backend submission; exact outbox/transaction DDL remains A-13.
+7. One A-11-authorized RunAttempt has a stable backend-submission identity for safe ambiguous-ack reconciliation/idempotent retransmission where supported.
+8. Backend request/message/callback IDs are transport evidence, not new logical submissions or RunAttempts.
+9. Backend submission acknowledgement loss and A-5 sport-child acknowledgement/reference loss are two independent ambiguity layers; both must be recoverable or fail closed.
+10. `WorkerClassRef` is stable logical capability; physical worker instance/hostname/pod/container is ephemeral provenance.
+11. Worker/backend capability and environment/mode/side-effect authorization are revalidated at actual assignment/start; descriptor drift can invalidate an old assignment.
+12. Duplicate queue delivery/claim, lease expiry, or heartbeat loss does not prove prior worker/backend/child stopped and cannot by itself authorize retry.
+13. A-5 child logical-idempotency context remains in the envelope so a child accepted before worker failure can be recovered.
+14. Timeout means elapsed policy boundary, not proof backend/child stopped.
+15. Cancellation requested/accepted/worker-observed/child-requested/child-terminal are distinct evidence; cancel acknowledgement is not terminal truth.
+16. Cancellation/completion races still require terminal result reconciliation.
+17. Backend callbacks are observations; duplicate/out-of-order callbacks cannot roll authoritative state backward by receipt order.
+18. Process exit 0, Prefect `Completed`, Kubernetes Job Complete, or queue acknowledgement never equals semantic StageRun success.
+19. Terminal semantic result/manifests must correlate to the exact StageRun/RunAttempt, ExecutionEnvelope, plan/stage/scope, logical idempotency, and A-5 child/synchronous invocation authority.
+20. Partial or unrelated files cannot become terminal output merely because filenames/hashes resemble expected output.
+21. Backend ExecutionHandle and A-5 sport child ref remain distinct logical roles even when one direct-service implementation uses the same opaque external ID.
+22. Stale queued work must fail current-authority validation near physical start.
+23. Backend outage/capacity is operational state, not sport readiness/failure.
+24. Backend replacement must preserve TDLA canonical identity, A-9 evidence, A-11 idempotency, A-5 child identity, and historical audit meaning.
 
 ## Daily-MLB / football compatibility note that must not be forgotten
 
-Future sport integrations remain responsible for sport readiness meaning and canonical sport state.
+Current Daily-MLB remains manual-first and is not production-automated because A-10 is certified.
 
-A future adapter can provide:
+Future M13/M14 MLB integration may use an authenticated service, container, Prefect/Kubernetes worker, or another certified backend, but it must preserve:
 
-```text
-ReadinessResult(
-    disposition = READY | WAITING | BLOCKED | NOT_APPLICABLE,
-    opaque sport reason/evidence,
-    scope revision,
-    freshness/validity
-)
-```
+- certified final manual MLB behavior;
+- A-5 caller-stable logical child idempotency/reconciliation;
+- A-6 immutable plan/stage/output contracts;
+- A-9 current eligibility/freshness;
+- A-10 immutable ExecutionEnvelope and durable backend dispatch identity;
+- exact semantic result/output validation;
+- shadow/supervised/production side-effect separation.
 
-TDLA then evaluates only generic current authority, dependencies, outputs, time/window, freshness, mode, and policy.
-
-TDLA must never implement:
-
-```text
-if MLB probable pitcher confirmed -> READY
-if lineup posted -> READY
-if NFL inactives final -> READY
-if weather changed enough -> rerun
-```
-
-Current Daily-MLB remains manual-first and is **not** production-ready merely because A-9 is certified.
+NFL/NCAAF may use different worker classes/backends without generic TDLA learning football-specific execution meaning.
 
 ---
 
-# Exact next step — A-10 Worker / Execution Backend Architecture
+# Exact next step — A-11 Retry / Timeout / Idempotency Architecture
 
-Design the replaceable execution plane that consumes an A-9 `DispatchEligibilityGrant`, performs mandatory final current-authority verification, creates/executes one physical dispatch attempt under TDLA canonical identity, invokes the A-5 sport adapter through an immutable execution envelope, and safely reconciles worker/backend/child-job ambiguity without making Prefect/Docker/Kubernetes/queue IDs canonical TDLA identity.
+Design the canonical logical-execution identity and retry state machine that guarantees duplicate trigger/evaluation/queue/backend delivery and transient failures do not create duplicate logical sport work or duplicate external effects.
 
-The central A-10 rule should be:
+The central A-11 rule should be:
 
-> **A worker/backend is an execution mechanism, not workflow authority. TDLA canonical StageRun/RunAttempt identity, immutable execution envelope, eligibility authority, and child-operation provenance remain valid when the physical backend changes. A backend acknowledgement or process exit code is never sufficient proof of semantic success.**
+> **A retry is a new physical `RunAttempt` of the same logical StageRun/operation, carrying the same stable logical idempotency identity. Timeout, lease loss, heartbeat loss, missing acknowledgement, or unknown state is not proof the prior attempt/child/side effect disappeared. Reconciliation and current-authority revalidation come before any retry that could duplicate work.**
 
-A-10 should define the execution plane without prematurely freezing A-11 retry/idempotency algorithms or A-13 persistence DDL.
+A-11 must define exact logical/idempotency semantics while leaving generalized failure/degradation recovery policy to A-12 and PostgreSQL uniqueness/outbox mechanics to A-13.
 
-## A-10 must define at minimum
+## A-11 must define at minimum
 
-### 1. Execution-plane authority entities
+### 1. Logical operation identity
 
-Define clear logical identities/contracts for concepts such as:
+Freeze the exact concept that represents **one intended logical execution** of a StageMaterialization under a specific lineage.
 
-- `ExecutionBackendDescriptor`;
-- `WorkerCapabilityDescriptor`;
-- `WorkerClassRef`;
-- `DispatchRequest`;
-- immutable `ExecutionEnvelope`;
-- `DispatchRecord` / dispatch intent;
-- `WorkerAssignment`;
-- `ExecutionHandle` / backend job handle;
-- `DispatchAcknowledgement`;
-- worker heartbeat/liveness evidence;
-- cancellation request/ack evidence;
-- execution result/child-operation handoff;
-- backend reconciliation result.
-
-Exact names may change, but canonical TDLA run/attempt identity must remain separate from backend-native job/task IDs.
-
-### 2. A-9 grant consumption and final revalidation
-
-Before physical dispatch:
-
-- verify `DispatchEligibilityGrant` semantic digest/signature/integrity as applicable;
-- verify it targets this exact stage materialization/environment/mode;
-- verify it has not expired;
-- re-check all required current-authority witnesses identified by A-9/ADR-0006;
-- fail closed and request reevaluation when stale;
-- do not silently mint a new grant inside the backend layer.
-
-Define the exact boundary between A-10 current-authority verification and A-11 final logical idempotency/attempt creation.
-
-### 3. ExecutionEnvelope contract
-
-Define an immutable, hashable envelope sufficient to reproduce/audit the physical attempt.
-
-At minimum consider:
-
-- TDLA WorkflowRun/StageRun/RunAttempt refs as applicable;
-- stage materialization/ref/version;
-- resolved plan digest;
-- A-9 eligibility evaluation/grant ref/digest;
-- sport scope/scope revision;
-- schedule resolution/time/deadline context;
-- immutable execution target/release/image digest;
-- adapter descriptor/protocol/capability binding;
-- validated non-secret configuration ref/digest;
-- logical idempotency reference supplied under A-11 contract;
-- input/output manifest refs;
-- execution mode/environment;
-- worker/backend class requirements;
-- resource requirement hints;
-- timeout/cancellation policy refs (exact mechanics A-11);
-- service identity/secret references, never secret values;
-- trace/correlation IDs;
-- created/issued time;
-- envelope schema/version/digest.
-
-### 4. Backend abstraction
-
-A-10 should support interchangeable physical mechanisms such as:
-
-- local subprocess for development/test;
-- OCI/Docker container worker;
-- authenticated sport service invocation;
-- queue-backed worker;
-- Prefect worker/deployment;
-- Kubernetes Job/worker pool;
-- dedicated GPU/heavy-CPU/research/publication worker classes later.
-
-Backend-native IDs are cross-references only.
-
-### 5. Worker capability matching
-
-Define generic capabilities such as:
-
-- CPU architecture/OS where needed;
-- container support;
-- network/provider access class;
-- GPU class;
-- memory/storage class;
-- sport-adapter protocol/capability compatibility;
-- environment authorization;
-- secret/service-identity capability;
-- side-effect/customer-visible authorization class where applicable;
-- version/capability descriptor digest.
-
-A stage must fail closed if no compatible authorized worker/backend exists.
-
-A-15 later owns resource/concurrency budgeting and optimization, not A-10.
-
-### 6. Worker classes vs individual workers
-
-Separate:
+Potential contract:
 
 ```text
-WorkerClassRef
-    = stable logical class/capability target
-
-WorkerInstance
-    = ephemeral physical worker/process/node/pod
+LogicalOperationIdentity
+- namespace/schema version
+- environment
+- execution lineage kind
+- workflow_run/logical workflow identity
+- stage_materialization_ref
+- resolved plan/stage authority
+- sport scope/scope revision as already bound by materialization
+- replay/backfill/reprocess lineage ref when applicable
+- logical operation digest/key
 ```
 
-A plan may target a certified worker class/hints without binding business identity to one machine hostname/pod ID.
+The exact formula should avoid depending on physical attempt IDs, backend IDs, timestamps, or mutable targets.
 
-### 7. Dispatch intent must be durable before irreversible external action
+### 2. StageRun uniqueness
 
-Architectural requirement:
+Define when duplicate requests converge on the same logical StageRun vs create a new logical operation.
+
+At minimum:
+
+- duplicate timer/trigger/reevaluation cause -> same StageRun;
+- duplicate queue/backend submission -> same StageRun;
+- retry after transient failure -> same StageRun, new RunAttempt;
+- lost backend acknowledgement -> same StageRun/RunAttempt while reconciling the same submission;
+- lost A-5 child acknowledgement -> same StageRun/RunAttempt/logical child identity;
+- explicit replay -> new lineaged logical operation;
+- reprocess with changed code/model/config -> new lineaged logical operation;
+- backfill historical operation -> separate backfill lineage;
+- superseding plan/stage materialization -> new authority/logical operation as declared by A-6/A-14.
+
+### 3. Stable LogicalIdempotencyKey
+
+A-11 must freeze a canonical, versioned, deterministic logical idempotency key for the StageRun operation.
+
+Requirements:
+
+- stable across all RunAttempts of the same StageRun;
+- stable across worker/backend changes for the same logical operation;
+- supplied through A-10 ExecutionEnvelope;
+- propagated into A-5 child invocation/dedup lookup;
+- safe to persist/log in sanitized form;
+- no secrets/raw credentials;
+- collision-resistant and namespace/version scoped;
+- distinct across replay/reprocess/backfill lineages and distinct StageMaterializations.
+
+Do **not** include `attempt_id` in the logical idempotency key.
+
+### 4. Idempotency-key hierarchy
+
+Explicitly distinguish at least:
 
 ```text
-durable TDLA dispatch intent / attempt authority
-    -> backend submission/invocation
+LogicalOperationKey / LogicalIdempotencyKey
+    = stable across retries of StageRun
+
+RunAttempt identity
+    = new physical TDLA attempt when A-11 authorizes a retry
+
+BackendSubmissionKey
+    = stable submission authority inside one RunAttempt
+
+A-5 child logical idempotency key
+    = derived/bound from stable logical operation identity,
+      not physical attempt identity
+
+external side-effect idempotency key(s)
+    = stable logical effect identity where supported
 ```
 
-not:
+Define which keys are reused vs regenerated at each layer.
+
+### 5. Exactly-once terminology
+
+Do not claim exactly-once transport/execution in a distributed system unless the external system contract truly provides it.
+
+Prefer explicit guarantees such as:
+
+- at-least-once delivery + idempotent logical acceptance;
+- effectively-once logical operation/side effect under certified dedup/reconciliation;
+- duplicate transport evidence retained.
+
+### 6. RunAttempt identity and sequence
+
+Define immutable physical attempts under one StageRun:
 
 ```text
-start external child first
-    -> maybe record it later
+StageRun S
+  RunAttempt 1
+  RunAttempt 2
+  RunAttempt 3
 ```
 
-Exact transaction/outbox mechanics remain A-13.
+Each attempt has:
 
-### 8. Dispatch acknowledgement identity
+- unique attempt ID;
+- monotonic attempt ordinal/sequence within StageRun;
+- immutable attempt policy/envelope/dispatch refs;
+- start/end/reconciliation evidence;
+- parent/prior attempt lineage;
+- exact reason a new attempt was authorized.
 
-Separate:
+Concurrent systems must not create conflicting attempt ordinals/duplicate active attempts for the same logical operation without explicit architecture allowance.
 
-- TDLA dispatch/attempt identity;
-- backend submission/message ID;
-- worker assignment ID;
-- backend-native job/task/pod/process ID;
-- A-5 sport child execution ref.
+Exact uniqueness DDL remains A-13.
 
-A backend returning “accepted” does not prove the sport child operation started or succeeded.
+### 7. New-attempt authorization gate
 
-### 9. Lost acknowledgement / ambiguous submission
+A new RunAttempt may be created only after A-11 can prove the prior attempt is in a state whose bound policy permits another attempt.
 
-Critical case:
+Examples:
+
+- confirmed backend rejection before child creation;
+- confirmed child terminal retryable technical failure under policy;
+- confirmed no backend submission/child exists;
+- prior attempt cancelled/terminal with safe retry policy;
+- retry budget/deadline/current authority still permit proceed.
+
+Unknown/ambiguous prior state is **not** automatically retryable.
+
+### 8. Single active attempt / overlap policy
+
+Define the default V1 invariant for whether more than one active RunAttempt of one StageRun may exist simultaneously.
+
+Recommended default:
+
+> one active attempt per logical StageRun unless a future explicitly certified speculative/hedged-execution policy exists.
+
+Duplicate HA coordinators must converge rather than intentionally race attempts.
+
+### 9. Current-authority revalidation before every attempt
+
+Every new retry attempt must obtain/reuse only current valid A-9 eligibility evidence according to A-9/ADR-0006.
+
+A retry cannot inherit stale permission from attempt 1 if:
+
+- schedule changed;
+- readiness expired;
+- upstream output retracted;
+- plan superseded;
+- deadline passed;
+- policy/mode changed.
+
+### 10. Retry policy binding
+
+Every StageRun/attempt must bind immutable retry policy identity/version/digest from the A-6 resolved policy authority.
+
+Policy may define:
+
+- max attempts;
+- total retry elapsed budget;
+- retryable transport/error classes;
+- backoff schedule;
+- jitter behavior;
+- start/deadline constraints;
+- cancellation-before-retry requirements;
+- reconciliation requirements;
+- side-effect safety requirements.
+
+Moving a mutable `current_retry_policy` alias after a StageRun begins must not silently alter historical behavior.
+
+### 11. Retry budget
+
+Define bounded retry behavior using at least:
+
+- maximum attempt count;
+- maximum total elapsed retry window/budget;
+- A-8 stage deadline/validity window;
+- optional per-error limits;
+- operator/manual escalation boundary.
+
+No unbounded automatic retries.
+
+### 12. Backoff / jitter semantics
+
+Define a versioned generic retry-delay policy.
+
+Possible families:
+
+- fixed;
+- exponential;
+- exponential with bounded jitter;
+- provider/backend hint (`retry_after`) constrained by policy;
+- no automatic retry.
+
+The policy must be reproducible/auditable enough to explain when another attempt became eligible without requiring retry wakeup timestamps to become logical operation identity.
+
+### 13. Timeout taxonomy
+
+Do not use one generic `timeout` for all layers.
+
+Define at least conceptually:
+
+- eligibility/grant handoff expiry;
+- queue wait/start timeout;
+- backend submission acknowledgement timeout;
+- backend start timeout;
+- worker heartbeat/liveness timeout;
+- sport child execution timeout;
+- result retrieval/validation timeout;
+- cancellation acknowledgement timeout;
+- overall attempt deadline;
+- stage/window hard deadline.
+
+Each timeout means only what its layer can prove.
+
+### 14. Timeout is evidence, not terminal proof
+
+Certified invariant:
 
 ```text
-TDLA records dispatch intent
--> sends to backend
--> backend accepts/starts work
--> acknowledgement lost
--> TDLA restarts
+timeout observed
+!= backend stopped
+!= worker stopped
+!= sport child stopped
+!= external side effect absent
+!= safe retry
 ```
 
-A-10 must define backend reconciliation capability or safe handoff into A-11/A-12 so TDLA does not blindly submit a duplicate.
+A timeout generally routes to reconciliation/cancellation/unknown handling before a new attempt.
 
-This is separate from the A-5 child-operation acknowledgement-loss case; both layers may exist.
+### 15. Ambiguous backend submission
 
-### 10. Worker claim / lease semantics
+If A-10 backend submission acknowledgement is lost:
 
-Define semantic requirements for claiming queued work:
+- preserve same RunAttempt;
+- reuse same stable `BackendSubmissionKey`;
+- reconcile backend by submission/attempt identity;
+- safe idempotent retransmission, if supported, uses same submission identity;
+- do not create RunAttempt N+1 merely because the acknowledgement timed out.
 
-- one logical dispatch attempt can be physically observed/claimed more than once under failure;
-- leases/claims are runtime coordination, not canonical attempt identity;
-- expired lease does not automatically prove the prior worker stopped;
-- lease loss cannot by itself authorize duplicate external side effects;
-- exact persistence/lease algorithm remains A-13/A-21.
+### 16. Ambiguous A-5 child creation
 
-### 11. Worker heartbeat / liveness
+If the backend/worker reached A-5 child invocation but child acknowledgement/ref was lost:
 
-Heartbeat absence means worker liveness is uncertain, not necessarily that child work terminated.
+- preserve same logical StageRun and logical idempotency key;
+- use A-5 lookup/reconciliation by logical child idempotency identity;
+- `ALREADY_EXISTS`/found child is normal recovery;
+- do not create a second child because physical attempt identity changed.
+
+### 17. Backend vs child retry ownership
+
+Define nested retry ownership so TDLA does not multiply retries already happening inside sport/DDC/provider layers.
+
+At minimum distinguish:
+
+- TDLA RunAttempt retry;
+- backend transport submission retransmission of same RunAttempt;
+- sport-service internal child attempt/retry under one logical child;
+- DDC provider/acquisition internal retries;
+- provider SDK/network retries.
+
+Each layer must have bounded responsibility; inner retries do not automatically become new TDLA RunAttempts.
+
+### 18. Technical vs semantic failure retryability
+
+A-11 should define generic retry mechanics/categories without interpreting sport meaning.
+
+Examples:
+
+- network/transport transient failure may be retryable;
+- backend capacity/unavailable may defer/retry;
+- malformed immutable contract/result likely terminal until authority changes;
+- sport semantic failure/degraded result is not automatically retryable;
+- sport-defined blocked/readiness state is not a RunAttempt failure;
+- broad failure/degradation/recovery action remains A-12.
+
+### 19. Retryability evidence
+
+A new attempt should retain structured evidence explaining:
+
+- prior attempt/result state;
+- reconciliation result;
+- retryability classification;
+- retry policy/version;
+- budget remaining;
+- current A-9 eligibility/grant;
+- scheduled retry eligibility time;
+- operator action if any.
+
+### 20. Side-effect idempotency / fencing
+
+For side-effecting stages, define a stable logical external-effect identity separate from physical attempts.
+
+Examples later may include publication, notification, destructive external operation, or write to another service.
+
+Requirements:
+
+- reuse the same external-effect idempotency identity across retries of the same intended effect;
+- never key external effect on physical `attempt_id`;
+- where the external system supports native idempotency keys, use them;
+- where it does not, require a certified durable wrapper/fence/receipt design before production automation;
+- unknown effect outcome blocks blind duplicate effect.
+
+A-18 will specialize publication receipts/keys.
+
+### 21. Partial side effects / unknown side effects
+
+If an attempt may have created a side effect but acknowledgement is missing:
+
+- do not retry the effect blindly;
+- reconcile by external receipt/idempotency key when possible;
+- record `UNKNOWN_EFFECT`/equivalent operational state if unresolved;
+- A-12/A-19 later own recovery/escalation.
+
+### 22. Idempotency collision handling
+
+A key collision where one key maps to incompatible semantic payload/authority must fail closed.
+
+Examples:
+
+- same logical key but different stage materialization;
+- same child key but different immutable target/config/input authority;
+- same side-effect key but different publication package.
+
+Do not silently treat incompatible content as `ALREADY_EXISTS`.
+
+### 23. Idempotency semantic payload digest
+
+Consider binding each idempotency record to a semantic request digest so `ALREADY_EXISTS` can be validated as the **same** intended operation rather than only the same text key.
+
+This should cover exact execution-semantic authority required to detect key misuse/collision without making physical attempt metadata semantic.
+
+### 24. Attempt policy after backend switch
+
+Switching physical backend/worker during a later retry does not reset:
+
+- StageRun logical identity;
+- logical idempotency key;
+- retry budget;
+- side-effect idempotency identity;
+- historical attempt lineage.
+
+A new backend may require a new per-attempt BackendSubmissionKey because it is a new RunAttempt, but the logical operation identity remains stable.
+
+### 25. Retry after worker/lease/heartbeat loss
+
+Lease/heartbeat expiry alone cannot authorize a new RunAttempt.
+
+Required sequence:
+
+```text
+worker/lease uncertain
+-> backend reconciliation
+-> A-5 child reconciliation when applicable
+-> result reconciliation
+-> only then classify prior attempt retryability
+```
+
+### 26. Retry after timeout + cancellation
+
+A timeout followed by cancellation request still requires proof/reconciliation of terminal state.
+
+`cancel accepted` does not automatically authorize next attempt while child may continue.
+
+### 27. Deadline/window interaction
+
+Retry cannot bypass A-8 timing authority.
+
+If backoff/reconciliation pushes beyond deadline:
+
+- no new normal attempt unless current missed-window/current-authority policy permits it;
+- customer-visible/destructive work gets no generic catch-up permission;
+- record retry budget/deadline exhaustion distinctly.
+
+### 28. Scheduled retry wakeup identity
+
+A retry timer/wakeup is a cause to reevaluate retry eligibility, not a new logical operation or permission to dispatch.
+
+It should use A-7/A-8-style durable event principles where applicable.
+
+### 29. Concurrent retry coordinators / HA
+
+Two coordinators may simultaneously decide a retry might be due.
+
+They must converge on one authorized next attempt ordinal/identity rather than create two active RunAttempts.
+
+Exact database compare-and-set/unique constraint remains A-13.
+
+### 30. Attempt terminality / immutability
+
+Completed attempt evidence is immutable.
+
+A later reconciliation correction should append/version state/evidence rather than rewrite history as though uncertainty never existed.
+
+Define how canonical current attempt status can advance while preserving the full event/evidence trail.
+
+### 31. Result after timeout
+
+A sport child/result may arrive after TDLA marked a timeout/reconciliation state.
+
+The actual terminal result must be reconciled and recorded; timeout does not erase it.
+
+Retry must not already have created duplicate logical work unless safe overlap was explicitly certified.
+
+### 32. Duplicate terminal callbacks
+
+Repeated backend/child/result completion delivery should converge on one terminal attempt/result authority while retaining duplicate delivery evidence where useful.
+
+### 33. Out-of-order retry/result events
+
+An old retry wakeup or running callback arriving after terminal success cannot reopen the StageRun or create a new attempt.
+
+### 34. Retry after terminal semantic success
+
+Ordinary retry is forbidden once StageRun is successfully satisfied.
+
+Replay/reprocess/backfill are separate A-14 lineages.
+
+### 35. Retry after terminal semantic failure
+
+Whether a semantic sport failure warrants another attempt depends on explicit generic retry/failure policy and A-12 classification; A-11 does not invent sport-specific retriability.
+
+### 36. Operator retry boundary
+
+An operator request to retry:
+
+- cannot bypass stable logical idempotency;
+- cannot bypass unresolved prior attempt/side-effect ambiguity;
+- cannot bypass current A-9/A-8 authority by default;
+- is distinct from replay/reprocess;
+- explicit overrides remain A-19 and must be separately audited.
+
+### 37. Policy supersession during StageRun
+
+Production StageRun should retain immutable retry policy version/digest used for its logical operation unless a certified explicit policy-transition mechanism creates new authority.
+
+A mutable alias change does not silently reset budget/backoff/retryability.
+
+### 38. Retry budget exhaustion
 
 Distinguish:
 
-- worker lost;
-- backend job still running;
-- sport child still running;
-- result exists but worker died before reporting;
-- truly never started.
+- terminal technical failure;
+- retry budget exhausted;
+- deadline/window exhausted;
+- unresolved ambiguous prior effect;
+- current authority superseded;
+- operator review required.
 
-Reconciliation must precede destructive retry decisions.
+A-12/A-17/A-19 later decide escalation/incident/manual recovery.
 
-### 12. Worker crash before child dispatch
+### 39. Retry counters and nested retries
 
-Expected behavior:
+TDLA attempt count must not accidentally count every inner HTTP/provider retry as a new RunAttempt.
 
-```text
-attempt assigned
-worker dies before invoking sport adapter
-```
+Retain nested retry evidence/provenance where exposed, but each layer's counters remain separate.
 
-TDLA can eventually determine/recover without falsely assuming a child exists.
+### 40. Idempotency and replay/reprocess/backfill
 
-Exact retry attempt semantics remain A-11.
+Replay, reprocess, and backfill must not reuse the original production logical idempotency key as if they were the same logical operation.
 
-### 13. Worker crash after child dispatch
+They need explicit lineage-scoped identities while still preserving links to the original run/evidence.
 
-Expected behavior:
+A-14 later freezes artifact/input semantics for these modes.
 
-```text
-sport child accepted
-worker dies before persisting/reporting child ref
-```
+### 41. Key privacy / security
 
-A-5 logical-idempotency/child-reconciliation contract must be usable to recover the child before another invoke.
+Idempotency identities must not include raw secrets, credentials, protected payload data, or mutable tokens.
 
-A-10 must preserve the logical idempotency context in the immutable envelope.
+Hashing/serialization must be deterministic and safe for logs/diagnostics.
 
-### 14. Worker crash after result produced
+### 42. Technology neutrality
 
-Expected behavior:
+Do not make logical retry/idempotency authority depend on:
 
-```text
-sport child terminal/result artifact exists
-worker dies before TDLA marks attempt complete
-```
+- Prefect retry count;
+- Celery retry ID;
+- queue redelivery count;
+- Kubernetes restart count;
+- process PID;
+- Redis lock key;
+- provider SDK retry counter.
 
-Recovery/reconciliation should retrieve/validate the existing result rather than rerun merely because worker state is lost.
+These may be runtime evidence/cross-references only.
 
-### 15. Synchronous vs asynchronous sport execution
+### 43. Recovery after coordinator crash
 
-A-10 must support both A-5 shapes:
+Durable StageRun/RunAttempt/idempotency/retry evidence must allow restart to determine:
 
-- synchronous invocation returns terminal `SportExecutionResult`;
-- asynchronous invocation returns child ref/ack and requires polling/event/reconciliation.
+- current logical operation;
+- latest/active attempt;
+- whether backend submission exists;
+- whether child exists;
+- whether result exists;
+- budget remaining;
+- next retry eligibility;
+- whether current authority is still valid.
 
-TDLA canonical attempt identity remains stable across transport shape.
+Exact persistence DDL remains A-13.
 
-### 16. Execution target immutability
+### 44. Fail-closed rules
 
-Production worker must execute the exact immutable target declared by the resolved plan/envelope:
+A-11 must fail closed for at least:
 
-- image digest rather than mutable `latest`;
-- immutable package/release/commit where appropriate;
-- exact adapter implementation version/capability;
-- validated config digest.
-
-Worker may verify target digest before start and must fail closed on mismatch.
-
-### 17. Input materialization / staging
-
-Define generic worker responsibility for obtaining declared inputs without filename guessing:
-
-- resolve input manifest refs;
-- verify schema/digests;
-- stage read-only/local copies when needed;
-- preserve provenance refs;
-- avoid mutating source evidence;
-- output only through declared logical output/artifact contracts.
-
-A-14 later owns artifact storage/retention details.
-
-### 18. Secret handling boundary
-
-ExecutionEnvelope contains stable secret/service-identity references only.
-
-Worker obtains secret material through A-20-approved mechanism at runtime.
-
-Secrets must not enter:
-
-- Git;
-- envelope semantic digest as raw values;
-- logs;
-- persisted safe diagnostics;
-- output manifests.
-
-### 19. Network/provider access classes
-
-Some stages may require controlled egress or provider credentials while others should run isolated.
-
-Worker capability matching must support generic network/access classes without encoding sport/provider business meaning in the control plane.
-
-### 20. Side-effect classes / worker authorization
-
-Customer-visible/destructive stages may require a worker/backend/service identity class authorized for that side-effect category.
-
-Worker capability does not itself grant plan/certification/operator authority; all prior gates still apply.
-
-### 21. Timeouts boundary
-
-A-10 carries timeout/deadline policy references and enforces backend-level deadline signals as instructed, but exact retry/timeout state machine belongs to A-11.
-
-A TDLA timeout does **not** prove the backend job or sport child stopped.
-
-### 22. Cancellation boundary
-
-Define separate states/evidence:
-
-- cancellation requested;
-- backend accepted cancellation;
-- worker observed cancellation;
-- sport child cancellation requested/accepted;
-- child actually terminal;
-- unable to cancel;
-- cancellation status unknown.
-
-Never equate “cancel request sent” with “side effects stopped.”
-
-### 23. Result validation handoff
-
-A backend/process exit code `0` or Prefect `Completed` is not semantic success.
-
-A-10 must obtain/forward:
-
-- A-5 `SportExecutionResult`;
-- required A-6 output/artifact manifest refs;
-- child execution ref;
-- semantic result/degradation/failure status;
-- backend/worker timing/evidence;
-- output contract validation evidence.
-
-A-12 later owns generalized failure/degradation propagation.
-
-### 24. Backend reconciliation interface
-
-Each production-capable backend should declare whether it supports reconciliation by:
-
-- TDLA attempt/dispatch key;
-- backend job handle;
-- submission/idempotency token where applicable;
-- worker assignment;
-- A-5 child ref/logical idempotency context.
-
-If a backend cannot safely reconcile ambiguous submission for a side-effecting production path, fail certification or require a proven compensating A-11 design.
-
-### 25. Backend health / outage
-
-Backend unavailable/capacity exhausted is operational state, not sport failure and not readiness state.
-
-A-10 should expose generic dispatch dispositions such as conceptually:
-
-- `DISPATCHABLE`;
-- `WAITING_BACKEND`;
-- `NO_COMPATIBLE_WORKER`;
-- `BACKEND_UNAVAILABLE`;
-- `SUBMISSION_AMBIGUOUS`;
-- `SUBMITTED`;
-- `RUNNING`;
-- `RECONCILING`;
-- `CANCEL_REQUESTED`;
-- terminal transport/backend error.
-
-Names can be refined during review.
-
-### 26. Queue ordering
-
-Do not assume global FIFO implies business priority or correctness.
-
-A-15 later defines resource/priority policies. A-10 must preserve exact stage/deadline/authority context so a queued item can be rejected/revalidated if it becomes stale before start.
-
-### 27. Queued work stale before worker start
-
-Critical case:
-
-```text
-grant valid at enqueue
--> waits in queue
--> schedule/readiness/plan changes
--> worker receives item later
-```
-
-Worker/backend must not start merely because the message exists. Final current-authority/grant validation is required near the actual side-effect boundary.
-
-### 28. Environment isolation
-
-Development/test/staging/production worker pools/service identities/queues must be logically isolated enough that staging work cannot accidentally use production publication authority.
-
-Exact deployment topology remains A-21.
-
-### 29. Shadow/supervised/production
-
-- shadow worker path must maintain no uncontrolled customer-visible side effects;
-- supervised work must stop at declared approval boundary;
-- production worker must verify production-authorized envelope/target/mode/service identity;
-- worker backend cannot promote mode/certification itself.
-
-### 30. Worker execution logs
-
-Logs are operational evidence, not output authority.
-
-Logs must include correlation IDs and sanitize secrets, but semantic success is based on versioned result/artifact contracts.
-
-A-16 later owns telemetry standards.
-
-### 31. Canonical execution-envelope digest
-
-Define deterministic semantic hashing with schema-controlled field participation.
-
-Physical worker hostname/pod UID/runtime log path should normally be audit metadata, not change the requested execution semantics.
-
-Immutable target/config/input/grant/idempotency/environment/mode fields are semantic.
-
-### 32. Result/output atomicity boundary
-
-A worker may produce multiple artifacts before terminal result handoff.
-
-A-10 should require an explicit final manifest/result commit point; partial files alone cannot be mistaken for successful outputs.
-
-Exact object-store/database atomicity remains A-13/A-14.
-
-### 33. Orphan detection
-
-Define generic orphan possibilities:
-
-- TDLA attempt says dispatched, backend has no job;
-- backend job exists, TDLA worker record missing/stale;
-- sport child exists but backend worker lost;
-- child terminal but TDLA attempt nonterminal;
-- backend job terminal but child state unknown.
-
-A-10 must preserve enough handles to reconcile; A-12 owns final recovery policy.
-
-### 34. Backend replacement neutrality
-
-Migrating from local/Docker/Prefect to Kubernetes/queue worker must not change:
-
-- StageRun identity;
-- logical operation identity;
-- A-9 eligibility evidence;
-- A-11 idempotency semantics;
-- sport child identity;
-- historical audit meaning.
-
-### 35. No direct worker authority
-
-Prohibit:
-
-```text
-worker receives message -> trust it -> run
-```
-
-Require conceptually:
-
-```text
-DispatchEligibilityGrant
-+ current-authority revalidation
-+ A-11 logical idempotency/attempt authority
-+ immutable ExecutionEnvelope
-+ compatible authorized backend/worker
-    -> physical invocation
-```
+- idempotency key collision with incompatible semantic digest;
+- unknown prior attempt/side-effect state without safe reconciliation;
+- concurrent active-attempt conflict;
+- exhausted retry budget;
+- stale A-9 authority;
+- deadline/window closed;
+- missing immutable retry policy;
+- external side-effect path with no certified idempotency/reconciliation mechanism;
+- child/backend lookup inconsistency that cannot be reconciled.
 
 ---
 
-# A-10 stress cases before certification
+# A-11 stress cases before certification
 
 At minimum test:
 
-1. Valid current grant dispatches to compatible local/test worker.
-2. Grant expired while waiting in queue.
-3. Schedule revision changes after enqueue before worker start.
-4. Readiness expires after enqueue before worker start.
-5. Upstream output retracted after enqueue.
-6. Plan revision supersedes queued work.
-7. Worker capability mismatch.
-8. No authorized production worker available.
-9. GPU-required stage with only CPU workers.
-10. Production stage accidentally routed toward staging worker pool.
-11. Immutable image digest available and verified.
-12. Worker sees mutable `latest` target in production -> fail closed.
-13. Input manifest digest mismatch before execution.
-14. Required input missing from artifact storage.
-15. Worker obtains secrets through reference without persisting raw value.
-16. Secret accidentally appears in adapter error/log -> sanitization/incident boundary.
-17. Dispatch intent persisted; worker crashes before adapter invocation.
-18. Backend accepts submission but acknowledgement is lost.
-19. Worker invokes async sport child; worker dies before persisting child ref.
-20. Worker invokes async child and records child ref, then dies.
-21. Sport child completes successfully while worker is dead.
-22. Sport child fails while worker is dead.
-23. Synchronous adapter returns semantic success plus valid outputs.
-24. Synchronous process exit code 0 but required result/output contract missing.
-25. Prefect/backend says Completed but sport semantic result is failed/degraded.
-26. Backend job fails before sport child invocation.
-27. Worker heartbeat lost while backend job still running.
-28. Worker heartbeat lost while sport child still running independently.
-29. Lease expires; previous worker might still be running.
-30. Two workers observe/claim same physical dispatch work.
-31. Duplicate queue message for same dispatch/attempt.
-32. Backend submission reconciliation finds existing job after acknowledgement loss.
-33. Backend cannot reconcile ambiguous side-effecting submission.
-34. A-5 child reconciliation finds existing child after worker loss.
-35. Cancellation requested before worker starts.
-36. Cancellation requested after backend job starts but before child invocation.
-37. Cancellation requested after sport child starts; child declines/unsupported.
-38. Backend accepts cancellation but child continues.
-39. Timeout reached but backend/child status is unknown.
-40. Worker produces partial files then crashes before final manifest/result.
-41. Worker produces final manifest/result then crashes before TDLA acknowledgement.
-42. Result manifest schema mismatch.
-43. Result digest mismatch.
-44. Shadow compute runs on isolated worker and cannot publish.
-45. Supervised compute finishes and waits at explicit approval boundary.
-46. Production customer-visible stage uses authorized service identity/backend.
-47. Same StageRun later uses a different physical worker backend after a retry attempt; canonical identity remains stable according to A-11 semantics.
-48. Backend migration Prefect -> Kubernetes preserves TDLA identity/audit contracts.
-49. Worker instance/pod restarts and gets a new physical ID; attempt lineage remains intact.
-50. Backend outage/capacity exhaustion delays work without becoming sport failure.
-51. Queue FIFO order conflicts with deadline priority; correctness still uses plan/deadline authority, not queue position.
-52. Queued message becomes past deadline before claim.
-53. Stale superseded queued message is delivered after current replacement already ran.
-54. Duplicate backend completion callback.
-55. Out-of-order backend running/completed callbacks.
-56. Backend reports terminal success but child reconciliation says still running/unknown.
-57. Child terminal result exists but backend native job record disappeared.
-58. Worker class descriptor changes incompatibly while work queued.
-59. ExecutionEnvelope semantic fields serialize differently but canonical digest stays deterministic.
-60. Physical worker metadata changes without changing semantic envelope digest when schema classifies it audit-only.
+1. Duplicate trigger causes converge on one logical StageRun.
+2. Duplicate eligibility evaluations converge on one logical StageRun.
+3. Retry after confirmed transient backend failure creates RunAttempt 2 under same StageRun.
+4. RunAttempt 2 uses same LogicalIdempotencyKey as attempt 1.
+5. RunAttempt 2 gets a new RunAttempt ID and ordinal.
+6. Backend switch on attempt 2 does not reset logical key/retry budget.
+7. Physical attempt ID is accidentally included in child idempotency key -> fail contract test.
+8. Duplicate queue delivery for attempt 1 does not create attempt 2.
+9. Backend ack timeout with ambiguous submission keeps attempt 1 in reconciliation.
+10. Backend reconciliation finds existing job; no new attempt.
+11. Safe idempotent backend retransmission reuses same BackendSubmissionKey.
+12. Backend reconciliation proves no submission existed and policy permits retry/new attempt.
+13. Backend ambiguous and cannot reconcile side-effecting submission -> no automatic retry.
+14. Worker dies before A-5 invocation and reconciliation proves no child.
+15. Worker dies after child acceptance before child ref persisted; A-5 lookup finds existing child.
+16. A-5 returns `ALREADY_EXISTS` for same logical child; treat as normal recovery.
+17. Same child idempotency key is presented with incompatible target/config/input digest -> fail closed.
+18. Child continues running after TDLA timeout.
+19. Timeout occurs, cancel requested, child later succeeds.
+20. Timeout occurs, cancel accepted by backend, child still runs.
+21. Heartbeat lost but backend job running; no retry yet.
+22. Lease expires while original worker still running; no duplicate attempt.
+23. Child terminal result arrives after timeout state; reconcile result.
+24. Attempt 1 succeeds while retry wakeup for attempt 2 is queued; retry wakeup becomes no-op/terminal current state.
+25. Duplicate child terminal callbacks converge on one attempt result.
+26. Out-of-order RUNNING callback arrives after terminal success; cannot reopen attempt.
+27. Retry policy max attempts = 3; fourth attempt rejected.
+28. Total retry elapsed budget expires before max attempt count.
+29. Stage hard deadline expires during backoff.
+30. Retry becomes due but A-9 readiness has expired -> reevaluate, no blind dispatch.
+31. Retry becomes due but schedule revision changed -> new current authority required.
+32. Retry becomes due but upstream output retracted -> no dispatch.
+33. Plan superseded between attempts -> old StageRun does not continue normal retry under new plan.
+34. Retry policy alias changes after attempt 1; pinned immutable policy remains authoritative.
+35. Fixed backoff policy produces declared next eligible retry time.
+36. Exponential+jitter policy stays within versioned bounds and is auditable.
+37. Provider `retry_after` exceeds stage deadline -> no retry beyond current authority.
+38. Backend capacity outage delays retry without becoming sport semantic failure.
+39. Technical readiness `WAITING` is not counted as failed RunAttempt.
+40. A-5 readiness call timeout before dispatch does not create a RunAttempt if no attempt authority/submission occurred.
+41. Semantic sport `FAILED` result is not automatically retryable without policy/A-12 classification.
+42. `SUCCEEDED_DEGRADED` accepted by output policy completes StageRun; no retry merely to seek non-degraded output unless explicitly separate reprocess policy.
+43. Process exit 0 but missing semantic result -> retryability classified technically, not success.
+44. Partial files exist after crash, no final manifest; no false success.
+45. Final correlated manifest exists after worker crash; retrieve it instead of retrying.
+46. Customer-visible side effect acknowledgement lost but external receipt lookup finds existing effect -> no duplicate effect.
+47. Customer-visible effect outcome unknown and system has no idempotency lookup -> stop automatic retry/escalate.
+48. External effect idempotency key accidentally includes RunAttempt ID -> fail contract test.
+49. Same external effect key with different semantic publication/effect digest -> collision fail closed.
+50. Operator presses retry while previous attempt state ambiguous -> cannot bypass reconciliation.
+51. Operator retry after confirmed retryable terminal failure still uses same logical StageRun/idempotency key.
+52. Explicit replay creates new lineaged logical operation/key, not attempt N+1 of production StageRun.
+53. Explicit reprocess creates new lineaged operation/key with changed target/config authority.
+54. Backfill historical run uses backfill lineage/key distinct from original production run.
+55. Two HA retry coordinators race to create next attempt; only one attempt ordinal becomes authoritative.
+56. Coordinator crashes after RunAttempt creation before backend submission; recovery sees no submission and handles same attempt safely.
+57. Coordinator crashes after backend submission before recording ack; recovery uses same attempt/BackendSubmissionKey.
+58. Retry wakeup is delivered twice; does not create two attempts.
+59. Prefect/Celery/Kubernetes native retry counter changes without changing TDLA logical attempt authority.
+60. Same semantic logical operation canonicalizes to the same LogicalIdempotencyKey across equivalent serialization/order.
+61. Different StageMaterialization never collides to same logical key.
+62. Same StageMaterialization in staging vs production gets distinct environment-scoped logical identity.
+63. Same production StageRun retries on a different worker host; logical key unchanged.
+64. A-5 sport service performs internal network/provider retries while TDLA remains on RunAttempt 1.
+65. DDC provider acquisition retries remain nested and do not increment TDLA RunAttempt count.
+66. Retry budget exhausted -> explicit exhausted disposition, no hidden infinite retry.
+67. Deadline exhausted before side-effect retry -> no generic catch-up.
+68. Cancel request is accepted but terminal state unknown -> retry remains blocked.
+69. Prior attempt definitely cancelled before any child/effect and policy permits retry -> next attempt authorized.
+70. Idempotency key/payload digest record is corrupted/mismatched -> fail closed and incident/recovery boundary.
 
-## Expected A-10 outputs
+---
+
+# Expected A-11 outputs
 
 Create at minimum:
 
-- `docs/architecture/A10_WORKER_EXECUTION_BACKEND_V1.md`;
-- A-10 V1.1 addendum if review exposes ambiguities;
-- A-10 architecture conformance/certification review with stress matrix;
-- ADR if dispatch-intent/backend-reconciliation/execution-envelope authority introduces a durable tradeoff;
+- `docs/architecture/A11_RETRY_TIMEOUT_IDEMPOTENCY_V1.md`;
+- A-11 V1.1 addendum if review exposes ambiguities;
+- A-11 architecture conformance/certification review with stress matrix;
+- ADR if logical-operation identity, key hierarchy, single-active-attempt, or exactly-once/effect-fencing semantics introduce durable tradeoffs;
 - updated ADR index;
 - updated architecture index;
 - updated `ARCHITECTURE_CERTIFICATION_LOG.md`;
 - detailed `CHANGE_JOURNAL.md` entry;
 - updated root `README.md`;
-- updated `CURRENT_RESUME_POINT.md` pointing to A-11.
+- updated `CURRENT_RESUME_POINT.md` pointing to A-12.
 
 ## Do not do yet
 
-Until A-10 is certified:
+Until A-11 is certified:
 
-- do not implement final worker/backend Pydantic models as frozen authority;
-- do not create production Prefect deployments/work pools;
-- do not add Kubernetes Jobs/queues/Celery workers as production architecture;
-- do not design PostgreSQL dispatch/lease/outbox tables around guessed fields;
-- do not wire live Daily-MLB/NFL/NCAAF execution into TDLA;
-- do not choose backend-native job IDs as canonical RunAttempt identity;
-- do not let queue delivery bypass A-9 grant/current-authority validation;
-- do not finalize A-11 retry/idempotency key construction prematurely;
+- do not implement final StageRun/RunAttempt/idempotency Pydantic models as frozen authority;
+- do not create retry loops/backoff policies in Prefect/Celery/queues as production authority;
+- do not design PostgreSQL unique/idempotency/attempt/outbox tables around guessed key fields;
+- do not wire live Daily-MLB/NFL/NCAAF retry automation;
+- do not use physical `attempt_id` as sport child or external-effect idempotency identity;
+- do not treat timeout/lease/heartbeat/cancel acknowledgement as proof prior work stopped;
+- do not permit automatic retry of ambiguous side effects without reconciliation/fencing;
+- do not implement A-12 generalized recovery policy prematurely;
 - do not enable production publication.
 
 ## Required reading for next session
@@ -691,15 +790,16 @@ Until A-10 is certified:
 2. `AGENTS.md`
 3. this file
 4. `docs/implementation/ARCHITECTURE_CERTIFICATION_LOG.md`
-5. `docs/architecture/A05_SPORT_AUTOMATION_ADAPTER_V1.md`
-6. `docs/architecture/A05_SPORT_AUTOMATION_ADAPTER_ADDENDUM_V1_1.md`
-7. `docs/architecture/A06_PIPELINE_PLAN_STAGE_CONTRACTS_V1.md`
-8. `docs/architecture/A06_PIPELINE_PLAN_STAGE_CONTRACTS_ADDENDUM_V1_1.md`
-9. `docs/architecture/A09_DEPENDENCY_READINESS_ENGINE_V1.md`
-10. `docs/architecture/A09_DEPENDENCY_READINESS_ENGINE_ADDENDUM_V1_1.md`
-11. `docs/implementation/A09_ARCHITECTURE_CONFORMANCE_REVIEW_20260905.md`
-12. `docs/adr/ADR-0006_VERSION_BOUND_DISPATCH_ELIGIBILITY_AND_FINAL_REVALIDATION.md`
-13. current A-5 child reconciliation/idempotent invocation requirements;
-14. A-8 timing/deadline/current-authority rules.
+5. `docs/architecture/A03`/foundation run-identity rules in `A00-A04_AUTOMATION_FOUNDATION_V1.md` + addendum
+6. `docs/architecture/A05_SPORT_AUTOMATION_ADAPTER_V1.md`
+7. `docs/architecture/A05_SPORT_AUTOMATION_ADAPTER_ADDENDUM_V1_1.md`
+8. `docs/architecture/A09_DEPENDENCY_READINESS_ENGINE_V1.md`
+9. `docs/architecture/A09_DEPENDENCY_READINESS_ENGINE_ADDENDUM_V1_1.md`
+10. `docs/architecture/A10_WORKER_EXECUTION_BACKEND_V1.md`
+11. `docs/architecture/A10_WORKER_EXECUTION_BACKEND_ADDENDUM_V1_1.md`
+12. `docs/implementation/A10_ARCHITECTURE_CONFORMANCE_REVIEW_20260905.md`
+13. `docs/adr/ADR-0006_VERSION_BOUND_DISPATCH_ELIGIBILITY_AND_FINAL_REVALIDATION.md`
+14. `docs/adr/ADR-0007_IMMUTABLE_EXECUTION_ENVELOPE_AND_RECONCILABLE_BACKEND_DISPATCH.md`
+15. current A-5 child idempotency/reconciliation requirements.
 
-The next architecture checkpoint is **A-10 Worker / Execution Backend Architecture**.
+The next architecture checkpoint is **A-11 Retry / Timeout / Idempotency Architecture**.
