@@ -2,60 +2,23 @@
 
 This directory records durable architecture decisions, alternatives, tradeoffs, and supersession history for The-Daily-Line-Automation.
 
-## When an ADR is required
-
-Create an ADR when a change materially affects one or more of:
-
-- repository/system ownership boundaries;
-- canonical identity semantics;
-- persistence authority;
-- orchestration/runtime technology with architectural consequences;
-- deployment model;
-- security/service identity;
-- public/inter-repository contracts;
-- compatibility/migration strategy;
-- failure/recovery/idempotency guarantees;
-- publication side-effect model;
-- significant technology selection where replacement cost/tradeoffs matter.
-
-Routine implementation details that simply conform to certified architecture do not require an ADR, but they still require a `CHANGE_JOURNAL.md` record when material.
-
-## ADR format
-
-Each ADR should include:
-
-- title and stable number;
-- date;
-- status (`PROPOSED`, `ACCEPTED`, `SUPERSEDED`, `REJECTED`);
-- context/problem;
-- decision;
-- alternatives considered;
-- consequences/tradeoffs;
-- compatibility/migration impact;
-- security/operational impact when relevant;
-- validation required;
-- related architecture sections;
-- supersedes/superseded-by links.
-
 ## Authority relationship
 
-An ADR explains a decision. It does not silently override governing architecture.
-
-If an accepted ADR changes a certified architecture contract, the same logical change must:
-
-1. update/version the affected architecture document;
-2. update the architecture certification log;
-3. append the change journal;
-4. update the current resume point;
-5. include migration/compatibility notes.
+ADRs explain durable decisions. They do not silently override governing architecture. If an ADR changes a certified contract, the affected architecture and certification/status documentation must be versioned/updated in the same logical change.
 
 ## Index
 
-- `ADR-0001_CONTROL_PLANE_AND_VENDOR_NEUTRAL_IDENTITY.md` — TDLA owns canonical automation identity/audit; Prefect is an initial replaceable runtime.
-- `ADR-0002_TRANSPORT_NEUTRAL_SPORT_ADAPTER_PROTOCOL.md` — Sport Automation Adapter is a versioned transport-neutral protocol boundary; TDLA does not canonically depend on sport Python imports, HTTP, or Prefect-specific integration semantics.
-- `ADR-0003_IMMUTABLE_PLAN_FRAGMENTS_AND_EXPLICIT_COMPOSITION.md` — sport/platform plan fragments remain immutable and separately owned; cross-fragment bindings are explicit and typed; conflicts fail closed; the immutable `ResolvedAutomationPlan` is the canonical executable plan authority.
-- `ADR-0004_DURABLE_TRIGGER_EVIDENCE_AND_REEVALUATION_ONLY_AUTHORITY.md` — trigger delivery is durable evidence, not execution authority; semantic trigger events, immutable bindings, evaluations, and logical eligibility-reevaluation requests are separate identities, with all execution still passing normal certified gates.
-- `ADR-0005_STABLE_SCHEDULE_SLOTS_AND_RESOLVED_TIME_AUTHORITY.md` — stable logical schedule slots remain independent of resolved clock times; immutable schedule resolutions/occurrences preserve exact authority and supersession; due occurrences create reevaluation-only A-7 `TIME_DUE` evidence rather than direct execution.
-- `ADR-0006_VERSION_BOUND_DISPATCH_ELIGIBILITY_AND_FINAL_REVALIDATION.md` — A-9 emits immutable version-bound dispatch-eligibility evidence, not a permanent `ready=true` flag; A-10/A-11 must revalidate current plan/scope/schedule/dependency/readiness authority before dispatch.
-- `ADR-0007_IMMUTABLE_EXECUTION_ENVELOPE_AND_RECONCILABLE_BACKEND_DISPATCH.md` — every physical attempt uses an immutable execution envelope and durable TDLA dispatch intent; backend submission and nested sport-child ambiguity are independently reconcilable; backend-native IDs remain provenance rather than canonical TDLA identity.
-- `ADR-0008_PARAMETERIZED_VIDEO_RENDERER_AND_FACT_AUTHORITY.md` — The Daily Line social-video subsystem uses versioned fact-bound contracts and a parameterized replaceable renderer; Remotion is the initial render runtime, sport repositories retain fact/explanation/recommendation authority, generated/stock stills plus reusable motion are preferred before expensive generative video, and rendering remains separate from A-18 publication side effects.
+- `ADR-0001_CONTROL_PLANE_AND_VENDOR_NEUTRAL_IDENTITY.md` — TDLA canonical automation identity/audit; Prefect is replaceable runtime.
+- `ADR-0002_TRANSPORT_NEUTRAL_SPORT_ADAPTER_PROTOCOL.md` — transport-neutral Sport Automation Adapter.
+- `ADR-0003_IMMUTABLE_PLAN_FRAGMENTS_AND_EXPLICIT_COMPOSITION.md` — immutable plan fragments and explicit composition.
+- `ADR-0004_DURABLE_TRIGGER_EVIDENCE_AND_REEVALUATION_ONLY_AUTHORITY.md` — triggers are durable reevaluation evidence, not execution authority.
+- `ADR-0005_STABLE_SCHEDULE_SLOTS_AND_RESOLVED_TIME_AUTHORITY.md` — stable schedule slots and immutable resolved-time authority.
+- `ADR-0006_VERSION_BOUND_DISPATCH_ELIGIBILITY_AND_FINAL_REVALIDATION.md` — version-bound eligibility and mandatory final current-authority revalidation.
+- `ADR-0007_IMMUTABLE_EXECUTION_ENVELOPE_AND_RECONCILABLE_BACKEND_DISPATCH.md` — immutable execution envelope and reconciliable backend dispatch.
+- `ADR-0008_PARAMETERIZED_VIDEO_RENDERER_AND_FACT_AUTHORITY.md` — DLVE uses a parameterized replaceable renderer with sport-owned fact authority and Remotion as V1 implementation.
+- `ADR-0009_RIGHTS_FIRST_MEDIA_PROVENANCE_AND_NON_DOCUMENTARY_GENERATIVE_VISUALS.md` — every media asset retains exact-use rights/provenance; generated visuals cannot masquerade as documentary evidence.
+- `ADR-0010_BOUNDED_ADAPTIVE_CREATIVE_SELECTION.md` — future optimization can select only among certified creative actions and cannot mutate sport truth/compliance/QC.
+
+## Required ADR content
+
+An ADR should include context, decision, alternatives, consequences, compatibility/migration, operational/security impact where relevant, validation requirements, and related architecture sections. Superseded decisions remain historical evidence.

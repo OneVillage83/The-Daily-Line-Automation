@@ -1,56 +1,51 @@
 # DLVE Production Architecture Status — 2026-09-08
 
-## Status
+## Final architecture status
 
-**Architecture coverage: COMPLETE through V-24.**
-**Architecture certification: PENDING dedicated V-0 through V-24 conformance/stress review.**
+**Architecture coverage: COMPLETE V-0 through V-24.**
+**Architecture certification: COMPLETE — ARCHITECTURE-CERTIFIED V1 + V1.1.**
+**Stress review: PASS — 120 cases after V1.1 corrections.**
 **Implementation: NOT STARTED.**
 
-## What is now documented
+## Governing evidence
 
-The complete production architecture surface exists for:
-- ownership/system boundaries;
-- publishable-fact and video-job contracts;
-- brand/motion identity;
-- template composition;
+- `docs/video/README.md`
+- `docs/video/V00-V24_PRODUCTION_ARCHITECTURE_ADDENDUM_V1_1.md`
+- `docs/implementation/DLVE_V00-V24_ARCHITECTURE_CONFORMANCE_REVIEW_20260908.md`
+- `docs/implementation/DLVE_ARCHITECTURE_CERTIFICATION_LOG.md`
+- ADR-0008, ADR-0009, ADR-0010.
+
+## What is frozen
+
+Production architecture now covers and certifies:
+- source fact authority and creative transformation;
+- canonical video identities/contracts;
+- brand/motion and template system;
 - script/narrative generation;
-- asset generation/stock/media rights;
-- voice/audio;
-- captions/accessibility;
-- renderer abstraction and Remotion deployment;
-- QC/template certification;
-- persistence/provenance;
-- publication handoff;
+- generated/stock/owned media rights/provenance;
+- voice/audio/captions/accessibility;
+- Remotion renderer abstraction/deployment;
+- automated QC and template certification;
+- persistence/provenance semantics;
+- publication-package/A-18 boundary;
 - analytics/attribution;
-- experimentation/causal learning;
-- cost/resource/provider budgets;
+- experiments/causal caution;
+- cost/resource/provider budgeting;
 - observability/alerts/incidents;
-- security/secrets/service identity;
-- HA/backup/DR;
+- security/service identity;
+- backup/DR;
 - CI/CD/immutable releases;
-- multi-sport/platform/account scaling;
+- multi-sport/multi-platform scaling;
 - operator approvals;
 - retention/privacy/compliance;
 - bounded future adaptive optimization.
 
-## Locked implementation principle
+## Exact next step
 
-No implementation should invent architecture outside these contracts. If implementation discovers a contradiction or missing production requirement, stop at the boundary and create a versioned architecture correction/addendum before continuing.
+**VM-0 — canonical contract implementation.**
 
-## Next exact architecture-only step
+Do not start with the title animation or template code. First encode the V-1 wire contracts in canonical JSON Schema, freeze canonical digests, create golden valid/invalid fixtures, and establish TypeScript/Python parity. After VM-0 passes its own conformance gate, scaffold Remotion in VM-1 and build the `DailyLineBrandSting` in VM-2.
 
-Perform one dedicated DLVE V-0 through V-24 architecture conformance review with >=100 stress cases, focused especially on:
-1. fact-authority mutation/inference attacks;
-2. stale/corrected odds/injury/weather/model evidence;
-3. render retry and duplicate side effects;
-4. asset rights/expiration/derivatives;
-5. provider outage and fallback consistency;
-6. platform policy changes;
-7. caption/layout failures;
-8. analytics metric mismatch/confounding;
-9. cost pressure/degraded modes;
-10. security/prompt/remote-media attacks;
-11. correction/retraction after publication;
-12. adaptive optimization overreach.
+## Parent TDLA dependency note
 
-If the review passes after necessary corrections, mark V-0 through V-24 architecture-certified and freeze VM-0 as the implementation start.
+The repository-wide control-plane architecture still proceeds independently from A-11 onward. DLVE's certified boundaries deliberately defer shared retry/persistence/publication/security/deployment/adaptive mechanics to their A-section owners and must conform to those sections as they are certified.
