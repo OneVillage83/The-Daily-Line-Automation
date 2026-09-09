@@ -1,6 +1,6 @@
 # The Daily Line Automation — Current Resume Point
 
-Last updated: 2026-09-08 (America/Los_Angeles)  
+Last updated: 2026-09-09 (America/Los_Angeles)  
 Authority: This file is the single exact continuation point for unfinished TDLA work. It does not override architecture/certification authority; it tells the next session where to resume.
 
 ## Current core TDLA state
@@ -19,6 +19,23 @@ Authority: This file is the single exact continuation point for unfinished TDLA 
 - Daily-MLB remains manual-first; later automation must prove equivalence after its final manual production pipeline is certified.
 
 Full A-0 through A-10 rules and evidence remain in the governing architecture files, certification log, and conformance reviews. This resume point intentionally does not duplicate every previously certified invariant.
+
+---
+
+# Cross-project AI engineering / CI execution policy added 2026-09-09
+
+The project now has an explicit cost/compute allocation rule for agentic engineering work:
+
+- Governing policy: `docs/implementation/AI_AGENT_MODEL_AND_CI_EXECUTION_POLICY.md`.
+- `AGENTS.md` section 18.1 links and summarizes the rule.
+- Higher-capability/premium models should perform reasoning-intensive engineering, difficult implementation/debugging, local validation, documentation, commit/PR preparation, and then produce an exact CI handoff.
+- They should **not** normally spend limited premium compute waiting/polling for remote PR checks, GitHub Actions, Docker CI, or public-mirror runs once the code is ready for validation.
+- Lower-cost capable validation models/operators should own sanitized mirror preparation where authorized, remote CI execution, waiting/polling, run-ID/log collection, and evidence recording.
+- Public CI mirrors remain supplemental validation only; private source authority and exact private-SHA -> public-SHA mapping must be preserved.
+- Mechanical/transient CI failures may remain with the lower-cost validation model. Architecture, PIT, migration, evidence integrity, scientific/model-quality, registry/promotion, security, or other substantive failures are escalated back to the higher-capability engineering model with an exact failure package.
+- This policy does **not** weaken any CI, exact-head, Docker, scientific, security, owner-approval, or documentation requirement.
+
+Use this pattern in future bounded Work prompts unless the task has no remote CI component.
 
 ---
 
