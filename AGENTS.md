@@ -223,15 +223,21 @@ Default execution preference:
 
 Agents must read this file and the current resume point before making changes.
 
-### 18.1 Premium-model compute / CI handoff rule
+### 18.1 Premium-model compute / validation / CI handoff rule
 
 The authoritative project-wide policy is `docs/implementation/AI_AGENT_MODEL_AND_CI_EXECUTION_POLICY.md`.
 
 Core rule:
 
-> Higher-capability/premium engineering models are for reasoning-intensive engineering, not routine CI waiting. Once a coherent work unit is code-complete, locally proven as far as practical, documented, committed, and PR-ready, the premium model must produce an exact CI handoff and stop when remaining work is primarily remote PR checks, public-mirror synchronization, GitHub Actions/Docker execution, polling, or evidence collection.
+> Higher-capability/premium engineering models are for reasoning-intensive engineering, not routine exhaustive-validation or CI waiting. Once a coherent work unit is code-complete, focused/locally useful proof is complete, documented, committed, and PR-ready, the premium model must produce an exact validation/CI handoff and stop when remaining work is primarily long-running full-repository tests, full Stats/model-quality suites, exhaustive migration/replay matrices, dependency/audit rehearsals, public-mirror synchronization, GitHub Actions/Docker execution, polling, or evidence collection.
 
-A lower-cost capable validation model/operator should perform those deterministic remote CI operations, preserve exact private-SHA -> public-SHA mapping where a public CI mirror is authorized, collect run evidence, and escalate only substantive architecture/PIT/migration/scientific/registry/security failures back to the higher-capability model.
+Higher-capability models may run focused, targeted, or reasonably fast local tests while those results are actively needed for implementation/debugging. They should not remain active merely because a long full-suite process is still running after the implementation scope is frozen. If such a suite can be stopped safely, record it as `INCOMPLETE — DELEGATED`, not failed, and include the exact command in the handoff.
+
+A lower-cost capable validation model/operator should perform deterministic exhaustive validation and remote CI operations, preserve exact private-SHA -> public-SHA mapping where a public CI mirror is authorized, collect run evidence, and escalate only substantive architecture/PIT/migration/scientific/registry/security failures back to the higher-capability model.
+
+Durable rule:
+
+> **Use premium tests to answer engineering questions. Use lower-cost validation to prove the finished repository exhaustively.**
 
 This rule does not weaken any test, exact-head, Docker, scientific, security, private/public authority, or owner-approval gate. It only assigns work to the most cost-effective capable model.
 
@@ -244,7 +250,7 @@ Read, in order:
 4. `docs/implementation/ARCHITECTURE_CERTIFICATION_LOG.md`
 5. relevant architecture/ADR/progress documents.
 
-For agentic engineering or CI work, also read `docs/implementation/AI_AGENT_MODEL_AND_CI_EXECUTION_POLICY.md`.
+For agentic engineering or validation/CI work, also read `docs/implementation/AI_AGENT_MODEL_AND_CI_EXECUTION_POLICY.md`.
 
 ## 20. Definition of done
 
