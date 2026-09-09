@@ -1,0 +1,19 @@
+{
+  "catalog_version": "dlve-video-contracts.v1",
+  "schemas": [
+    {"schema_version": "publishable-fact-package.v1", "filename": "publishable-fact-package.schema.json", "digest_field": "package_digest"},
+    {"schema_version": "content-candidate.v1", "filename": "content-candidate.schema.json", "digest_field": "candidate_digest"},
+    {"schema_version": "creative-plan.v1", "filename": "creative-plan.schema.json", "digest_field": "creative_plan_digest"},
+    {"schema_version": "script-package.v1", "filename": "script-package.schema.json", "digest_field": "script_digest"},
+    {"schema_version": "fact-integrity-report.v1", "filename": "fact-integrity-report.schema.json", "digest_field": "report_digest"},
+    {"schema_version": "asset-plan.v1", "filename": "asset-plan.schema.json", "digest_field": "asset_plan_digest"},
+    {"schema_version": "asset-manifest.v1", "filename": "asset-manifest.schema.json", "digest_field": "manifest_digest"},
+    {"schema_version": "voice-package.v1", "filename": "voice-package.schema.json", "digest_field": "voice_digest"},
+    {"schema_version": "caption-package.v1", "filename": "caption-package.schema.json", "digest_field": "caption_digest"},
+    {"schema_version": "video-render-spec.v1", "filename": "video-render-spec.schema.json", "digest_field": "render_spec_digest"},
+    {"schema_version": "render-manifest.v1", "filename": "render-manifest.schema.json", "digest_field": "manifest_digest"},
+    {"schema_version": "video-qc-report.v1", "filename": "video-qc-report.schema.json", "digest_field": "report_digest"},
+    {"schema_version": "video-publication-package.v1", "filename": "video-publication-package.schema.json", "digest_field": "package_digest"},
+    {"schema_version": "platform-metric-snapshot.v1", "filename": "platform-metric-snapshot.schema.json", "digest_field": "snapshot_digest"}
+  ]
+}
