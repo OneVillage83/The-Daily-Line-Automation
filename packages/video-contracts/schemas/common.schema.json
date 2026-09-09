@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://thedailyline.bet/schemas/video/v1/common.schema.json",
+  "title": "DLVE Common Types",
+  "type": "object",
+  "$defs": {
+    "Id": {"type": "string", "minLength": 1, "maxLength": 256, "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/+\\-]*$"},
+    "Ref": {"type": "string", "minLength": 1, "maxLength": 1024},
+    "Digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "Timestamp": {"type": "string", "format": "date-time", "pattern": "(?:Z|[+-][0-9]{2}:[0-9]{2})$"},
+    "DecimalString": {"type": "string", "pattern": "^-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?$"},
+    "SafeInteger": {"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991},
+    "Scalar": {"oneOf": [{"type": "string"}, {"$ref": "#/$defs/SafeInteger"}, {"type": "boolean"}, {"type": "null"}]},
+    "StringSet": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "RefSet": {"type": "array", "items": {"$ref": "#/$defs/Ref"}, "uniqueItems": true},
+    "DigestRef": {"type": "object", "additionalProperties": false, "required": ["ref", "digest"], "properties": {"ref": {"$ref": "#/$defs/Ref"}, "digest": {"$ref": "#/$defs/Digest"}}},
+    "ProtectedToken": {"type": "object", "additionalProperties": false, "required": ["token_id", "source_ref", "source_value", "render_value", "normalization_rule_ref", "match_policy"], "properties": {"token_id": {"$ref": "#/$defs/Id"}, "source_ref": {"$ref": "#/$defs/Ref"}, "source_value": {"type": ["string", "integer", "boolean"]}, "render_value": {"type": "string", "minLength": 1}, "normalization_rule_ref": {"$ref": "#/$defs/Ref"}, "match_policy": {"enum": ["EXACT", "CASE_SENSITIVE_EXACT", "TOKEN_BOUNDARY"]}}},
+    "FactTrace": {"type": "object", "additionalProperties": false, "required": ["claim_refs", "fact_refs", "explanation_refs"], "properties": {"claim_refs": {"$ref": "#/$defs/RefSet"}, "fact_refs": {"$ref": "#/$defs/RefSet"}, "explanation_refs": {"$ref": "#/$defs/RefSet"}}}
+  }
+}
