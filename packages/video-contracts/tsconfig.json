@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "resolveJsonModule": true,
+    "types": ["node"],
+    "skipLibCheck": false
+  },
+  "include": ["typescript/src/**/*.ts", "generated/typescript/**/*.ts"]
+}
