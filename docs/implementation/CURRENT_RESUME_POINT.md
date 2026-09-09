@@ -22,20 +22,26 @@ Full A-0 through A-10 rules and evidence remain in the governing architecture fi
 
 ---
 
-# Cross-project AI engineering / CI execution policy added 2026-09-09
+# Cross-project AI engineering / validation / CI execution policy — refined 2026-09-09
 
-The project now has an explicit cost/compute allocation rule for agentic engineering work:
+The project has an explicit cost/compute allocation rule for agentic engineering and validation work:
 
 - Governing policy: `docs/implementation/AI_AGENT_MODEL_AND_CI_EXECUTION_POLICY.md`.
 - `AGENTS.md` section 18.1 links and summarizes the rule.
-- Higher-capability/premium models should perform reasoning-intensive engineering, difficult implementation/debugging, local validation, documentation, commit/PR preparation, and then produce an exact CI handoff.
-- They should **not** normally spend limited premium compute waiting/polling for remote PR checks, GitHub Actions, Docker CI, or public-mirror runs once the code is ready for validation.
-- Lower-cost capable validation models/operators should own sanitized mirror preparation where authorized, remote CI execution, waiting/polling, run-ID/log collection, and evidence recording.
+- Higher-capability/premium models should perform reasoning-intensive engineering, difficult implementation/debugging, focused/locally useful validation, documentation, commit/PR preparation, and then produce an exact validation/CI handoff.
+- They should **not** normally spend limited premium compute waiting/polling for remote PR checks, GitHub Actions, Docker CI, or public-mirror runs once code is ready for validation.
+- The same rule now explicitly applies to **long-running local exhaustive validation** after implementation scope is frozen.
+- Premium models may run focused, targeted, or reasonably fast local tests when those results are actively needed to implement/debug.
+- Once the state is effectively `implementation frozen; full suite still running; no current failure to diagnose`, the remaining full-suite work is validation-operator work.
+- Full repository regression suites, full Stats/model-quality suites, exhaustive migration/replay matrices, long certification/E2E runs, Docker certification, and routine dependency/audit rehearsals should normally be delegated to a lower-cost capable validation model.
+- If a long-running local suite can be stopped safely, record it as `INCOMPLETE — DELEGATED`, not failed, and pass the exact command/result requirement to the validation model.
+- Lower-cost capable validation models/operators should own exhaustive local validation, sanitized mirror preparation where authorized, remote CI execution, waiting/polling, run-ID/log collection, and evidence recording.
 - Public CI mirrors remain supplemental validation only; private source authority and exact private-SHA -> public-SHA mapping must be preserved.
-- Mechanical/transient CI failures may remain with the lower-cost validation model. Architecture, PIT, migration, evidence integrity, scientific/model-quality, registry/promotion, security, or other substantive failures are escalated back to the higher-capability engineering model with an exact failure package.
-- This policy does **not** weaken any CI, exact-head, Docker, scientific, security, owner-approval, or documentation requirement.
+- Mechanical/transient validation failures may remain with the lower-cost validation model. Architecture, PIT, migration, evidence integrity, scientific/model-quality, registry/promotion, security, or other substantive failures are escalated back to the higher-capability engineering model with an exact failure package.
+- Durable rule: **Use premium tests to answer engineering questions. Use lower-cost validation to prove the finished repository exhaustively.**
+- This policy does **not** weaken any test, CI, exact-head, Docker, scientific, security, owner-approval, or documentation requirement.
 
-Use this pattern in future bounded Work prompts unless the task has no remote CI component.
+Use this pattern in future bounded Work prompts unless the task has no meaningful exhaustive-validation or remote-CI component.
 
 ---
 
