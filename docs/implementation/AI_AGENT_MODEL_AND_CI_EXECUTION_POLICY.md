@@ -2,21 +2,23 @@
 
 Status: **AUTHORITATIVE OPERATING POLICY**  
 Effective: 2026-09-09T00:56:00-07:00 (America/Los_Angeles)  
+Last refined: 2026-09-09T08:24:19-07:00 (America/Los_Angeles)  
 Scope: The Daily Line engineering work across TDLA and the Daily-* repositories, including Daily-MLB, Daily-Data-Core, Daily-NFL, Daily-NCAAF, website integration, and later automation/video implementation.
 
 ## 1. Purpose
 
 The Daily Line uses multiple agent/model capability tiers. High-capability models are scarce engineering compute and must be spent on work that benefits from their reasoning quality: authority reconstruction, architecture, difficult implementation, scientific/PIT reasoning, migration semantics, hard debugging, and cross-repository integration.
 
-They must **not** be used as expensive CI waiters.
+They must **not** be used as expensive CI or exhaustive-validation waiters.
 
 The standard production-development loop is therefore:
 
 ```text
 HIGH-CAPABILITY ENGINEERING MODEL
-  -> implement / debug / locally validate / commit / prepare PR
-  -> produce exact CI handoff
+  -> implement / debug / focused validation / commit / prepare PR
+  -> produce exact validation/CI handoff
 LOWER-COST VALIDATION MODEL
+  -> run exhaustive local suites as required
   -> mirror/push as required
   -> run remote PR/CI checks
   -> wait/poll
@@ -29,13 +31,13 @@ This policy changes **execution allocation only**. It does not lower architectur
 
 ## 2. Core rule
 
-> **Higher-capability models must not spend their limited compute running routine remote PR checks and waiting/polling for GitHub Actions or equivalent CI to finish when a lower-cost model can perform the same operational work safely.**
+> **Higher-capability models must not spend their limited compute running routine remote PR checks, waiting/polling for GitHub Actions, or sitting on long-running exhaustive local validation when a lower-cost model can perform the same operational work safely.**
 
 The high-capability model should normally stop at:
 
-> **code complete + locally proven as far as practical + documented + authoritative private commit/PR prepared + exact CI handoff produced.**
+> **code complete + focused/locally useful proof complete + documented + authoritative private commit/PR prepared + exact validation/CI handoff produced.**
 
-The lower-cost validation model then owns routine remote validation and waiting.
+The lower-cost validation model then owns routine exhaustive validation, remote validation, and waiting.
 
 ## 3. What the high-capability engineering model should own
 
@@ -57,24 +59,28 @@ Use the strongest model available when the work materially benefits from deeper 
 - code changes where an incorrect first pass would create substantial rework;
 - final diff/architecture review before handoff.
 
-The high-capability model should also run local/focused tests while it is actively using those results to implement or debug. This policy does **not** prohibit local testing by the engineering model.
+The high-capability model should run **focused, targeted, and reasonably fast local tests** while it is actively using those results to implement or debug. Testing is a reasoning instrument for the engineering model; it is not a reason to keep premium compute occupied after the implementation scope is frozen.
 
 ## 4. High-capability model stop boundary
 
 Once the coherent coding unit is complete, the high-capability model should:
 
-1. run locally efficient validation required to establish that the implementation is ready for remote CI;
+1. run focused/locally efficient validation required to establish that the implementation is ready for exhaustive validation;
 2. inspect the final diff;
 3. verify no unrelated user work was overwritten;
 4. verify no secrets/private/licensed artifacts are about to cross an inappropriate boundary;
 5. update the authoritative documentation/handoff;
 6. create the authoritative private commit;
 7. prepare the PR or merge candidate when appropriate;
-8. produce the CI handoff defined below;
-9. **stop** if the remaining work is primarily remote execution or waiting.
+8. produce the validation/CI handoff defined below;
+9. **stop** if the remaining work is primarily exhaustive validation, remote execution, or waiting.
 
 The high-capability model should not remain active merely to:
 
+- wait several minutes on a full repository regression suite whose result is no longer needed for active implementation reasoning;
+- wait on a full Stats/model-quality suite after implementation scope is frozen;
+- run a long migration/replay matrix solely for certification evidence;
+- wait on long dependency/security/audit rehearsals that a validation model can execute identically;
 - push a sanitized CI mirror;
 - click/run GitHub Actions;
 - wait for runners;
@@ -84,28 +90,61 @@ The high-capability model should not remain active merely to:
 - collect routine job IDs/log links;
 - record a straightforward pass result.
 
-Those are validation-operator duties.
+Those are validation-operator duties once active engineering reasoning is no longer required.
+
+### 4.1 Long-running local validation cutoff
+
+The same compute-allocation principle used for remote CI also applies to **local exhaustive validation**.
+
+The high-capability model may start or run a broader suite when its result is immediately useful for active diagnosis, when the suite is reasonably fast, or when repository state makes handoff impractical. However, once the model reaches a state equivalent to:
+
+> `implementation scope frozen; long-running suite active; no current failure to diagnose; waiting for completion`
+
+it should treat that work as validation-operator work.
+
+If a long-running local suite can be stopped safely without corrupting repository state, it may be stopped and recorded as `INCOMPLETE — DELEGATED`, not failed. The validation handoff must then identify the exact command and required result for the lower-cost model.
+
+Typical validation work to delegate includes:
+
+- full repository pytest/regression suites;
+- full Stats/model-quality suites;
+- exhaustive migration matrices;
+- exhaustive replay/backfill compatibility matrices;
+- long integration/end-to-end certification suites;
+- Docker build/runtime certification;
+- dependency/audit/locked-install rehearsals when they are routine evidence collection rather than active diagnosis;
+- remote CI and all associated polling.
+
+A broad suite may remain with the high-capability model only when doing so materially advances active reasoning or is clearly cheaper than a context/model handoff.
+
+Durable rule:
+
+> **Use premium tests to answer engineering questions. Use lower-cost validation to prove the finished repository exhaustively.**
 
 ## 5. Lower-cost validation model responsibilities
 
-The lower-cost validation model/operator owns routine CI operations after receiving a complete handoff:
+The lower-cost validation model/operator owns routine exhaustive and CI operations after receiving a complete handoff:
 
 - verify the exact authoritative private SHA;
 - verify PR/branch identity;
-- read the repository-specific CI/public-mirror contract;
+- read the repository-specific validation/CI/public-mirror contract;
+- run required full local repository suites;
+- run required full Stats/model-quality suites;
+- run migration/replay/integration matrices delegated by the engineering model;
+- run routine dependency, locked-install, and security audits;
 - prepare/push the permitted sanitized mirror when required;
 - preserve the exact private-SHA -> public-SHA mapping;
 - confirm tested-code equivalence and document exclusions;
 - trigger required GitHub Actions/workflows;
 - execute Docker CI where the established workflow supports it;
-- wait/poll for workflow completion;
+- wait/poll for local or remote validation completion;
 - collect workflow IDs, run IDs, job results, and relevant logs;
 - classify failures;
 - retry clearly transient infrastructure failures when policy permits;
 - update the evidence ledger/handoff with exact results;
 - return substantive failures to the high-capability model.
 
-A lower-cost validation model must not silently alter scientific or production semantics simply to make CI green.
+A lower-cost validation model must not silently alter scientific or production semantics simply to make validation green.
 
 ## 6. Public CI mirror rule
 
@@ -150,7 +189,7 @@ Every public-CI evidence record must identify, at minimum:
 
 Secrets, credentials, licensed/private data, proprietary evidence, and other disallowed material must never be copied merely to obtain public CI capacity.
 
-## 7. Mandatory CI handoff from the high-capability model
+## 7. Mandatory validation/CI handoff from the high-capability model
 
 Before stopping, the engineering model must leave a durable handoff containing:
 
@@ -160,7 +199,8 @@ Before stopping, the engineering model must leave a durable handoff containing:
 - exact authoritative private SHA;
 - parent/base SHA when relevant;
 - PR number/status when relevant;
-- governing CI/mirror contract;
+- governing validation/CI/mirror contract;
+- exact full local suites still required;
 - required workflows/checks;
 - required Docker validation;
 - expected test suites;
@@ -168,15 +208,16 @@ Before stopping, the engineering model must leave a durable handoff containing:
 - mirror exclusions/sanitization requirements;
 - scientific permissions that must remain unchanged;
 - PIT/evidence/registry/security invariants that must not be weakened;
-- locally executed validation and exact result;
+- locally executed focused validation and exact result;
+- any long-running validation intentionally stopped/delegated and its exact command;
 - expected success condition;
 - explicit failure-routing instructions.
 
-The lower-cost validation model should not have to reconstruct architecture merely to run CI.
+The lower-cost validation model should not have to reconstruct architecture merely to run exhaustive validation or CI.
 
 ## 8. Failure-routing policy
 
-Remote CI failures are routed by complexity rather than by whichever model happens to be active.
+Validation failures are routed by complexity rather than by whichever model happens to be active.
 
 ### Lower-cost model may handle
 
@@ -216,14 +257,14 @@ The high-capability model should return to a completed coding workstream only wh
 
 - exact private SHA;
 - exact mirror SHA if applicable;
-- workflow/run/job ID;
+- local command or workflow/run/job ID;
 - failing command/test;
 - relevant log excerpt;
 - failure classification attempted;
 - reproduction information;
 - what was already ruled out.
 
-The high-capability model should not be asked to spend compute rediscovering CI state that a lower-cost validation model can summarize precisely.
+The high-capability model should not be asked to spend compute rediscovering validation state that a lower-cost validation model can summarize precisely.
 
 ## 10. Parallel execution
 
@@ -233,7 +274,7 @@ Example:
 
 ```text
 TDL-01 implementation complete
-  -> lower-cost model runs TDL-01-CI
+  -> lower-cost model runs TDL-01 exhaustive validation / CI
 
 while
 
@@ -244,16 +285,16 @@ This is permitted only when:
 
 - the dependency on the provisional parent is explicit;
 - the parent is not falsely called certified;
-- the descendant can be safely rebased/reconciled if parent CI finds a substantive defect;
+- the descendant can be safely rebased/reconciled if parent validation finds a substantive defect;
 - repository merge/owner-approval rules remain respected.
 
 ## 11. Exceptions
 
-A higher-capability model may interact directly with remote CI when doing so is part of active diagnosis and materially reduces uncertainty, for example when a difficult environment-specific failure only appears in CI and the model must inspect one immediate rerun after a targeted repair.
+A higher-capability model may run broad local validation or interact directly with remote CI when doing so is part of active diagnosis and materially reduces uncertainty, for example when a difficult environment-specific failure only appears in CI or a full suite is needed immediately to locate a cross-cutting regression after a foundational schema change.
 
 This is an exception, not the default operating mode.
 
-Even then, prolonged waiting/polling should be handed back to the validation model whenever practical.
+Even then, prolonged validation waiting/polling should be handed back to the validation model whenever practical.
 
 ## 12. Model naming and future-proofing
 
@@ -263,11 +304,11 @@ Current examples may include a highest-capability engineering model such as Astr
 
 The durable rule is:
 
-> Spend premium reasoning compute on reasoning-intensive engineering. Spend lower-cost compute on deterministic CI operations and waiting.
+> Spend premium reasoning compute on reasoning-intensive engineering. Spend lower-cost compute on deterministic exhaustive validation, CI operations, and waiting.
 
 ## 13. Relationship to quality gates
 
-This policy does not authorize skipping CI.
+This policy does not authorize skipping validation or CI.
 
 It does not change:
 
@@ -290,10 +331,10 @@ Use this pattern for future bounded Daily Line implementation jobs:
 
 ```text
 A. HIGH-CAPABILITY IMPLEMENTATION PASS
-   authority -> implementation -> local validation -> documentation -> commit/PR -> CI handoff -> STOP
+   authority -> implementation -> focused local validation -> documentation -> commit/PR -> validation/CI handoff -> STOP
 
-B. LOWER-COST CI PASS
-   verify SHA -> mirror if authorized -> push -> remote CI/Docker -> wait -> evidence -> classify
+B. LOWER-COST VALIDATION PASS
+   verify SHA -> exhaustive local suites -> mirror if authorized -> push -> remote CI/Docker -> wait -> evidence -> classify
 
 C1. PASS
    record evidence -> advance/certify according to authority
@@ -305,4 +346,4 @@ C3. SUBSTANTIVE FAILURE
    exact failure handoff -> high-capability engineering model
 ```
 
-This pattern should be included in future Work prompts unless the task has no remote CI component.
+This pattern should be included in future Work prompts unless the task has no meaningful exhaustive-validation or remote-CI component.
