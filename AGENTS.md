@@ -223,6 +223,18 @@ Default execution preference:
 
 Agents must read this file and the current resume point before making changes.
 
+### 18.1 Premium-model compute / CI handoff rule
+
+The authoritative project-wide policy is `docs/implementation/AI_AGENT_MODEL_AND_CI_EXECUTION_POLICY.md`.
+
+Core rule:
+
+> Higher-capability/premium engineering models are for reasoning-intensive engineering, not routine CI waiting. Once a coherent work unit is code-complete, locally proven as far as practical, documented, committed, and PR-ready, the premium model must produce an exact CI handoff and stop when remaining work is primarily remote PR checks, public-mirror synchronization, GitHub Actions/Docker execution, polling, or evidence collection.
+
+A lower-cost capable validation model/operator should perform those deterministic remote CI operations, preserve exact private-SHA -> public-SHA mapping where a public CI mirror is authorized, collect run evidence, and escalate only substantive architecture/PIT/migration/scientific/registry/security failures back to the higher-capability model.
+
+This rule does not weaken any test, exact-head, Docker, scientific, security, private/public authority, or owner-approval gate. It only assigns work to the most cost-effective capable model.
+
 ## 19. Before beginning work
 
 Read, in order:
@@ -231,6 +243,8 @@ Read, in order:
 3. `docs/implementation/CURRENT_RESUME_POINT.md`
 4. `docs/implementation/ARCHITECTURE_CERTIFICATION_LOG.md`
 5. relevant architecture/ADR/progress documents.
+
+For agentic engineering or CI work, also read `docs/implementation/AI_AGENT_MODEL_AND_CI_EXECUTION_POLICY.md`.
 
 ## 20. Definition of done
 
