@@ -2,13 +2,19 @@
 
 Verified against current OpenAI platform documentation on 2026-09-15.
 
-DLADS is multi-provider. This document defines the OpenAI-specific adapter only; see `MULTI_PROVIDER_EXECUTION_STRATEGY.md` for provider selection and Grok Bot/xAI lanes.
+DLADS is multi-provider. This document defines the optional OpenAI-specific supervision adapter only; see `MULTI_PROVIDER_EXECUTION_STRATEGY.md` and `CODEX_SUPERVISION_LOOP.md`.
+
+## Core rule
+
+**OpenAI API agents are not the Daily Line coding lane. Codex under ChatGPT Pro remains the sole code-changing executor.**
+
+If OpenAI Agents API is added later, its job is to automate supervision around Codex: handoff ingestion, status reconciliation, review-packet generation, classification, notifications, and next-prompt drafting.
 
 ## Current platform primitives
 
-OpenAI's Agents API supports reusable agents with named instructions/model configuration and explicit multi-agent configuration. Sessions can create/coordinate subagents. OpenAI Skills are versioned reusable workflow bundles built around `SKILL.md` plus resources.
+OpenAI's Agents API supports reusable agents with named instructions/model configuration and coordinated subagents. OpenAI Skills are reusable workflow bundles built around `SKILL.md` plus resources.
 
-DLADS is intentionally usable before any runtime publication: Codex reads Git-controlled instructions/state directly.
+DLADS is intentionally usable before any runtime publication.
 
 ## Provider-neutral mapping
 
@@ -20,10 +26,9 @@ Internal DLADS manifest -> OpenAI runtime concept:
 | `name` | reusable agent `name` |
 | `instructions_file` | agent `instructions` |
 | `model_policy` | selected API `model` + reasoning configuration |
-| `allow_subagents` | `multi_agent.enabled` |
-| `max_concurrent_subagents` | multi-agent concurrency setting |
-| Codex `SKILL.md` bundle | Skills API skill/version |
-| `capabilities` | persisted tools/MCP/runtime tool policy |
+| `allow_subagents` | multi-agent coordination setting |
+| Codex `SKILL.md` bundle | reusable Skill/workflow |
+| `capabilities` | read/review/notification/coordination tools |
 | program state | Git/Command data, **not** hidden provider memory |
 | provider agent/session IDs | metadata only |
 
@@ -39,7 +44,7 @@ Git agent version
   -> dry-run/eval gate
   -> permission/tool review
   -> cost policy review
-  -> publish candidate runtime agent/skill
+  -> publish candidate supervision agent/skill
   -> staging/shadow session
   -> acceptance evidence
   -> make version active
@@ -53,11 +58,13 @@ Never commit API keys or provider session credentials. Runtime credentials belon
 
 Initial recommended split:
 
-- Codex/ChatGPT subscription workflows: heavy engineering implementation where practical;
-- Grok Bot subscription: persistent worker, QA, documentation, and validation tasks where it is capable;
-- Agents API: supervisor/routing, durable service integration, scheduled/API-driven work, and bounded specialist execution when API autonomy is useful;
-- low-cost OpenAI models: reconciliation, routing, formatting, and deterministic support tasks;
-- flagship OpenAI models: escalate complex architecture/modeling/debugging only when needed.
+- **Codex/ChatGPT Pro:** all engineering implementation and high-value architecture/scientific review;
+- **Grok Bot subscription:** persistent Codex liaison/monitoring where useful;
+- **OpenAI Agents API:** optional programmatic supervisor/relay when automation convenience justifies usage cost;
+- **low-cost OpenAI models:** routine handoff parsing, classification, status reconciliation, formatting, and next-prompt drafting;
+- **stronger OpenAI reasoning model:** only for substantive review that cannot be handled adequately by the interactive ChatGPT Pro loop.
+
+The API supervisor should consume compact Codex handoff packets rather than whole repository context wherever possible.
 
 ## Runtime state rule
 
@@ -65,13 +72,16 @@ GitHub documentation and repository evidence remain the source of program truth.
 
 ## Initial OpenAI runtime agents
 
-When OpenAI API publication is authorized, publish in this order:
+If API publication is authorized, publish only non-coding roles first:
 
-1. Daily Line Supervisor — read-first, no mutation tools;
-2. QA/Audit — read-only evidence review;
-3. Documentation — scoped Git/document writes;
-4. Engineering — scoped repository write tools;
-5. Modeling — scoped model/research tools;
-6. Validation/CI — CI/log/status tools.
+1. **Codex Liaison** — read Codex handoffs, classify next state, draft next Codex prompt;
+2. **Daily Line Supervisor** — read-first program routing/reconciliation;
+3. **QA/Audit Review** — read-only evidence review;
+4. **Documentation/State** — coordination-only status updates;
+5. **Validation/CI Monitor** — CI/log/status monitoring and evidence collection.
 
-Only after read-first behavior is proven should any agent receive tools that can create state-changing production ActionRequests.
+Engineering Review and Modeling Review may be published as read-only review/prompt-drafting roles if useful, but they must not receive repository code-write tools.
+
+## Write boundary
+
+No OpenAI API agent in DLADS receives permission to edit Daily Line implementation source/tests/migrations/model code under the default design. If that policy ever changes, it requires a new owner-approved ADR rather than an implicit tool grant.
