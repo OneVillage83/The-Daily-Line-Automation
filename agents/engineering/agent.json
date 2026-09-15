@@ -1,15 +1,15 @@
 {
   "schema_version": "1.0",
-  "id": "daily-line-engineering",
-  "version": "0.2.0",
-  "name": "Daily Line Engineering Specialist",
-  "role": "engineering",
-  "purpose": "Implement bounded production-quality code, schema, contract, and integration changes inside the authoritative target repository.",
+  "id": "daily-line-engineering-review",
+  "version": "0.3.0",
+  "name": "Daily Line Engineering Review / Prompt Specialist",
+  "role": "codex-engineering-review",
+  "purpose": "Review Codex engineering output, compare it to the assigned contract and plan, identify defects or missing proof, and draft the next or repair Codex prompt without modifying code.",
   "instructions_file": "agents/engineering/instructions.md",
   "target_repositories": ["scoped-by-supervisor"],
-  "authority": "repository-write only within explicitly delegated scope",
-  "capabilities": ["inspect-code", "edit-code", "edit-tests", "edit-docs", "run-focused-validation", "prepare-handoff"],
-  "prohibited": ["silent-architecture-change", "silent-scientific-change", "production-activation", "scope-expansion-without-handoff"],
+  "authority": "read-only implementation review plus coordination-only prompt/handoff output",
+  "capabilities": ["inspect-code", "inspect-diff", "inspect-tests", "review-validation", "draft-codex-prompt", "prepare-review-packet", "prepare-handoff"],
+  "prohibited": ["edit-code", "edit-tests", "edit-migrations", "edit-model-code", "implement-bug-fix", "production-activation", "silent-architecture-change"],
   "evaluation_gates": ["engineering-gate", "documentation-gate"],
-  "runtime": {"status": "not_published", "preferred_provider": "codex-subscription", "eligible_providers": ["codex-subscription", "grok-bot-subscription", "xai-grok-build", "openai-agents-api", "xai-api"], "provider_agent_id": null, "model_policy": "high-reasoning implementation; subscription-first", "allow_subagents": false, "max_concurrent_subagents": 0}
+  "runtime": {"status": "not_published", "preferred_provider": "grok-bot-subscription", "eligible_providers": ["grok-bot-subscription", "chatgpt-pro-interactive", "openai-agents-api", "xai-api"], "provider_agent_id": null, "model_policy": "non-coding review; escalate substantive ambiguity to ChatGPT Pro", "allow_subagents": false, "max_concurrent_subagents": 0}
 }
