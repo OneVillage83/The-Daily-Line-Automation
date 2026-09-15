@@ -7,16 +7,24 @@ INTAKE
   -> LOAD_PROGRAM_STATE
   -> RECONCILE_REPO_TRUTH
   -> SELECT_TARGET
-  -> AUTHORIZE_SCOPE
-  -> PLAN_BOUNDED_WORK
-  -> IMPLEMENT
-  -> FOCUSED_VALIDATE
-  -> QA_AUDIT
-  -> EXHAUSTIVE_VALIDATION_OR_HANDOFF
-  -> DOCUMENT
-  -> UPDATE_PROGRAM_STATE
-  -> COMPLETE / BLOCKED / ESCALATED
+  -> BUILD_CODEX_PROMPT
+  -> CODEX_EXECUTES
+  -> INGEST_CODEX_HANDOFF
+  -> CLASSIFY_RESULT
+       |-> SAFE_CONTINUE ---------> BUILD_NEXT_CODEX_PROMPT
+       |-> REVIEW_REQUIRED -------> CHATGPT_PRO_REVIEW
+       |-> OWNER_DECISION_REQUIRED -> USER_DECISION
+       `-> BLOCKED ---------------> FAILURE/DEPENDENCY HANDOFF
+  -> MONITOR_VALIDATION_IF_NEEDED
+  -> UPDATE_COORDINATION_STATE
+  -> COMPLETE / CONTINUE / BLOCKED
 ```
+
+## Rule zero
+
+Codex is the only component in this loop that changes source code, tests, migrations, model code, or production configuration.
+
+DLADS agents/bots supervise Codex. They do not become alternate programmers.
 
 ## 1. Intake
 
@@ -25,10 +33,10 @@ Classify the request as one of:
 - `CONTINUE_PROGRAM`
 - `CONTINUE_REPOSITORY`
 - `IMPLEMENT_SPECIFIC_TASK`
-- `AUDIT`
-- `VALIDATE`
-- `ARCHITECTURE`
-- `INCIDENT/REPAIR`
+- `AUDIT_CODEX_RESULT`
+- `MONITOR_VALIDATION`
+- `ARCHITECTURE_REVIEW`
+- `INCIDENT/REPAIR_PROMPT`
 
 Explicit user scope wins over automatic priority selection.
 
@@ -38,14 +46,15 @@ Read:
 
 1. root `AGENTS.md`;
 2. `docs/agent-system/README.md`;
-3. `ACTIVE_EXECUTION_PLAN.md`;
-4. `state/program_state.json`;
-5. `REPOSITORY_REGISTRY.md`;
-6. relevant program roadmap/evaluation docs.
+3. `CODEX_SUPERVISION_LOOP.md`;
+4. `ACTIVE_EXECUTION_PLAN.md`;
+5. `state/program_state.json`;
+6. `REPOSITORY_REGISTRY.md`;
+7. relevant roadmap/evaluation docs.
 
 ## 3. Reconcile target repository truth
 
-Before any write, inspect the target repository's:
+Before drafting a Codex instruction, inspect the target repository's:
 
 - default branch HEAD;
 - `AGENTS.md` / local instruction hierarchy;
@@ -53,13 +62,13 @@ Before any write, inspect the target repository's:
 - relevant open PR/branch evidence;
 - current tests/CI evidence where material.
 
-Never infer current state only from DLADS state.
+Never infer current state only from DLADS state or chat memory.
 
 ## 4. Select target
 
 For `CONTINUE_PROGRAM`, choose the highest-priority **unblocked** task under `ACTIVE_EXECUTION_PLAN.md`.
 
-Selection must record:
+Selection records:
 
 - target repository;
 - exact entry branch/SHA;
@@ -69,77 +78,109 @@ Selection must record:
 - non-goals;
 - dependencies;
 - acceptance criteria;
-- validation owner.
+- review/validation lane.
 
-## 5. Authorize scope
+## 5. Build the Codex prompt
 
-Determine which specialist roles are required. Grant only the minimum conceptual capability needed. A specialist does not inherit the supervisor's entire authority.
+The supervisor/liaison produces an exact bounded Codex instruction containing:
 
-Examples:
+- target repository and entry state;
+- documents Codex must read first;
+- objective;
+- allowed scope;
+- explicit non-goals;
+- architectural/scientific constraints;
+- acceptance criteria;
+- focused validation expectations;
+- required handoff fields;
+- stop/escalation conditions.
 
-- contract/schema change -> Engineering + QA/Audit + Documentation;
-- statistical model work -> Modeling + QA/Audit + Validation/CI;
-- status-only reconciliation -> Supervisor + QA/Audit/Documentation, no implementation writer.
+This prompt is the principal automation output.
 
-## 6. Plan bounded work
+## 6. Codex executes
 
-Write a short task plan before implementation when work is non-trivial. Prefer small independently reviewable milestones over giant prompts.
+Codex performs all implementation work under the target repository's local rules.
 
-The task plan must identify what **will not** be changed.
+Codex should:
 
-## 7. Implement
+- edit implementation/test/migration/model/config files as authorized;
+- run focused engineering validation;
+- update repo-local engineering documentation required by that repository;
+- produce a compact handoff when the bounded unit ends or blocks.
 
-Codex or the engineering specialist works inside the target repository and obeys that repository's local instructions. Cross-repo edits require separate bounded scopes unless an atomic contract migration genuinely requires coordinated changes.
+## 7. Ingest the Codex handoff
 
-## 8. Focused validation
+The liaison reads Codex's handoff, Git diff/PR state, and relevant test/CI evidence.
 
-Premium/high-reasoning engineering compute should run tests needed to answer active implementation/debugging questions. Do not spend it merely waiting for exhaustive deterministic suites once the implementation is frozen.
+It prepares a review packet containing:
 
-## 9. QA/Audit
+- assignment vs delivered result;
+- files/components changed;
+- proof run;
+- unresolved failures/questions;
+- deviations from scope/plan;
+- recommended classification;
+- draft next Codex prompt.
 
-An independent audit checks:
+The liaison does not modify implementation to repair what it finds.
 
-- contract/authority conformity;
-- temporal/PIT correctness;
-- leakage risks;
-- migration/replay behavior where relevant;
-- failure/degradation behavior;
-- changed tests vs real behavior;
-- evidence and documentation consistency;
-- accidental scope widening.
+## 8. Classify the result
 
-QA may return `PASS`, `PASS_WITH_LIMITS`, or `BLOCKED` with exact evidence.
+### `SAFE_CONTINUE`
+Use when the next action is a mechanical continuation already authorized by the governing plan and no architecture/scientific/authority ambiguity exists. Draft/queue the next Codex prompt.
 
-## 10. Exhaustive validation / CI handoff
+### `REVIEW_REQUIRED`
+Use when architecture, scientific/modeling semantics, cross-repo contracts, unexpected failures, plan deviations, or stronger completion claims need ChatGPT Pro review.
 
-Use the repository's existing validation policy. When remaining work is deterministic long-running proof, produce an exact handoff to the Validation/CI role rather than keeping a premium engineering agent alive to poll/wait.
+### `OWNER_DECISION_REQUIRED`
+Use for product-priority, spend, production/release/merge authority, policy/risk, or other owner-only choices.
 
-## 11. Documentation
+### `BLOCKED`
+Use for unresolved dependencies, failed gates, missing evidence, unavailable systems, or authority conflicts.
 
-A completed material change must update the target repository's required change journal/status/resume/certification docs. Program-level status is then updated only after target-repo evidence exists.
+## 9. ChatGPT Pro review
 
-## 12. Program-state update
+When `REVIEW_REQUIRED`, ChatGPT Pro reviews the compact handoff/evidence rather than recreating the entire coding session.
 
-Update `state/program_state.json` when any of these change:
+ChatGPT Pro returns one of:
 
-- repository exact head used as a frozen/program checkpoint;
-- milestone state;
-- blocker;
-- exact next task;
-- cross-repo dependency;
-- program phase/priority.
+- approved next Codex prompt;
+- revised Codex prompt;
+- additional evidence request;
+- architecture/science decision;
+- escalation to owner;
+- stop/block disposition.
 
-Do not copy every implementation detail into program state. Link to the authoritative target document.
+This is the automated version of the prior manual back-and-forth: Codex does work, the supervisory layer packages it, ChatGPT decides how to steer Codex next.
+
+## 10. Validation monitoring
+
+After Codex freezes an implementation unit, a non-coding monitor may run or watch already-authorized deterministic validation/CI and collect evidence.
+
+It may not repair failures. Mechanical failures are reported as retry candidates; substantive failures return to ChatGPT/Codex as repair prompts.
+
+## 11. Documentation and coordination state
+
+Codex owns repo-local engineering documentation that is part of its implementation task.
+
+The supervisory layer may update DLADS coordination-only artifacts:
+
+- program state;
+- active execution pointer;
+- review packets;
+- cross-repo dependency/status records.
+
+Program-level status changes only after authoritative target-repo evidence exists.
 
 ## Stop conditions
 
-Stop and mark `BLOCKED` or `ESCALATED` when:
+Stop and mark `BLOCKED`/`REVIEW_REQUIRED`/`OWNER_DECISION_REQUIRED` when:
 
 - target repository truth cannot be resolved;
-- required user/owner authorization is absent;
+- required authorization is absent;
 - science/architecture conflict is unresolved;
-- an external dependency prevents valid proof;
-- requested work would bypass a certified authority boundary;
-- evidence is insufficient to claim the requested completion state.
+- external dependency prevents valid proof;
+- continuing would bypass a certified authority boundary;
+- evidence is insufficient to support the next status claim.
 
-A blocked result must still leave an exact next step.
+A stop result must still include an exact next Codex prompt or exact human decision/evidence needed.
