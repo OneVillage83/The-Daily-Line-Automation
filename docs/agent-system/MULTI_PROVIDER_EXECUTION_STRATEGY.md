@@ -1,129 +1,154 @@
 # DLADS Multi-Provider Execution Strategy
 
-Established: 2026-09-15
+Established: 2026-09-15  
+Corrected: 2026-09-15 — **Codex-only coding rule**
 
 ## Goal
 
-Maximize engineering quality per dollar by separating **project truth and workflow contracts** from the model/provider that performs a task.
+Maximize engineering quality per dollar by separating **coding** from **supervision**.
 
-DLADS is provider-neutral. GitHub remains the durable coordination layer; Codex, ChatGPT Work, Grok Bot, OpenAI Agents API, xAI API/Grok Build, and future providers are execution lanes.
+- **Codex under the user's ChatGPT Pro subscription is the sole code-changing executor.**
+- ChatGPT Pro supplies high-reasoning architecture/review/prompt guidance.
+- Grok Bot or other inexpensive bots may supervise, monitor, summarize, and draft prompts, but they do not code.
+- APIs are optional convenience layers for programmatic supervision, not required coding capacity.
+
+GitHub/DLADS remains the durable coordination layer.
 
 ## Current execution lanes
 
-### 1. ChatGPT Pro / Codex subscription lane
+### 1. ChatGPT Pro / Codex subscription lane — coding + difficult reasoning
+
+Codex owns:
+- all source-code changes;
+- all test-code changes;
+- migrations;
+- model/training/calibration/ensemble code;
+- refactors and bug fixes;
+- implementation-focused validation;
+- repo-local engineering documentation tied to the code change.
+
+ChatGPT Pro owns:
+- architecture review;
+- scientific/modeling reasoning;
+- reviewing Codex handoffs;
+- diagnosing ambiguous/substantive failures;
+- deciding how to steer Codex next;
+- crafting/refining difficult Codex prompts.
+
+Economic rule: use the paid Pro/Codex allowance for actual engineering rather than buying duplicate API coding compute.
+
+### 2. SuperGrok / Grok Bot subscription lane — non-coding liaison/monitor
 
 Best use:
-- high-reasoning architecture;
-- difficult repository implementation/refactors;
-- cross-repository contract work;
-- scientific/modeling design;
-- debugging substantive failures;
-- owner-interactive development.
+- persistent Codex-handoff monitoring;
+- repository status reconciliation;
+- summarizing Codex output/diffs/PR state;
+- checking work against the assigned plan;
+- drafting the next Codex prompt;
+- preparing ChatGPT review packets;
+- watching CI/checks/logs;
+- updating coordination-only DLADS state;
+- notifying the user when a review/decision is needed.
 
-Economic rule: prefer subscription Codex/Work for heavy engineering while included plan usage is available before moving identical work to usage-billed APIs.
+Grok Bot must **not**:
+- implement/refactor code;
+- edit tests/migrations/model code;
+- fix bugs itself;
+- make production configuration changes;
+- silently resolve architecture/scientific decisions.
 
-### 2. SuperGrok / Grok Bot subscription lane
+If Grok Bot discovers a defect, it writes a **Codex repair prompt**.
 
-Best use:
-- persistent long-running worker tasks;
-- repository audits/reconciliation;
-- documentation/status synchronization;
-- repetitive bounded implementation;
-- browser/tool workflows;
-- CI monitoring/evidence collection;
-- independent second-pass QA;
-- multiple parallel bots for independent scopes.
+Product behavior to remember:
+- Grok Bot can keep persistent Bots/routines;
+- its cloud computer can continue working while the user's laptop is closed;
+- Bots share one cloud computer per user;
+- subscription usage is bounded by the provider's current allowance/extra-usage rules.
 
-Important product behavior:
-- SuperGrok includes Grok Bot access;
-- Grok Bot receives included weekly usage, not unlimited usage;
-- additional usage may be billed based on token cost;
-- Bots share one persistent cloud computer per user, not one isolated machine per bot;
-- the cloud computer can remain active while the user's laptop is closed.
+### 3. OpenAI Agents API lane — optional automated supervisor/relay
 
-Grok Bot should clone/use the same Git repositories and DLADS handoff contracts rather than become a separate hidden source of program state.
+Best use only if we want the back-and-forth fully programmatic:
+- ingest a compact Codex handoff;
+- classify `SAFE_CONTINUE` vs `REVIEW_REQUIRED`;
+- generate the next Codex prompt;
+- create review packets/notifications;
+- update coordination state;
+- trigger user/ChatGPT review at defined gates.
 
-### 3. OpenAI Agents API lane
+It should **not** be used to write Daily Line code while Codex/Pro remains the coding lane.
 
-Best use:
-- programmatic/scheduled/API-triggered supervisor work;
-- structured multi-agent orchestration;
-- product/service integration where a persistent API agent is needed;
-- bounded specialists that must be invoked from One Village Command or another service.
+Because it sees compact handoff packets instead of entire repositories, supervisory API usage should be relatively inexpensive.
 
-Economic rule: Agents API has no separate platform fee; pay for chosen model tokens and tools. Use low-cost models for routing/reconciliation and escalate selectively.
+### 4. xAI API lane — optional programmatic liaison
 
-### 4. xAI API / Grok Build lane
+If direct Grok programmability becomes useful, xAI API can perform the same non-coding liaison/classification/prompt-drafting function as Grok Bot. It is not needed simply because Grok Bot exists.
 
-Best use:
-- programmatic Grok execution when direct API integration is required;
-- long-running code/agent tasks that benefit from xAI models;
-- alternative provider/fallback evaluation.
+### 5. ChatGPT Work / local-computer access
 
-This is separate from the SuperGrok/Grok Bot subscription and is usage-billed.
-
-### 5. ChatGPT Work / local computer lane
-
-Best use:
-- local Windows files/apps/browser workflows;
-- operations that require the user's local environment;
-- tasks needing direct access to local repositories, terminal, app server, or desktop tools.
-
-Prefer native desktop Work/Codex local access when available. A remote-desktop/plugin bridge may be used when remote chat access to a specific authorized machine is materially useful.
+Useful when the supervisor needs local files/apps/terminal context. This does not change the authority rule: local access can inspect and coordinate; Codex remains responsible for implementation changes.
 
 ## Recommended Daily Line allocation
 
 ```text
-Daily Line Supervisor
-    |
-    +-- architecture / hard reasoning ----------> Codex / ChatGPT Pro
-    |
-    +-- persistent cheap worker ----------------> Grok Bot
-    |
-    +-- independent QA --------------------------> Grok Bot or OpenAI low/mid-cost model
-    |
-    +-- deterministic validation / CI ----------> Grok Bot or low-cost validation lane
-    |
-    +-- scheduled/API service orchestration ----> OpenAI Agents API (when needed)
-    |
-    +-- alternative programmatic Grok ----------> xAI API (when needed)
+                 YOU
+                  |
+                  v
+        ChatGPT Pro Supervisor
+      architecture + key review
+                  |
+          next Codex prompt
+                  v
+                CODEX
+       ONLY CODING EXECUTOR
+                  |
+          code/tests/handoff
+                  v
+      Grok Bot / Liaison Monitor
+       summarize / classify / watch
+          |                 |
+          | SAFE_CONTINUE   | REVIEW_REQUIRED
+          v                 v
+ next Codex prompt      ChatGPT Pro
+                              |
+                              v
+                       revised prompt
 ```
 
 ## Provider selection rules
 
-1. **Subscription-first for heavy interactive engineering.** Do not pay API rates for work already well served by included Codex/Grok Bot allowance.
-2. **API only when programmability matters.** Use API agents for scheduled/service-driven workflows, not merely because an API exists.
-3. **Use the lowest-cost capable model.** Routing, state reconciliation, formatting, and deterministic documentation do not normally need the flagship model.
-4. **Escalate on evidence.** Move a task to a stronger model when it fails defined evals or encounters architecture/scientific ambiguity.
-5. **Independent review can be cross-provider.** A patch written by Codex may be audited by Grok Bot, and vice versa.
-6. **No provider owns project memory.** Durable status lives in Git.
-7. **No GUI-driving dependency between agents.** Do not make the production workflow depend on ChatGPT clicking Grok Bot's UI or Grok Bot clicking ChatGPT. Use Git branches/PRs/issues/handoff files or supported APIs.
-8. **Least privilege.** Grok Bot/cloud workers should use scoped GitHub access and work on branches/PRs rather than direct production/main mutation unless explicitly authorized.
-9. **Shared cloud-computer awareness.** Multiple Grok Bots share one user cloud computer; avoid conflicting checkouts, ports, credentials, or working directories.
+1. **Never buy duplicate coding capacity by default.** Codex/Pro handles code.
+2. **Bots supervise, not implement.** Grok Bot and API agents are liaison/monitor roles.
+3. **Mechanical continuation can be cheap.** Routine handoff parsing and next-prompt drafting may use Grok Bot or a low-cost API model.
+4. **Escalate reasoning, not coding.** Architecture/scientific ambiguity goes to ChatGPT Pro; the resulting implementation still goes to Codex.
+5. **No provider owns project memory.** Durable status lives in Git.
+6. **No GUI-driving dependency between vendors.** Prefer Git/PR/handoff artifacts and supported automations/APIs rather than making one AI click another AI's UI.
+7. **Least privilege.** Liaison bots should be read-only to source code where practical; if they can update Git, limit writes to coordination-only paths/branches.
+8. **Validation monitor is not a fixer.** A failed gate produces evidence + a Codex repair prompt.
 
 ## Handoff transport
 
-Until there is a supported direct Grok Bot orchestration API/ChatGPT plugin integration, cross-provider agents coordinate through durable artifacts:
+Cross-provider coordination uses durable artifacts:
 
-- Git branches and commits;
-- pull requests/issues;
-- `HANDOFF_CONTRACT.md` records;
+- Git branches/commits/PRs;
+- Codex handoff documents;
+- review packets;
+- `HANDOFF_CONTRACT.md`;
 - validation receipts;
-- DLADS machine-readable program state.
+- DLADS machine-readable program state;
+- optional GitHub event/automation triggers.
 
-This is intentional: the coordination protocol remains stable even if model vendors change.
+## Initial provider assignment
 
-## Initial provider assignment by DLADS role
-
-| Role | Primary initial lane | Secondary lane |
+| Function | Primary lane | Optional secondary lane |
 |---|---|---|
-| Daily Line Supervisor | Codex / ChatGPT Pro | Grok Bot; OpenAI Agents API later |
-| Engineering | Codex | Grok Bot / Grok Build |
-| Modeling | Codex / high-reasoning OpenAI | Grok 4.6 as independent comparison |
-| QA / Audit | Grok Bot | OpenAI Terra/Sol as needed |
-| Documentation | Grok Bot | OpenAI Luna/Terra |
-| Validation / CI | Grok Bot | OpenAI Luna/Terra or local automation |
+| Coding / tests / migrations / models | **Codex (Pro)** | none by default |
+| Architecture / difficult review | **ChatGPT Pro** | none needed normally |
+| Codex liaison / prompt drafting | Grok Bot | low-cost OpenAI API later |
+| Repo-state reconciliation | Grok Bot / ChatGPT | OpenAI API later |
+| QA review of Codex output | Grok Bot for routine pass; ChatGPT Pro for substantive review | low-cost API classifier |
+| CI / validation monitoring | Grok Bot / Codex automation | local script / ChatGPT automation |
+| Owner decisions | User | — |
 
 ## Activation rule
 
-DL-AGENT-1 may use multiple providers for read-only reconciliation. Before any provider receives write access to private authoritative repositories, confirm its GitHub permissions, branch policy, secrets handling, and rollback path.
+DL-AGENT-1 may use supervisory bots for read-only reconciliation. Do not grant any non-Codex bot authority to modify Daily Line implementation code. If a provider needs Git write access for coordination, restrict it to explicitly approved coordination artifacts.
