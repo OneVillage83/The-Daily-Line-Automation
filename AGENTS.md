@@ -263,3 +263,26 @@ A change is not done merely because code runs. It is done when applicable:
 - resume point is current;
 - certification status is updated when warranted;
 - no unresolved ownership ambiguity was hidden.
+
+## 21. Cross-repository Daily Line Agent Development System
+
+For a request that spans The Daily Line program rather than this repository alone — especially **"Continue Daily Line development"** — also read:
+
+1. `docs/agent-system/README.md`
+2. `docs/agent-system/ACTIVE_EXECUTION_PLAN.md`
+3. `docs/agent-system/state/program_state.json`
+4. `docs/agent-system/REPOSITORY_REGISTRY.md`
+5. `docs/agent-system/WORKFLOW.md`
+6. `docs/agent-system/EVALUATION_GATES.md`
+
+Use the `daily-line-continue`, `daily-line-repo-audit`, and `daily-line-validation-handoff` workflows under `codex/skills/` when relevant.
+
+### Authority rule
+
+DLADS is **program coordination only**. It does not supersede this repository's `CURRENT_RESUME_POINT.md`, any sport repository's local `AGENTS.md`/resume/certification documents, Daily-Data-Core authority, Daily-Model-Core authority, website authority, or owner approval gates.
+
+When DLADS state and a target repository disagree, the target repository's verified current truth wins. Reconcile DLADS state before continuing.
+
+### Initial continuation rule
+
+Until `DL-AGENT-1` is complete, a generic program-continuation request must begin with cross-repository truth reconciliation rather than jumping directly into remembered implementation work.
