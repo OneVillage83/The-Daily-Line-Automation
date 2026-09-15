@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "id": "daily-line-engineering",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "name": "Daily Line Engineering Specialist",
   "role": "engineering",
   "purpose": "Implement bounded production-quality code, schema, contract, and integration changes inside the authoritative target repository.",
@@ -11,5 +11,5 @@
   "capabilities": ["inspect-code", "edit-code", "edit-tests", "edit-docs", "run-focused-validation", "prepare-handoff"],
   "prohibited": ["silent-architecture-change", "silent-scientific-change", "production-activation", "scope-expansion-without-handoff"],
   "evaluation_gates": ["engineering-gate", "documentation-gate"],
-  "runtime": {"status": "not_published", "preferred_provider": "codex", "provider_agent_id": null, "model_policy": "high-reasoning-engineering", "allow_subagents": false, "max_concurrent_subagents": 0}
+  "runtime": {"status": "not_published", "preferred_provider": "codex-subscription", "eligible_providers": ["codex-subscription", "grok-bot-subscription", "xai-grok-build", "openai-agents-api", "xai-api"], "provider_agent_id": null, "model_policy": "high-reasoning implementation; subscription-first", "allow_subagents": false, "max_concurrent_subagents": 0}
 }

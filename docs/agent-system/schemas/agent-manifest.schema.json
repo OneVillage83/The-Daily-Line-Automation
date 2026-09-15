@@ -19,15 +19,17 @@
     "evaluation_gates": {"type": "array", "items": {"type": "string"}},
     "runtime": {
       "type": "object",
-      "required": ["status", "preferred_provider", "model_policy", "allow_subagents"],
+      "required": ["status", "preferred_provider", "eligible_providers", "model_policy", "allow_subagents"],
       "properties": {
         "status": {"enum": ["not_published", "candidate", "staging", "production", "retired"]},
         "preferred_provider": {"type": "string"},
+        "eligible_providers": {"type": "array", "items": {"type": "string"}, "minItems": 1},
         "provider_agent_id": {"type": ["string", "null"]},
         "model_policy": {"type": "string"},
         "allow_subagents": {"type": "boolean"},
         "max_concurrent_subagents": {"type": "integer", "minimum": 0}
-      }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

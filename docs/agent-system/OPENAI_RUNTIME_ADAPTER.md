@@ -2,6 +2,8 @@
 
 Verified against current OpenAI platform documentation on 2026-09-15.
 
+DLADS is multi-provider. This document defines the OpenAI-specific adapter only; see `MULTI_PROVIDER_EXECUTION_STRATEGY.md` for provider selection and Grok Bot/xAI lanes.
+
 ## Current platform primitives
 
 OpenAI's Agents API supports reusable agents with named instructions/model configuration and explicit multi-agent configuration. Sessions can create/coordinate subagents. OpenAI Skills are versioned reusable workflow bundles built around `SKILL.md` plus resources.
@@ -52,16 +54,18 @@ Never commit API keys or provider session credentials. Runtime credentials belon
 Initial recommended split:
 
 - Codex/ChatGPT subscription workflows: heavy engineering implementation where practical;
+- Grok Bot subscription: persistent worker, QA, documentation, and validation tasks where it is capable;
 - Agents API: supervisor/routing, durable service integration, scheduled/API-driven work, and bounded specialist execution when API autonomy is useful;
-- lower-cost validation role: deterministic exhaustive proof where model capability permits.
+- low-cost OpenAI models: reconciliation, routing, formatting, and deterministic support tasks;
+- flagship OpenAI models: escalate complex architecture/modeling/debugging only when needed.
 
 ## Runtime state rule
 
 GitHub documentation and repository evidence remain the source of program truth. A provider session may retain conversational execution context, but it must not become the only place where milestone state, architecture decisions, or exact continuation points exist.
 
-## Initial runtime agents
+## Initial OpenAI runtime agents
 
-When publication is authorized, publish in this order:
+When OpenAI API publication is authorized, publish in this order:
 
 1. Daily Line Supervisor — read-first, no mutation tools;
 2. QA/Audit — read-only evidence review;

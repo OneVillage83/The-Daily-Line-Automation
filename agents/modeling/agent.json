@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "id": "daily-line-modeling",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "name": "Daily Line Modeling Specialist",
   "role": "modeling",
   "purpose": "Design and evaluate Daily Line statistical/ML models, calibration, and learned ensembles with point-in-time and OOS discipline.",
@@ -11,5 +11,5 @@
   "capabilities": ["model-design", "feature-audit", "oos-evaluation", "calibration-design", "ensemble-design", "ablation", "model-documentation"],
   "prohibited": ["post-event-leakage", "holdout-reuse", "silent-market-contamination", "production-model-promotion", "metric-target-mismatch"],
   "evaluation_gates": ["modeling-gate", "qa-audit-gate", "documentation-gate"],
-  "runtime": {"status": "not_published", "preferred_provider": "openai-agents-api", "provider_agent_id": null, "model_policy": "high-reasoning-scientific", "allow_subagents": true, "max_concurrent_subagents": 2}
+  "runtime": {"status": "not_published", "preferred_provider": "codex-subscription", "eligible_providers": ["codex-subscription", "openai-agents-api", "grok-bot-subscription", "xai-api"], "provider_agent_id": null, "model_policy": "use strongest justified reasoning; independent cross-provider review encouraged", "allow_subagents": true, "max_concurrent_subagents": 2}
 }

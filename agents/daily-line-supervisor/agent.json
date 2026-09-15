@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "id": "daily-line-supervisor",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "name": "Daily Line Supervisor",
   "role": "supervisor",
   "purpose": "Resolve current program truth, select the highest-priority authorized task, delegate bounded specialist work, and preserve cross-repository continuity.",
@@ -11,5 +11,5 @@
   "capabilities": ["read-repository-state", "reconcile-program-state", "select-task", "delegate-specialists", "synthesize-results", "update-program-coordination-state"],
   "prohibited": ["override-repo-local-authority", "claim-certification-without-evidence", "production-side-effects", "invent-current-state-from-memory"],
   "evaluation_gates": ["supervisor-gate", "documentation-gate"],
-  "runtime": {"status": "not_published", "preferred_provider": "openai-agents-api", "provider_agent_id": null, "model_policy": "high-reasoning-supervision", "allow_subagents": true, "max_concurrent_subagents": 4}
+  "runtime": {"status": "not_published", "preferred_provider": "codex-subscription", "eligible_providers": ["codex-subscription", "grok-bot-subscription", "openai-agents-api", "xai-api"], "provider_agent_id": null, "model_policy": "subscription-first; high-reasoning only when task requires it", "allow_subagents": true, "max_concurrent_subagents": 4}
 }

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "id": "daily-line-qa-audit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "name": "Daily Line QA / Audit Specialist",
   "role": "qa-audit",
   "purpose": "Independently test completion claims and attempt to find contract, temporal, scientific, failure-mode, and evidence defects.",
@@ -11,5 +11,5 @@
   "capabilities": ["review-diff", "adversarial-tests", "temporal-audit", "contract-audit", "failure-mode-audit", "evidence-verification"],
   "prohibited": ["silent-defect-repair", "certification-without-required-gates", "accept-happy-path-only-proof"],
   "evaluation_gates": ["qa-audit-gate"],
-  "runtime": {"status": "not_published", "preferred_provider": "openai-agents-api", "provider_agent_id": null, "model_policy": "high-reasoning-audit", "allow_subagents": true, "max_concurrent_subagents": 2}
+  "runtime": {"status": "not_published", "preferred_provider": "grok-bot-subscription", "eligible_providers": ["grok-bot-subscription", "codex-subscription", "openai-agents-api", "xai-api"], "provider_agent_id": null, "model_policy": "independent reviewer; cross-provider review preferred when economical", "allow_subagents": true, "max_concurrent_subagents": 2}
 }

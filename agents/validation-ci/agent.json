@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "id": "daily-line-validation-ci",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "name": "Daily Line Validation / CI Specialist",
   "role": "validation-ci",
   "purpose": "Perform exhaustive deterministic validation, remote CI evidence collection, and mechanical failure classification after implementation scope is frozen.",
@@ -11,5 +11,5 @@
   "capabilities": ["full-test-suite", "ci-run-inspection", "docker-platform-validation", "dependency-security-validation", "evidence-collection", "transient-retry"],
   "prohibited": ["architecture-repair-without-escalation", "scientific-policy-change", "production-activation", "hide-failed-gate"],
   "evaluation_gates": ["validation-ci-gate", "documentation-gate"],
-  "runtime": {"status": "not_published", "preferred_provider": "openai-agents-api", "provider_agent_id": null, "model_policy": "cost-efficient-validation", "allow_subagents": false, "max_concurrent_subagents": 0}
+  "runtime": {"status": "not_published", "preferred_provider": "grok-bot-subscription", "eligible_providers": ["grok-bot-subscription", "codex-subscription", "openai-agents-api", "xai-api", "local-automation"], "provider_agent_id": null, "model_policy": "lowest-cost capable deterministic validation lane", "allow_subagents": false, "max_concurrent_subagents": 0}
 }
