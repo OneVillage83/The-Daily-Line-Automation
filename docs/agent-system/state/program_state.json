@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "updated_at": "2026-09-15",
+  "authority": "program-coordination-only",
+  "current_phase": "DL-AGENT-1",
+  "current_task": {
+    "id": "DL-AGENT-1",
+    "title": "Cross-repository truth reconciliation",
+    "status": "READY",
+    "target_repository": "OneVillage83/The-Daily-Line-Automation",
+    "details": "docs/agent-system/ACTIVE_EXECUTION_PLAN.md"
+  },
+  "macro_sequence": [
+    "shared-data-authority",
+    "priority-sport-pipelines",
+    "daily-model-core",
+    "sport-model-integration",
+    "calibration",
+    "learned-ensemble-unified-line",
+    "market-intelligence",
+    "recommendation-publication",
+    "website",
+    "automation",
+    "social-video",
+    "one-village-command",
+    "cross-sport-expansion"
+  ],
+  "repositories": {
+    "Daily-Data-Core": {"status": "NEEDS_RECONCILIATION"},
+    "Daily-MLB": {"status": "NEEDS_RECONCILIATION"},
+    "Daily-NFL": {"status": "NEEDS_RECONCILIATION"},
+    "Daily-NCAAF": {"status": "NEEDS_RECONCILIATION"},
+    "Daily-Model-Core": {
+      "status": "NEEDS_RECONCILIATION",
+      "seed_hint": "DMC-2 documented merged/frozen; DMC-3 authorized/not started"
+    },
+    "The-Daily-Line-website": {"status": "NEEDS_RECONCILIATION"},
+    "The-Daily-Line-Automation": {
+      "status": "NEEDS_RECONCILIATION",
+      "seed_hint": "repo-local core resume previously points to A-11; DLADS does not supersede it"
+    },
+    "Daily-Line-Private-Validation": {"status": "NEEDS_RECONCILIATION"}
+  },
+  "policy": {
+    "repository_truth_wins": true,
+    "post_event_information_for_pregame_predictions": "FORBIDDEN",
+    "automation_before_manual_certification": "FORBIDDEN",
+    "production_side_effects_from_development_agents": "FORBIDDEN_UNLESS_SEPARATELY_AUTHORIZED",
+    "chat_memory_as_sole_status_source": "FORBIDDEN"
+  }
+}

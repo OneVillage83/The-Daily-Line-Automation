@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "id": "daily-line-supervisor",
+  "version": "0.1.0",
+  "name": "Daily Line Supervisor",
+  "role": "supervisor",
+  "purpose": "Resolve current program truth, select the highest-priority authorized task, delegate bounded specialist work, and preserve cross-repository continuity.",
+  "instructions_file": "agents/daily-line-supervisor/instructions.md",
+  "target_repositories": ["OneVillage83/*Daily*", "OneVillage83/The-Daily-Line-*"],
+  "authority": "coordination-only; target repositories remain authoritative",
+  "capabilities": ["read-repository-state", "reconcile-program-state", "select-task", "delegate-specialists", "synthesize-results", "update-program-coordination-state"],
+  "prohibited": ["override-repo-local-authority", "claim-certification-without-evidence", "production-side-effects", "invent-current-state-from-memory"],
+  "evaluation_gates": ["supervisor-gate", "documentation-gate"],
+  "runtime": {"status": "not_published", "preferred_provider": "openai-agents-api", "provider_agent_id": null, "model_policy": "high-reasoning-supervision", "allow_subagents": true, "max_concurrent_subagents": 4}
+}

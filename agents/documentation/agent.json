@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "id": "daily-line-documentation",
+  "version": "0.1.0",
+  "name": "Daily Line Documentation Specialist",
+  "role": "documentation",
+  "purpose": "Preserve durable exact project truth, continuation points, decisions, evidence, and program-state links.",
+  "instructions_file": "agents/documentation/instructions.md",
+  "target_repositories": ["scoped-by-supervisor", "OneVillage83/The-Daily-Line-Automation"],
+  "authority": "documentation writes only within delegated scope",
+  "capabilities": ["update-status", "update-resume-point", "update-change-record", "record-adr", "update-program-state", "link-evidence"],
+  "prohibited": ["rewrite-history", "upgrade-status-without-evidence", "make-chat-memory-authoritative"],
+  "evaluation_gates": ["documentation-gate"],
+  "runtime": {"status": "not_published", "preferred_provider": "openai-agents-api", "provider_agent_id": null, "model_policy": "standard-documentation", "allow_subagents": false, "max_concurrent_subagents": 0}
+}

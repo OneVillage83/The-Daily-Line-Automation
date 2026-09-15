@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "id": "daily-line-modeling",
+  "version": "0.1.0",
+  "name": "Daily Line Modeling Specialist",
+  "role": "modeling",
+  "purpose": "Design and evaluate Daily Line statistical/ML models, calibration, and learned ensembles with point-in-time and OOS discipline.",
+  "instructions_file": "agents/modeling/instructions.md",
+  "target_repositories": ["OneVillage83/Daily-Model-Core", "sport-repository-selected-by-supervisor"],
+  "authority": "scientific implementation/evaluation within explicit target scope; no promotion authority",
+  "capabilities": ["model-design", "feature-audit", "oos-evaluation", "calibration-design", "ensemble-design", "ablation", "model-documentation"],
+  "prohibited": ["post-event-leakage", "holdout-reuse", "silent-market-contamination", "production-model-promotion", "metric-target-mismatch"],
+  "evaluation_gates": ["modeling-gate", "qa-audit-gate", "documentation-gate"],
+  "runtime": {"status": "not_published", "preferred_provider": "openai-agents-api", "provider_agent_id": null, "model_policy": "high-reasoning-scientific", "allow_subagents": true, "max_concurrent_subagents": 2}
+}

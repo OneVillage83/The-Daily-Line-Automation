@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://thedailyline.bet/schemas/dlads-agent-manifest-v1.json",
+  "title": "DLADS Agent Manifest V1",
+  "type": "object",
+  "required": ["schema_version", "id", "version", "name", "role", "purpose", "instructions_file", "authority", "capabilities", "prohibited", "evaluation_gates", "runtime"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+    "version": {"type": "string"},
+    "name": {"type": "string"},
+    "role": {"type": "string"},
+    "purpose": {"type": "string"},
+    "instructions_file": {"type": "string"},
+    "target_repositories": {"type": "array", "items": {"type": "string"}},
+    "authority": {"type": "string"},
+    "capabilities": {"type": "array", "items": {"type": "string"}},
+    "prohibited": {"type": "array", "items": {"type": "string"}},
+    "evaluation_gates": {"type": "array", "items": {"type": "string"}},
+    "runtime": {
+      "type": "object",
+      "required": ["status", "preferred_provider", "model_policy", "allow_subagents"],
+      "properties": {
+        "status": {"enum": ["not_published", "candidate", "staging", "production", "retired"]},
+        "preferred_provider": {"type": "string"},
+        "provider_agent_id": {"type": ["string", "null"]},
+        "model_policy": {"type": "string"},
+        "allow_subagents": {"type": "boolean"},
+        "max_concurrent_subagents": {"type": "integer", "minimum": 0}
+      }
+    }
+  },
+  "additionalProperties": false
+}
