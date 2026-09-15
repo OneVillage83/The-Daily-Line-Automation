@@ -6,39 +6,53 @@ Home repository: `OneVillage83/The-Daily-Line-Automation`
 
 ## Purpose
 
-The Daily Line Agent Development System (DLADS) is the cross-repository engineering control layer for continuing The Daily Line as a long-horizon production program with Codex today and reusable OpenAI agents later.
+The Daily Line Agent Development System (DLADS) is the cross-repository **Codex supervision and continuity layer** for The Daily Line.
 
-It solves one specific problem: a future session must be able to receive a short instruction such as **"Continue Daily Line development"** and determine the correct next bounded task from durable repository state instead of reconstructing months of chat history.
+It solves one specific problem: a future session must be able to receive a short instruction such as **"Continue Daily Line development"**, determine the correct next bounded task from durable repository state, supervise Codex's output, and prepare the next precise Codex instruction without reconstructing months of chat history.
 
 DLADS does **not** transfer domain authority into this repository. Each sport, shared core, website, and automation repository remains authoritative for its own contracts and implementation.
+
+## Non-negotiable coding rule
+
+> **Codex is the sole code-changing executor.**
+
+DLADS bots/agents do not implement code. They may inspect, summarize, monitor, review, classify, update coordination state, and draft the next Codex prompt. They must not edit source code, tests, migrations, model code, or production configuration.
+
+ChatGPT Pro remains the primary high-reasoning reviewer/architect. Grok Bot or another inexpensive persistent bot may act as a liaison/monitor, but not as a programmer.
+
+See [`CODEX_SUPERVISION_LOOP.md`](CODEX_SUPERVISION_LOOP.md).
 
 ## Operating model
 
 ```text
-User / scheduled development task
-              |
-              v
-     Daily Line Supervisor
-              |
-       program state + roadmap
-              |
-    +---------+----------+----------+----------+
-    v         v          v          v          v
-Engineering Modeling  QA/Audit Documentation Validation/CI
-    |         |          |          |          |
-    +---------+----------+----------+----------+
-              |
-              v
-     target repository Codex work
-              |
-              v
- local AGENTS.md / CODEX_START_HERE / repo docs
-              |
-              v
- implementation -> focused proof -> audit -> docs -> handoff
-              |
-              v
-      program state updated
+User / program goal
+        |
+        v
+ChatGPT Pro / Daily Line Supervisor
+        |
+        | precise bounded prompt
+        v
+      CODEX
+   sole coding executor
+        |
+        | code + tests + repo-local handoff
+        v
+  Codex handoff/result
+        |
+        v
+Liaison / QA / Monitor bots
+  - summarize
+  - compare to plan
+  - monitor checks
+  - classify next step
+  - draft next Codex prompt
+  - never edit code
+        |
+        +---- mechanical continuation ----> next Codex prompt
+        |
+        +---- architecture/science issue --> ChatGPT Pro review
+        |
+        +---- owner decision --------------> user
 ```
 
 ## Source-of-truth precedence
@@ -63,12 +77,13 @@ When the user says **"Continue Daily Line development"**, the supervisor must:
 2. inspect the candidate target repository's current default-branch head and local continuation documents;
 3. reconcile stale status before selecting work;
 4. choose the highest-priority unblocked task consistent with the roadmap and repository authority;
-5. delegate bounded work to the appropriate specialist role;
-6. run focused validation needed to answer engineering questions;
-7. invoke QA/Audit before claiming completion;
-8. hand long deterministic/exhaustive validation to Validation/CI when appropriate;
-9. update target-repository documentation and exact resume point;
-10. update DLADS program state and active plan when program-level status changed.
+5. create the exact bounded Codex prompt;
+6. send/queue the coding task to Codex;
+7. consume Codex's handoff and compare it to the assignment;
+8. classify the result as `SAFE_CONTINUE`, `REVIEW_REQUIRED`, `OWNER_DECISION_REQUIRED`, or `BLOCKED`;
+9. use ChatGPT Pro for architecture/science/ambiguous review when needed;
+10. draft the next Codex prompt or exact stop condition;
+11. update DLADS coordination state after repo-local evidence exists.
 
 ## Macro build order
 
@@ -91,28 +106,30 @@ Data authority / shared contracts
 
 Do not jump to a later phase merely because it is easier or more visible.
 
-## Codex vs runtime agents
+## Codex vs supervisory bots
 
-- **Codex** remains the primary engineering implementer. Repository-local `AGENTS.md` and Codex skills govern how work is performed.
-- **DLADS agent manifests** define roles, capability boundaries, evaluation requirements, and future runtime mapping.
-- **OpenAI Agents API publication is not yet active.** No provider agent IDs or API credentials are stored here.
-- Runtime publication must remain provider-neutral and must not create a second source of project truth outside Git.
+- **Codex:** all source/test/migration/model/config code changes and focused engineering proof.
+- **ChatGPT Pro:** primary architecture/reasoning reviewer and prompt author for difficult or consequential decisions.
+- **Grok Bot / other liaison bot:** optional persistent monitoring, handoff summarization, repo-state reconciliation, CI watching, and next-prompt drafting.
+- **DLADS manifests:** define non-coding supervisory roles and future runtime mapping.
+- **OpenAI Agents API publication is not required to use DLADS.** Runtime publication remains optional and provider-neutral.
 
 ## Key files
 
+- `CODEX_SUPERVISION_LOOP.md` — exact Codex-only coding and handoff model.
 - `ACTIVE_EXECUTION_PLAN.md` — exact program-level continuation point.
 - `PROGRAM_ROADMAP.md` — full ordered development plan.
 - `REPOSITORY_REGISTRY.md` — ownership and start documents for every repository.
 - `WORKFLOW.md` — supervisor state machine and cross-repo rules.
-- `AGENT_ROLES.md` — specialist responsibilities and handoffs.
-- `EVALUATION_GATES.md` — minimum proof before promotion/completion.
+- `AGENT_ROLES.md` — non-coding supervisory/liaison responsibilities.
+- `EVALUATION_GATES.md` — minimum proof before stronger status claims.
 - `HANDOFF_CONTRACT.md` — required bounded-work handoff format.
-- `OPENAI_RUNTIME_ADAPTER.md` — future Agents API / Skills publication mapping.
+- `MULTI_PROVIDER_EXECUTION_STRATEGY.md` — subscription/API/provider allocation.
+- `OPENAI_RUNTIME_ADAPTER.md` — optional future API mapping.
 - `state/program_state.json` — machine-readable program state.
-- `schemas/` — contracts for state and agent manifests.
-- `/agents/` — version-controlled specialist definitions.
+- `/agents/` — version-controlled non-coding supervisory definitions.
 - `/codex/skills/` — reusable Codex workflows.
 
 ## Safety rule
 
-No development agent may silently widen scientific, production, publication, financial, or destructive authority. An engineering implementation can propose such a change, but activation requires the target repository's existing governance and owner approval rules.
+No supervisory bot may silently widen scientific, production, publication, financial, or destructive authority. If a bot discovers a needed implementation change, it must produce a Codex prompt or escalation—not a code patch.
