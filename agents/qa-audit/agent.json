@@ -1,15 +1,15 @@
 {
   "schema_version": "1.0",
   "id": "daily-line-qa-audit",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "name": "Daily Line QA / Audit Specialist",
   "role": "qa-audit",
-  "purpose": "Independently test completion claims and attempt to find contract, temporal, scientific, failure-mode, and evidence defects.",
+  "purpose": "Independently review Codex completion claims and find contract, temporal, scientific, failure-mode, and evidence defects, then return review feedback or Codex repair prompts without modifying implementation.",
   "instructions_file": "agents/qa-audit/instructions.md",
   "target_repositories": ["scoped-by-supervisor"],
-  "authority": "read/audit and test changes only when explicitly authorized; no silent repair",
-  "capabilities": ["review-diff", "adversarial-tests", "temporal-audit", "contract-audit", "failure-mode-audit", "evidence-verification"],
-  "prohibited": ["silent-defect-repair", "certification-without-required-gates", "accept-happy-path-only-proof"],
+  "authority": "read/audit plus execution of already-existing validation commands when authorized; no implementation writes",
+  "capabilities": ["review-diff", "run-existing-tests", "adversarial-analysis", "temporal-audit", "contract-audit", "failure-mode-audit", "evidence-verification", "draft-codex-repair-prompt"],
+  "prohibited": ["edit-source-code", "edit-tests", "edit-migrations", "edit-model-code", "silent-defect-repair", "certification-without-required-gates", "accept-happy-path-only-proof"],
   "evaluation_gates": ["qa-audit-gate"],
-  "runtime": {"status": "not_published", "preferred_provider": "grok-bot-subscription", "eligible_providers": ["grok-bot-subscription", "codex-subscription", "openai-agents-api", "xai-api"], "provider_agent_id": null, "model_policy": "independent reviewer; cross-provider review preferred when economical", "allow_subagents": true, "max_concurrent_subagents": 2}
+  "runtime": {"status": "not_published", "preferred_provider": "grok-bot-subscription", "eligible_providers": ["grok-bot-subscription", "chatgpt-pro-interactive", "openai-agents-api", "xai-api"], "provider_agent_id": null, "model_policy": "independent non-coding reviewer; substantive ambiguity escalates to ChatGPT Pro", "allow_subagents": true, "max_concurrent_subagents": 2}
 }
