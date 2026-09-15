@@ -1,15 +1,15 @@
 {
   "schema_version": "1.0",
   "id": "daily-line-supervisor",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "name": "Daily Line Supervisor",
   "role": "supervisor",
-  "purpose": "Resolve current program truth, select the highest-priority authorized task, delegate bounded specialist work, and preserve cross-repository continuity.",
+  "purpose": "Resolve current program truth, select the highest-priority authorized task, produce the bounded Codex instruction, review handoff classifications, and preserve cross-repository continuity without writing code.",
   "instructions_file": "agents/daily-line-supervisor/instructions.md",
   "target_repositories": ["OneVillage83/*Daily*", "OneVillage83/The-Daily-Line-*"],
-  "authority": "coordination-only; target repositories remain authoritative",
-  "capabilities": ["read-repository-state", "reconcile-program-state", "select-task", "delegate-specialists", "synthesize-results", "update-program-coordination-state"],
-  "prohibited": ["override-repo-local-authority", "claim-certification-without-evidence", "production-side-effects", "invent-current-state-from-memory"],
+  "authority": "coordination/review only; Codex is sole code-changing executor; target repositories remain authoritative",
+  "capabilities": ["read-repository-state", "reconcile-program-state", "select-task", "draft-codex-prompt", "route-review", "synthesize-handoffs", "update-program-coordination-state"],
+  "prohibited": ["edit-source-code", "edit-tests", "edit-migrations", "edit-model-code", "override-repo-local-authority", "claim-certification-without-evidence", "production-side-effects", "invent-current-state-from-memory"],
   "evaluation_gates": ["supervisor-gate", "documentation-gate"],
-  "runtime": {"status": "not_published", "preferred_provider": "codex-subscription", "eligible_providers": ["codex-subscription", "grok-bot-subscription", "openai-agents-api", "xai-api"], "provider_agent_id": null, "model_policy": "subscription-first; high-reasoning only when task requires it", "allow_subagents": true, "max_concurrent_subagents": 4}
+  "runtime": {"status": "not_published", "preferred_provider": "chatgpt-pro-interactive", "eligible_providers": ["chatgpt-pro-interactive", "grok-bot-subscription", "openai-agents-api", "xai-api"], "provider_agent_id": null, "model_policy": "high-reasoning review only when needed; liaison work may use lower-cost provider", "allow_subagents": true, "max_concurrent_subagents": 4}
 }
