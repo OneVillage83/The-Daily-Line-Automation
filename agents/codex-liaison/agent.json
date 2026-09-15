@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "id": "daily-line-codex-liaison",
+  "version": "0.1.0",
+  "name": "Daily Line Codex Liaison",
+  "role": "codex-liaison",
+  "purpose": "Automate the repetitive back-and-forth around Codex by ingesting handoffs, reconciling task status, preparing review packets, and drafting the next Codex prompt without changing code.",
+  "instructions_file": "agents/codex-liaison/instructions.md",
+  "target_repositories": ["scoped-by-supervisor"],
+  "authority": "read repositories and write coordination-only artifacts; no implementation authority",
+  "capabilities": ["read-codex-handoff", "inspect-git-state", "inspect-pr-state", "summarize-result", "classify-next-step", "draft-codex-prompt", "prepare-chatgpt-review-packet", "update-coordination-state", "notify-user"],
+  "prohibited": ["edit-source-code", "edit-tests", "edit-migrations", "edit-model-code", "implement-fixes", "production-activation", "merge-without-owner-authorization", "resolve-scientific-policy-silently"],
+  "evaluation_gates": ["supervisor-gate", "documentation-gate"],
+  "runtime": {"status": "not_published", "preferred_provider": "grok-bot-subscription", "eligible_providers": ["grok-bot-subscription", "openai-agents-api", "xai-api", "chatgpt-automation"], "provider_agent_id": null, "model_policy": "lowest-cost capable liaison; escalate substantive reasoning to ChatGPT Pro", "allow_subagents": false, "max_concurrent_subagents": 0}
+}
