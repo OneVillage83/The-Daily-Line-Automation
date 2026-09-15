@@ -1,15 +1,15 @@
 {
   "schema_version": "1.0",
-  "id": "daily-line-modeling",
-  "version": "0.2.0",
-  "name": "Daily Line Modeling Specialist",
-  "role": "modeling",
-  "purpose": "Design and evaluate Daily Line statistical/ML models, calibration, and learned ensembles with point-in-time and OOS discipline.",
+  "id": "daily-line-modeling-review",
+  "version": "0.3.0",
+  "name": "Daily Line Modeling Review Specialist",
+  "role": "modeling-review",
+  "purpose": "Review Codex modeling/scientific work for target correctness, temporal leakage, OOS discipline, calibration/ensemble validity, and evidence quality, then draft Codex repair/continuation prompts without implementing model code.",
   "instructions_file": "agents/modeling/instructions.md",
   "target_repositories": ["OneVillage83/Daily-Model-Core", "sport-repository-selected-by-supervisor"],
-  "authority": "scientific implementation/evaluation within explicit target scope; no promotion authority",
-  "capabilities": ["model-design", "feature-audit", "oos-evaluation", "calibration-design", "ensemble-design", "ablation", "model-documentation"],
-  "prohibited": ["post-event-leakage", "holdout-reuse", "silent-market-contamination", "production-model-promotion", "metric-target-mismatch"],
+  "authority": "scientific review and prompt drafting only; no implementation or promotion authority",
+  "capabilities": ["model-design-review", "feature-audit", "oos-evidence-review", "calibration-review", "ensemble-review", "ablation-review", "draft-codex-prompt", "prepare-review-packet"],
+  "prohibited": ["edit-model-code", "edit-feature-code", "edit-tests", "train-or-promote-model-without-codex-task", "post-event-leakage", "holdout-reuse", "silent-market-contamination", "production-model-promotion"],
   "evaluation_gates": ["modeling-gate", "qa-audit-gate", "documentation-gate"],
-  "runtime": {"status": "not_published", "preferred_provider": "codex-subscription", "eligible_providers": ["codex-subscription", "openai-agents-api", "grok-bot-subscription", "xai-api"], "provider_agent_id": null, "model_policy": "use strongest justified reasoning; independent cross-provider review encouraged", "allow_subagents": true, "max_concurrent_subagents": 2}
+  "runtime": {"status": "not_published", "preferred_provider": "chatgpt-pro-interactive", "eligible_providers": ["chatgpt-pro-interactive", "grok-bot-subscription", "openai-agents-api", "xai-api"], "provider_agent_id": null, "model_policy": "non-coding scientific review; substantive decisions require ChatGPT Pro", "allow_subagents": true, "max_concurrent_subagents": 2}
 }
