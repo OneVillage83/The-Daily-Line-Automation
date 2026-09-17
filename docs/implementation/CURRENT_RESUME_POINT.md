@@ -1,6 +1,6 @@
 # The Daily Line Automation — Current Resume Point
 
-Last updated: 2026-09-09 (America/Los_Angeles)  
+Last updated: 2026-09-17 (America/Los_Angeles)  
 Authority: This file is the single exact continuation point for unfinished TDLA work. It does not override architecture/certification authority; it tells the next session where to resume.
 
 ## Current core TDLA state
@@ -108,9 +108,47 @@ External publication remains blocked until A-18 is certified.
 
 ---
 
+# Supplemental product architecture documented 2026-09-17 — EdgeStack Parlay Optimizer
+
+The Daily Line now has a formal V1 architecture and implementation handoff for a probability-first **2-5 leg parlay/combo optimizer** plus an **All Bets Prediction Scanner**.
+
+## Governing EdgeStack documents
+
+- `docs/architecture/EDGESTACK_PARLAY_OPTIMIZER_V1.md` — product definition, ownership, All Bets scanner, leg eligibility, candidate generation, joint probability/correlation, Kalshi/provider pricing, Core/Value/Upside classes, publication contract, website/report requirements, PIT validation, and V1 invariants.
+- `docs/implementation/EDGESTACK_IMPLEMENTATION_HANDOFF_V1.md` — ES-0 through ES-10 bounded implementation sequence for GrokBot-OpenAI-Bridge / Codex.
+
+## Locked EdgeStack product rules
+
+1. Product name: **EdgeStack Parlay Optimizer**.
+2. Product tagline: **“Stack the Edge. Not the Odds.”**
+3. The broader pipeline must analyze and publish **every supported/modelable bet known to the system**, not only highlighted picks.
+4. Every supported bet should expose model fair probability, market price/probability, edge, Recommendation Gate, quote time, and reason/provenance.
+5. EdgeStack only builds from individually eligible Recommendation-Gate-approved legs.
+6. V1 EdgeStacks contain **2-5 legs**.
+7. Cross-game and cross-sport combinations are first-class candidates.
+8. Same-game combinations require explicit correlation/joint-probability treatment; unsupported correlation fails closed.
+9. Real Kalshi Combo/RFQ or sportsbook parlay quotes are compared against model joint probability; a synthetic product of standalone prices is diagnostic only.
+10. Required ranking views include highest hit rate, best value, best balance, and best upside.
+11. Core / Value / Upside are separate product classes; payout size alone never determines ranking.
+12. Historical evaluation must be point-in-time and contamination-free.
+13. TDLA may later orchestrate EdgeStack but may not own sport fair probabilities, Recommendation Gate semantics, or EdgeStack value mathematics.
+14. **Bankroll management, stake sizing, stop-loss/chase controls, and automated wagering are explicitly deferred from V1.**
+
+## Safe EdgeStack implementation sequence when intentionally resumed
+
+Start here:
+
+> **ES-0 — freeze EdgeStack runtime ownership/physical repository through ADR and implement the canonical V1 contracts/fixtures in the authorized repository.**
+
+Then proceed one repository per Bridge/Codex turn through the ES-series handoff. Do not jump directly to website UI, Kalshi RFQ automation, or ranking code before ES-0 contracts and ownership are frozen.
+
+This supplemental product architecture does **not** supersede the current core TDLA A-series resume point.
+
+---
+
 # Exact next core TDLA step — A-11 Retry / Timeout / Idempotency Architecture
 
-The video architecture is complete for this checkpoint and does **not** supersede the canonical A-series sequence.
+The video architecture and EdgeStack supplemental product architecture are documented for future intentional execution and do **not** supersede the canonical A-series sequence.
 
 Resume core TDLA architecture at:
 
@@ -125,6 +163,10 @@ A-11 must freeze logical operation identity, StageRun uniqueness, stable logical
 ## If the next user request is specifically to start building the video system
 
 Do not redo architecture discovery. Read the V-series documents above and begin **VM-0** directly.
+
+## If the next user request is specifically to start building EdgeStack
+
+Do not reconstruct intent from chat history. Read the two EdgeStack documents above and begin **ES-0** directly, preserving one-repository-per-turn Bridge routing.
 
 ## If the next user request is to continue the main automation architecture
 
