@@ -65,7 +65,7 @@ A-5 establishes a transport-neutral versioned sport adapter with opaque sport sc
 - `docs/implementation/A06_ARCHITECTURE_CONFORMANCE_REVIEW_20260903.md`
 - `docs/adr/ADR-0003_IMMUTABLE_PLAN_FRAGMENTS_AND_EXPLICIT_COMPOSITION.md`
 
-A-6 establishes immutable DAG-based resolved plans, separately owned sport/platform fragments, explicit typed composition, exact sport-owned fan-out/fan-in membership, stable `ScheduleSlotRef` identities, immutable execution targets/policies, and deterministic semantic plan digests.
+A-6 establishes immutable DAG-based resolved plans, separately owned sport/TDLA fragments, explicit typed composition, exact sport-owned fan-out/fan-in membership, stable `ScheduleSlotRef` identities, immutable execution targets/policies, and deterministic semantic plan digests.
 
 ## Certification evidence for A-7
 
@@ -141,6 +141,18 @@ Important certified rules:
 - A-11 remains final logical retry/timeout/idempotency authority and is next.
 - PostgreSQL is intended as authoritative TDLA persistence; A-13 will freeze DDL/transaction mechanics.
 - every material change leaves durable journal/status/resume documentation.
+
+## Supplemental product-intelligence architecture
+
+These documents are cross-repository product architecture stored here for durable coordination. They do **not** move model/value/Recommendation Gate authority into TDLA and do not supersede the A-series sequence.
+
+| Feature | Architecture | Implementation handoff | Status |
+|---|---|---|---|
+| **EdgeStack Parlay Optimizer** | `EDGESTACK_PARLAY_OPTIMIZER_V1.md` | `../implementation/EDGESTACK_IMPLEMENTATION_HANDOFF_V1.md` | **DOCUMENTED — FUTURE IMPLEMENTATION** |
+
+EdgeStack formalizes a probability-first 2-5 leg parlay/combo optimizer plus an All Bets Prediction Scanner. It consumes versioned sport fair probabilities/Recommendation Gates and DDC market observations, evaluates real Kalshi/provider combo quotes, adjusts joint probabilities for correlation, and publishes Core/Value/Upside combinations. Its product tagline is **“Stack the Edge. Not the Odds.”**
+
+Bankroll management, stake sizing, chase controls, and automated wagering are explicitly deferred from EdgeStack V1.
 
 ## Change process
 
