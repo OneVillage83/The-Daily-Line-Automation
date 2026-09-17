@@ -146,18 +146,25 @@ Important certified rules:
 
 EdgeStack and the All Bets Prediction Scanner are **not TDLA-owned capabilities**.
 
-The canonical logical owner is **Daily-Line-Core (DLC)**, a planned peer repository that consumes sealed sport decision packages plus Daily-Data-Core market evidence and emits a sealed `DailyLinePublicationPackage` for downstream consumers.
+The canonical owner is now the peer repository:
 
-Until `OneVillage83/Daily-Line-Core` is created, canonical DLC planning documents are staged under:
+`OneVillage83/Daily-Line-Core`
 
-`OneVillage83/Daily-Data-Core/docs/daily_line_core/`
+DLC consumes sealed sport decision packages plus Daily-Data-Core market evidence and emits a sealed `DailyLinePublicationPackage` for downstream consumers.
 
-Key staged documents:
+Canonical DLC documents include:
 
-- `DLC_ARCHITECTURE_V1.md`
-- `EDGESTACK_PARLAY_OPTIMIZER_V1.md`
-- `DLC_IMPLEMENTATION_HANDOFF_V1.md`
-- `DLC_REPOSITORY_BOOTSTRAP.md`
+- `OneVillage83/Daily-Line-Core/README.md`
+- `OneVillage83/Daily-Line-Core/AGENTS.md`
+- `OneVillage83/Daily-Line-Core/CODEX_START_HERE.md`
+- `OneVillage83/Daily-Line-Core/docs/ARCHITECTURE.md`
+- `OneVillage83/Daily-Line-Core/docs/OWNERSHIP_BOUNDARIES.md`
+- `OneVillage83/Daily-Line-Core/docs/INTEGRATION_CONTRACTS.md`
+- `OneVillage83/Daily-Line-Core/docs/EDGESTACK_PARLAY_OPTIMIZER_V1.md`
+- `OneVillage83/Daily-Line-Core/docs/IMPLEMENTATION_ROADMAP.md`
+- `OneVillage83/Daily-Line-Core/docs/CURRENT_RESUME_POINT.md`
+
+The former `OneVillage83/Daily-Data-Core/docs/daily_line_core/` directory is historical staging only.
 
 The legacy local TDLA paths:
 
@@ -176,7 +183,7 @@ TDLA may consume DLC-sealed `DailyLinePublicationPackage` or approved derivative
 - EdgeStack candidate generation/joint probability/value/ranking;
 - cross-sport product recommendation authority.
 
-The current GrokBot-OpenAI-Bridge being tested in TDLA is a bounded proving-ground choice because TDLA is near completion; it does not imply product-intelligence ownership.
+The current GrokBot-OpenAI-Bridge being tested in TDLA is a bounded proving-ground choice because TDLA is near completion; it does not imply product-intelligence ownership. DLC is not added to Bridge authorization until TDLA proving-ground acceptance and explicit owner approval.
 
 ## Change process
 
