@@ -5,12 +5,18 @@
 
 Do not implement EdgeStack inside The-Daily-Line-Automation.
 
-The canonical implementation plan is now staged for **Daily-Line-Core (DLC)** at:
+The canonical implementation plan now lives in:
 
-- `OneVillage83/Daily-Data-Core/docs/daily_line_core/DLC_IMPLEMENTATION_HANDOFF_V1.md`
-- `OneVillage83/Daily-Data-Core/docs/daily_line_core/DLC_REPOSITORY_BOOTSTRAP.md`
+`OneVillage83/Daily-Line-Core`
 
-The final physical home will be `OneVillage83/Daily-Line-Core` after repository creation.
+Primary files:
+
+- `CODEX_START_HERE.md`
+- `docs/IMPLEMENTATION_ROADMAP.md`
+- `docs/CURRENT_RESUME_POINT.md`
+- `docs/EDGESTACK_PARLAY_OPTIMIZER_V1.md`
+
+The former `Daily-Data-Core/docs/daily_line_core/` staging copy is historical only.
 
 ## Why this moved
 
@@ -31,6 +37,6 @@ TDLA does not own the EdgeStack optimizer, Recommendation Gate semantics, sport 
 
 The GrokBot-OpenAI-Bridge is being proven against TDLA first because TDLA is near completion and provides a bounded proving ground. That testing location does not confer ownership of DLC/EdgeStack logic on TDLA.
 
-Once the bridge proving-ground test is accepted and the authorized repository catalog is expanded, DLC should be registered as its own repository/workstream and implemented beginning with **DLC-0** in the canonical DLC handoff.
+Once the Bridge proving-ground test is accepted and the authorized repository catalog is deliberately expanded, `OneVillage83/Daily-Line-Core` should be registered as its own repository/workstream.
 
-The current TDLA core resume point remains **A-11 Retry / Timeout / Idempotency Architecture** unless the owner explicitly chooses a different TDLA task.
+The current DLC next step is **DLC-0 architecture/ownership conformance review**. The current TDLA core resume point remains its own A-series continuation unless the owner explicitly chooses a different TDLA task.
