@@ -30,7 +30,7 @@ The project has an explicit cost/compute allocation rule for agentic engineering
 - `AGENTS.md` section 18.1 links and summarizes the rule.
 - Higher-capability/premium models should perform reasoning-intensive engineering, difficult implementation/debugging, focused/locally useful validation, documentation, commit/PR preparation, and then produce an exact validation/CI handoff.
 - They should **not** normally spend limited premium compute waiting/polling for remote PR checks, GitHub Actions, Docker CI, or public-mirror runs once code is ready for validation.
-- The same rule now explicitly applies to **long-running local exhaustive validation** after implementation scope is frozen.
+- The same rule explicitly applies to long-running local exhaustive validation after implementation scope is frozen.
 - Premium models may run focused, targeted, or reasonably fast local tests when those results are actively needed to implement/debug.
 - Once the state is effectively `implementation frozen; full suite still running; no current failure to diagnose`, the remaining full-suite work is validation-operator work.
 - Full repository regression suites, full Stats/model-quality suites, exhaustive migration/replay matrices, long certification/E2E runs, Docker certification, and routine dependency/audit rehearsals should normally be delegated to a lower-cost capable validation model.
@@ -41,27 +41,25 @@ The project has an explicit cost/compute allocation rule for agentic engineering
 - Durable rule: **Use premium tests to answer engineering questions. Use lower-cost validation to prove the finished repository exhaustively.**
 - This policy does **not** weaken any test, CI, exact-head, Docker, scientific, security, owner-approval, or documentation requirement.
 
-Use this pattern in future bounded Work prompts unless the task has no meaningful exhaustive-validation or remote-CI component.
-
 ---
 
 # Supplemental architecture completed 2026-09-08 — Daily Line Video Engine (DLVE)
 
-A complete V1 supplemental architecture baseline for automated social video now exists inside this repository.
+A complete V1 supplemental architecture baseline for automated social video exists inside this repository.
 
 ## Governing video documents
 
-- `docs/video/README.md` — video architecture index and A-series boundary map.
-- `docs/video/V00_SOCIAL_VIDEO_ENGINE_ARCHITECTURE_V1.md` — system topology, ownership, identity, provenance, renderer boundary.
-- `docs/video/V01_VIDEO_JOB_AND_FACT_CONTRACTS_V1.md` — canonical `PublishableFactPackage` through `VideoPublicationPackage` contracts.
-- `docs/video/V02_BRAND_MOTION_SYSTEM_V1.md` — Daily Line visual/motion/audio system and reusable `DailyLineBrandSting`.
-- `docs/video/V03_TEMPLATE_LIBRARY_V1.md` — `single_pick`, `top_three`, `model_explainer`, `line_movement`, `weather_edge`, `results_audit`, `data_story` templates.
-- `docs/video/V04_RENDER_ASSET_QC_HANDOFF_V1.md` — Remotion adapter, asset provenance, generated-still policy, render/QC, A-18 handoff.
-- `docs/video/V05_PERFORMANCE_EXPERIMENTATION_V1.md` — creative metrics, experimentation, cost-aware evaluation, A-24 boundary.
-- `docs/implementation/VIDEO_ENGINE_IMPLEMENTATION_ROADMAP_V1.md` — VM-0 through VM-15 implementation/certification sequence.
-- `docs/implementation/VIDEO_ENGINE_ARCHITECTURE_CONFORMANCE_REVIEW_20260908.md` — 48-case architecture stress review; PASS for the supplemental baseline.
-- `docs/adr/ADR-0008_PARAMETERIZED_VIDEO_RENDERER_AND_FACT_AUTHORITY.md` — accepted decision to use a parameterized renderer with sport-owned fact authority and Remotion as the replaceable V1 render runtime.
-- `docs/implementation/VIDEO_ENGINE_CHANGE_RECORD_20260908.md` — durable change record for this architecture pass.
+- `docs/video/README.md`
+- `docs/video/V00_SOCIAL_VIDEO_ENGINE_ARCHITECTURE_V1.md`
+- `docs/video/V01_VIDEO_JOB_AND_FACT_CONTRACTS_V1.md`
+- `docs/video/V02_BRAND_MOTION_SYSTEM_V1.md`
+- `docs/video/V03_TEMPLATE_LIBRARY_V1.md`
+- `docs/video/V04_RENDER_ASSET_QC_HANDOFF_V1.md`
+- `docs/video/V05_PERFORMANCE_EXPERIMENTATION_V1.md`
+- `docs/implementation/VIDEO_ENGINE_IMPLEMENTATION_ROADMAP_V1.md`
+- `docs/implementation/VIDEO_ENGINE_ARCHITECTURE_CONFORMANCE_REVIEW_20260908.md`
+- `docs/adr/ADR-0008_PARAMETERIZED_VIDEO_RENDERER_AND_FACT_AUTHORITY.md`
+- `docs/implementation/VIDEO_ENGINE_CHANGE_RECORD_20260908.md`
 
 ## Locked DLVE rules that must not be forgotten
 
@@ -108,47 +106,59 @@ External publication remains blocked until A-18 is certified.
 
 ---
 
-# Supplemental product architecture documented 2026-09-17 — EdgeStack Parlay Optimizer
+# EdgeStack / All Bets relocation — Daily-Line-Core owns product intelligence
 
-The Daily Line now has a formal V1 architecture and implementation handoff for a probability-first **2-5 leg parlay/combo optimizer** plus an **All Bets Prediction Scanner**.
+The EdgeStack Parlay Optimizer and All Bets Prediction Scanner were initially documented in TDLA as a coordination checkpoint, then intentionally relocated on 2026-09-17 after the product boundary was clarified.
 
-## Governing EdgeStack documents
+**Canonical logical owner:** `Daily-Line-Core (DLC)`
 
-- `docs/architecture/EDGESTACK_PARLAY_OPTIMIZER_V1.md` — product definition, ownership, All Bets scanner, leg eligibility, candidate generation, joint probability/correlation, Kalshi/provider pricing, Core/Value/Upside classes, publication contract, website/report requirements, PIT validation, and V1 invariants.
-- `docs/implementation/EDGESTACK_IMPLEMENTATION_HANDOFF_V1.md` — ES-0 through ES-10 bounded implementation sequence for GrokBot-OpenAI-Bridge / Codex.
+**Temporary canonical staging location until DLC repo creation:**
 
-## Locked EdgeStack product rules
+`OneVillage83/Daily-Data-Core/docs/daily_line_core/`
 
-1. Product name: **EdgeStack Parlay Optimizer**.
-2. Product tagline: **“Stack the Edge. Not the Odds.”**
-3. The broader pipeline must analyze and publish **every supported/modelable bet known to the system**, not only highlighted picks.
-4. Every supported bet should expose model fair probability, market price/probability, edge, Recommendation Gate, quote time, and reason/provenance.
-5. EdgeStack only builds from individually eligible Recommendation-Gate-approved legs.
-6. V1 EdgeStacks contain **2-5 legs**.
-7. Cross-game and cross-sport combinations are first-class candidates.
-8. Same-game combinations require explicit correlation/joint-probability treatment; unsupported correlation fails closed.
-9. Real Kalshi Combo/RFQ or sportsbook parlay quotes are compared against model joint probability; a synthetic product of standalone prices is diagnostic only.
-10. Required ranking views include highest hit rate, best value, best balance, and best upside.
-11. Core / Value / Upside are separate product classes; payout size alone never determines ranking.
-12. Historical evaluation must be point-in-time and contamination-free.
-13. TDLA may later orchestrate EdgeStack but may not own sport fair probabilities, Recommendation Gate semantics, or EdgeStack value mathematics.
-14. **Bankroll management, stake sizing, stop-loss/chase controls, and automated wagering are explicitly deferred from V1.**
+Governing staged documents:
 
-## Safe EdgeStack implementation sequence when intentionally resumed
+- `README.md` — DLC staging index and topology;
+- `DLC_ARCHITECTURE_V1.md` — cross-sport decision/product assembly architecture;
+- `EDGESTACK_PARLAY_OPTIMIZER_V1.md` — EdgeStack / All Bets product architecture;
+- `DLC_IMPLEMENTATION_HANDOFF_V1.md` — DLC-0 through DLC-12 Bridge/Codex sequence;
+- `DLC_REPOSITORY_BOOTSTRAP.md` — seed/extraction plan for `OneVillage83/Daily-Line-Core`.
 
-Start here:
+Repository creation is tracked in `OneVillage83/Daily-Data-Core#5`.
 
-> **ES-0 — freeze EdgeStack runtime ownership/physical repository through ADR and implement the canonical V1 contracts/fixtures in the authorized repository.**
+## Locked TDLA consumer rule
 
-Then proceed one repository per Bridge/Codex turn through the ES-series handoff. Do not jump directly to website UI, Kalshi RFQ automation, or ranking code before ES-0 contracts and ownership are frozen.
+TDLA is downstream of DLC for product intelligence.
 
-This supplemental product architecture does **not** supersede the current core TDLA A-series resume point.
+TDLA may consume a sealed `DailyLinePublicationPackage` or approved derivative `PublishableFactPackage` for:
+
+- video/social content;
+- marketing content;
+- distribution/publication automation;
+- other operational workflows allowed by TDLA architecture.
+
+TDLA must not:
+
+- calculate sport fair probabilities;
+- own Recommendation Gate semantics;
+- build the All Bets product scanner;
+- generate/rank EdgeStacks;
+- recompute cross-sport product recommendations;
+- silently alter sealed DLC product decisions.
+
+The local files `docs/architecture/EDGESTACK_PARLAY_OPTIMIZER_V1.md` and `docs/implementation/EDGESTACK_IMPLEMENTATION_HANDOFF_V1.md` are now relocation notices only.
+
+## Bridge proving-ground rule
+
+The GrokBot-OpenAI-Bridge is currently being tested against TDLA because TDLA is near completion and provides a bounded proving ground. This does not make TDLA the owner of DLC/EdgeStack intelligence.
+
+Once the bridge test is accepted and the authorized repository catalog expands, `Daily-Line-Core` should become its own registered repository/workstream and begin at **DLC-0**, not inside TDLA.
 
 ---
 
 # Exact next core TDLA step — A-11 Retry / Timeout / Idempotency Architecture
 
-The video architecture and EdgeStack supplemental product architecture are documented for future intentional execution and do **not** supersede the canonical A-series sequence.
+The video architecture and DLC relocation do **not** supersede the canonical A-series sequence.
 
 Resume core TDLA architecture at:
 
@@ -164,9 +174,9 @@ A-11 must freeze logical operation identity, StageRun uniqueness, stable logical
 
 Do not redo architecture discovery. Read the V-series documents above and begin **VM-0** directly.
 
-## If the next user request is specifically to start building EdgeStack
+## If the next user request is specifically to start building EdgeStack / Daily-Line-Core
 
-Do not reconstruct intent from chat history. Read the two EdgeStack documents above and begin **ES-0** directly, preserving one-repository-per-turn Bridge routing.
+Do not implement it in this repository. Use the canonical DLC staging docs in `OneVillage83/Daily-Data-Core/docs/daily_line_core/`; create/seed `OneVillage83/Daily-Line-Core`, then begin **DLC-0**.
 
 ## If the next user request is to continue the main automation architecture
 
