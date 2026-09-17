@@ -142,17 +142,41 @@ Important certified rules:
 - PostgreSQL is intended as authoritative TDLA persistence; A-13 will freeze DDL/transaction mechanics.
 - every material change leaves durable journal/status/resume documentation.
 
-## Supplemental product-intelligence architecture
+## External upstream product-intelligence boundary — Daily-Line-Core
 
-These documents are cross-repository product architecture stored here for durable coordination. They do **not** move model/value/Recommendation Gate authority into TDLA and do not supersede the A-series sequence.
+EdgeStack and the All Bets Prediction Scanner are **not TDLA-owned capabilities**.
 
-| Feature | Architecture | Implementation handoff | Status |
-|---|---|---|---|
-| **EdgeStack Parlay Optimizer** | `EDGESTACK_PARLAY_OPTIMIZER_V1.md` | `../implementation/EDGESTACK_IMPLEMENTATION_HANDOFF_V1.md` | **DOCUMENTED — FUTURE IMPLEMENTATION** |
+The canonical logical owner is **Daily-Line-Core (DLC)**, a planned peer repository that consumes sealed sport decision packages plus Daily-Data-Core market evidence and emits a sealed `DailyLinePublicationPackage` for downstream consumers.
 
-EdgeStack formalizes a probability-first 2-5 leg parlay/combo optimizer plus an All Bets Prediction Scanner. It consumes versioned sport fair probabilities/Recommendation Gates and DDC market observations, evaluates real Kalshi/provider combo quotes, adjusts joint probabilities for correlation, and publishes Core/Value/Upside combinations. Its product tagline is **“Stack the Edge. Not the Odds.”**
+Until `OneVillage83/Daily-Line-Core` is created, canonical DLC planning documents are staged under:
 
-Bankroll management, stake sizing, chase controls, and automated wagering are explicitly deferred from EdgeStack V1.
+`OneVillage83/Daily-Data-Core/docs/daily_line_core/`
+
+Key staged documents:
+
+- `DLC_ARCHITECTURE_V1.md`
+- `EDGESTACK_PARLAY_OPTIMIZER_V1.md`
+- `DLC_IMPLEMENTATION_HANDOFF_V1.md`
+- `DLC_REPOSITORY_BOOTSTRAP.md`
+
+The legacy local TDLA paths:
+
+- `docs/architecture/EDGESTACK_PARLAY_OPTIMIZER_V1.md`
+- `docs/implementation/EDGESTACK_IMPLEMENTATION_HANDOFF_V1.md`
+
+are retained only as relocation notices so existing links do not silently misroute future agents.
+
+### TDLA consumer rule
+
+TDLA may consume DLC-sealed `DailyLinePublicationPackage` or approved derivative `PublishableFactPackage` artifacts for video/social/content/marketing/publication automation. TDLA must not calculate or modify:
+
+- sport fair probabilities;
+- Recommendation Gate semantics;
+- All Bets ranking/assembly;
+- EdgeStack candidate generation/joint probability/value/ranking;
+- cross-sport product recommendation authority.
+
+The current GrokBot-OpenAI-Bridge being tested in TDLA is a bounded proving-ground choice because TDLA is near completion; it does not imply product-intelligence ownership.
 
 ## Change process
 
