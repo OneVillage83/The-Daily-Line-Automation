@@ -106,25 +106,25 @@ External publication remains blocked until A-18 is certified.
 
 ---
 
-# EdgeStack / All Bets relocation — Daily-Line-Core owns product intelligence
+# EdgeStack / All Bets relocation — canonical Daily-Line-Core repo now exists
 
 The EdgeStack Parlay Optimizer and All Bets Prediction Scanner were initially documented in TDLA as a coordination checkpoint, then intentionally relocated on 2026-09-17 after the product boundary was clarified.
 
-**Canonical logical owner:** `Daily-Line-Core (DLC)`
+**Canonical owner:** `OneVillage83/Daily-Line-Core`
 
-**Temporary canonical staging location until DLC repo creation:**
+Canonical DLC documents now include:
 
-`OneVillage83/Daily-Data-Core/docs/daily_line_core/`
+- `README.md` — mission/system position;
+- `AGENTS.md` — DLC constitution;
+- `CODEX_START_HERE.md` — mandatory agent entry point;
+- `docs/ARCHITECTURE.md` — cross-sport decision/product assembly architecture;
+- `docs/OWNERSHIP_BOUNDARIES.md` — repository authority split;
+- `docs/INTEGRATION_CONTRACTS.md` — sport/DDC/DLC/downstream handoffs;
+- `docs/EDGESTACK_PARLAY_OPTIMIZER_V1.md` — EdgeStack / All Bets product architecture;
+- `docs/IMPLEMENTATION_ROADMAP.md` — DLC-0 through DLC-12 sequence;
+- `docs/CURRENT_RESUME_POINT.md` — exact DLC continuation point.
 
-Governing staged documents:
-
-- `README.md` — DLC staging index and topology;
-- `DLC_ARCHITECTURE_V1.md` — cross-sport decision/product assembly architecture;
-- `EDGESTACK_PARLAY_OPTIMIZER_V1.md` — EdgeStack / All Bets product architecture;
-- `DLC_IMPLEMENTATION_HANDOFF_V1.md` — DLC-0 through DLC-12 Bridge/Codex sequence;
-- `DLC_REPOSITORY_BOOTSTRAP.md` — seed/extraction plan for `OneVillage83/Daily-Line-Core`.
-
-Repository creation is tracked in `OneVillage83/Daily-Data-Core#5`.
+The former `OneVillage83/Daily-Data-Core/docs/daily_line_core/` staging directory is historical only.
 
 ## Locked TDLA consumer rule
 
@@ -146,13 +146,13 @@ TDLA must not:
 - recompute cross-sport product recommendations;
 - silently alter sealed DLC product decisions.
 
-The local files `docs/architecture/EDGESTACK_PARLAY_OPTIMIZER_V1.md` and `docs/implementation/EDGESTACK_IMPLEMENTATION_HANDOFF_V1.md` are now relocation notices only.
+The local files `docs/architecture/EDGESTACK_PARLAY_OPTIMIZER_V1.md` and `docs/implementation/EDGESTACK_IMPLEMENTATION_HANDOFF_V1.md` are relocation notices only.
 
 ## Bridge proving-ground rule
 
-The GrokBot-OpenAI-Bridge is currently being tested against TDLA because TDLA is near completion and provides a bounded proving ground. This does not make TDLA the owner of DLC/EdgeStack intelligence.
+The GrokBot-OpenAI-Bridge is still being proven against TDLA because TDLA is near completion and provides a bounded proving ground. This does not make TDLA the owner of DLC/EdgeStack intelligence.
 
-Once the bridge test is accepted and the authorized repository catalog expands, `Daily-Line-Core` should become its own registered repository/workstream and begin at **DLC-0**, not inside TDLA.
+DLC is **not yet authorized** merely because its repository exists. After TDLA proving-ground acceptance and explicit owner authorization, add `OneVillage83/Daily-Line-Core` to the Bridge authorized catalog as its own repository/workstream. Its current next step is **DLC-0 architecture/ownership conformance review**.
 
 ---
 
@@ -174,9 +174,9 @@ A-11 must freeze logical operation identity, StageRun uniqueness, stable logical
 
 Do not redo architecture discovery. Read the V-series documents above and begin **VM-0** directly.
 
-## If the next user request is specifically to start building EdgeStack / Daily-Line-Core
+## If the next user request is specifically to work on EdgeStack / Daily-Line-Core
 
-Do not implement it in this repository. Use the canonical DLC staging docs in `OneVillage83/Daily-Data-Core/docs/daily_line_core/`; create/seed `OneVillage83/Daily-Line-Core`, then begin **DLC-0**.
+Do not implement it in this repository. Route work to `OneVillage83/Daily-Line-Core` and follow its `CODEX_START_HERE.md` / `docs/CURRENT_RESUME_POINT.md`. Do not add DLC to Bridge authorization until the proving-ground acceptance and explicit owner approval are complete.
 
 ## If the next user request is to continue the main automation architecture
 
