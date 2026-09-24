@@ -1,7 +1,7 @@
 # Daily WNBA Build Boundary V1
 
-**Status:** PLANNED — IMPLEMENTATION NOT AUTHORIZED BY THIS FILE  
-**Planned repository:** `OneVillage83/Daily-WNBA`
+**Status:** EXISTING EMPTY REPOSITORY — ARCHITECTURE / IMPLEMENTATION NOT AUTHORIZED BY THIS FILE  
+**Repository:** `OneVillage83/Daily-WNBA`
 
 Read `SHARED_SPORT_BUILD_CONSTITUTION_V1.md` first.
 
