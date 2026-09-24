@@ -181,3 +181,21 @@ If one work unit contains several logically distinct material changes, record th
 4. Every completed work session updates `docs/implementation/CURRENT_RESUME_POINT.md`.
 5. Certification authority changes must also update `ARCHITECTURE_CERTIFICATION_LOG.md`.
 6. Use an actual ISO-8601 timestamp for new entries; do not use placeholder time-of-day values.
+
+
+---
+
+## 2026-09-23T23:23:00-07:00 — Sport build boundary pack established
+
+- **Change ID:** DLADS-SPORT-BOUNDARIES-V1
+- **Area:** program coordination / documentation / sport expansion guardrails.
+- **Summary:** Added a shared sport build constitution plus program-level build-boundary documents for Daily-MLB, Daily-NFL, Daily-NCAAF, planned Daily-NBA, Daily-NCAAB, Daily-WNBA, Daily-NHL and Daily-Soccer, plus a future-sport template. Linked the pack from the DLADS README and recorded it in the TDLA resume point without changing the current core TDLA milestone.
+- **Reason:** Give the GrokBot-OpenAI-Bridge and DLADS supervisor durable boundaries before sport work is dispatched, preventing scope drift, cross-repository ownership leakage, market contamination of independent forecasts, accidental pregame/live mixing, and copy/rename architectures across sports.
+- **Files/components affected:** `docs/agent-system/sport-build-boundaries/`; `docs/agent-system/README.md`; `docs/implementation/CURRENT_RESUME_POINT.md`; this journal.
+- **Authority/contract impact:** Coordination guidance only. Existing sport repositories retain local authority. Future sport outlines do not create repositories, certify architecture, or grant Bridge registration/production authority. Daily-Line-Core remains owner of All Bets/EdgeStack after sealed SportDecisionPackages; TDLA remains orchestration-only.
+- **Data/migration impact:** None.
+- **Operational impact:** Before sport expansion, Bridge supervisors now have an explicit mandatory read path and stop conditions. One repository per Codex turn remains unchanged.
+- **Validation/evidence:** All sport files inherit the shared independent-prediction market firewall, PIT discipline, immutable prediction/gate history, live/pregame separation and manual-first automation rule.
+- **Risks/open questions:** Exact future sport repository creation order and detailed local architecture remain owner decisions. NCAAB supports competition namespaces so women's college basketball is not structurally excluded; a later repository split would require an explicit authority decision. Soccer is competition-registry driven and includes women's competitions with independent calibration requirements.
+- **Rollback/recovery:** Remove or supersede this pack only through a documented program-level change; do not silently delete local sport authority references.
+- **Next exact step:** No change to the active TDLA core resume point. When the owner chooses a future sport, use the exact boundary file to bootstrap that sport's local architecture before implementation; otherwise continue currently authorized repository-local work.
