@@ -187,6 +187,13 @@ Begin **A-11** directly.
 
 # Supplemental program planning — sport build boundary pack
 
-Added 2026-09-23 and expanded after reconciling the GitHub `Daily-*` sport catalog. DLADS now contains `docs/agent-system/sport-build-boundaries/` with a shared sport constitution plus dedicated build-boundary files for all 15 current sport repositories: MLB, NFL, NCAAF, NBA, WNBA, NCAAB (**men's college basketball**), NCAAWB (**women's college basketball**), NHL, Soccer, Tennis, Golf, MMA, Boxing, Motorsports and Esports, plus a future-sport template.
+Added 2026-09-23 and expanded after reconciling the GitHub `Daily-*` sport catalog. DLADS now contains `docs/GrokBot OpenAI Bridge/sport-build-boundaries/` with a shared sport constitution plus dedicated build-boundary files for all 15 current sport repositories: MLB, NFL, NCAAF, NBA, WNBA, NCAAB (**men's college basketball**), NCAAWB (**women's college basketball**), NHL, Soccer, Tennis, Golf, MMA, Boxing, Motorsports and Esports, plus a future-sport template.
 
 This is **program coordination guidance only**. It does not alter TDLA's core certification state, does not authorize any future sport repository for Bridge execution, and does not change the exact next core TDLA architecture step already recorded by this file: **A-11 Retry / Timeout / Idempotency Architecture**.
+
+
+---
+
+# GrokBot OpenAI Bridge directory migration
+
+The former TDLA coordination path `docs/agent-system/` has been retired and renamed to `docs/GrokBot OpenAI Bridge/` so Bridge-facing planning, state, workflow, and sport boundary documents have one unmistakable home. The Bridge must begin with `docs/GrokBot OpenAI Bridge/BRIDGE_START_HERE.md` for Daily Line coordination work. This path migration does not alter TDLA architecture certification or the exact core continuation milestone recorded above.

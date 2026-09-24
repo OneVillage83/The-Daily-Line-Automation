@@ -75,7 +75,7 @@ PASS requires:
 - transient vs substantive failures are classified;
 - substantive failures are escalated, not papered over.
 
-## Agent-system promotion gate
+## GrokBot OpenAI Bridge / DLADS promotion gate
 
 Before publishing any DLADS role as a persistent OpenAI runtime agent:
 

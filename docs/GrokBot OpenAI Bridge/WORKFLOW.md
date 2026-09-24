@@ -45,7 +45,7 @@ Explicit user scope wins over automatic priority selection.
 Read:
 
 1. root `AGENTS.md`;
-2. `docs/agent-system/README.md`;
+2. `docs/GrokBot OpenAI Bridge/README.md`;
 3. `CODEX_SUPERVISION_LOOP.md`;
 4. `ACTIVE_EXECUTION_PLAN.md`;
 5. `state/program_state.json`;

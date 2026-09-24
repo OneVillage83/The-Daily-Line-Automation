@@ -8,7 +8,7 @@
     "title": "Cross-repository truth reconciliation",
     "status": "READY",
     "target_repository": "OneVillage83/The-Daily-Line-Automation",
-    "details": "docs/agent-system/ACTIVE_EXECUTION_PLAN.md"
+    "details": "docs/GrokBot OpenAI Bridge/ACTIVE_EXECUTION_PLAN.md"
   },
   "macro_sequence": [
     "shared-data-authority",

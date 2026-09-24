@@ -12,7 +12,7 @@ description: Continue The Daily Line from verified GitHub repository truth, sele
 
 ## Workflow
 
-1. Read repository root `AGENTS.md` and `docs/agent-system/README.md`.
+1. Read repository root `AGENTS.md` and `docs/GrokBot OpenAI Bridge/README.md`.
 2. Read `ACTIVE_EXECUTION_PLAN.md`, `state/program_state.json`, and `REPOSITORY_REGISTRY.md`.
 3. If the user did not choose a task, resolve the highest-priority unblocked candidate.
 4. Fetch/inspect that repository's actual default head and local AGENTS/start/resume/certification documents.

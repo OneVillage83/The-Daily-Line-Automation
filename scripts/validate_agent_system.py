@@ -6,7 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 AGENTS_DIR = ROOT / "agents"
-STATE = ROOT / "docs" / "agent-system" / "state" / "program_state.json"
+STATE = ROOT / "docs" / "GrokBot OpenAI Bridge" / "state" / "program_state.json"
 
 REQUIRED_MANIFEST = {
     "schema_version",

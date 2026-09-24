@@ -268,12 +268,12 @@ A change is not done merely because code runs. It is done when applicable:
 
 For a request that spans The Daily Line program rather than this repository alone — especially **"Continue Daily Line development"** — also read:
 
-1. `docs/agent-system/README.md`
-2. `docs/agent-system/ACTIVE_EXECUTION_PLAN.md`
-3. `docs/agent-system/state/program_state.json`
-4. `docs/agent-system/REPOSITORY_REGISTRY.md`
-5. `docs/agent-system/WORKFLOW.md`
-6. `docs/agent-system/EVALUATION_GATES.md`
+1. `docs/GrokBot OpenAI Bridge/README.md`
+2. `docs/GrokBot OpenAI Bridge/ACTIVE_EXECUTION_PLAN.md`
+3. `docs/GrokBot OpenAI Bridge/state/program_state.json`
+4. `docs/GrokBot OpenAI Bridge/REPOSITORY_REGISTRY.md`
+5. `docs/GrokBot OpenAI Bridge/WORKFLOW.md`
+6. `docs/GrokBot OpenAI Bridge/EVALUATION_GATES.md`
 
 Use the `daily-line-continue`, `daily-line-repo-audit`, and `daily-line-validation-handoff` workflows under `codex/skills/` when relevant.
 

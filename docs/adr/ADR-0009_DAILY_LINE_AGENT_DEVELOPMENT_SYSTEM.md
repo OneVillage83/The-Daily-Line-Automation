@@ -58,10 +58,10 @@ DLADS is not:
 
 ## References
 
-- `docs/agent-system/README.md`
-- `docs/agent-system/CODEX_SUPERVISION_LOOP.md`
-- `docs/agent-system/ACTIVE_EXECUTION_PLAN.md`
-- `docs/agent-system/WORKFLOW.md`
-- `docs/agent-system/EVALUATION_GATES.md`
-- `docs/agent-system/MULTI_PROVIDER_EXECUTION_STRATEGY.md`
+- `docs/GrokBot OpenAI Bridge/README.md`
+- `docs/GrokBot OpenAI Bridge/CODEX_SUPERVISION_LOOP.md`
+- `docs/GrokBot OpenAI Bridge/ACTIVE_EXECUTION_PLAN.md`
+- `docs/GrokBot OpenAI Bridge/WORKFLOW.md`
+- `docs/GrokBot OpenAI Bridge/EVALUATION_GATES.md`
+- `docs/GrokBot OpenAI Bridge/MULTI_PROVIDER_EXECUTION_STRATEGY.md`
 - `docs/implementation/AI_AGENT_MODEL_AND_CI_EXECUTION_POLICY.md`

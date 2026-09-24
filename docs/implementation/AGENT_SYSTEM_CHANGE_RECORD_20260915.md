@@ -15,8 +15,8 @@ The Daily Line now spans enough repositories, certifications, and long-horizon e
 ## Files/components affected
 
 New or updated:
-- `docs/agent-system/`
-- `docs/agent-system/MULTI_PROVIDER_EXECUTION_STRATEGY.md`
+- `docs/GrokBot OpenAI Bridge/`
+- `docs/GrokBot OpenAI Bridge/MULTI_PROVIDER_EXECUTION_STRATEGY.md`
 - `agents/` DLADS role definitions
 - `codex/skills/` Daily Line development skills
 - `scripts/validate_agent_system.py`
@@ -60,4 +60,4 @@ Remove the new DLADS files and root pointer. No production rollback is required 
 
 ## Next exact step
 
-Execute **DL-AGENT-1 — Cross-repository truth reconciliation** from `docs/agent-system/ACTIVE_EXECUTION_PLAN.md`, using the multi-provider strategy for read-only parallel audits where useful, then select the first real bounded program task from verified repository truth.
+Execute **DL-AGENT-1 — Cross-repository truth reconciliation** from `docs/GrokBot OpenAI Bridge/ACTIVE_EXECUTION_PLAN.md`, using the multi-provider strategy for read-only parallel audits where useful, then select the first real bounded program task from verified repository truth.

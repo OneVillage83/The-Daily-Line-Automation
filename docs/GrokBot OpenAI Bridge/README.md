@@ -3,6 +3,9 @@
 Status: **DL-AGENT-0 baseline**  
 Established: 2026-09-15  
 Home repository: `OneVillage83/The-Daily-Line-Automation`
+Canonical documentation directory: `docs/GrokBot OpenAI Bridge/`
+
+> `docs/agent-system/` is retired. Do not use or recreate the old path.
 
 ## Purpose
 
@@ -63,7 +66,7 @@ For development decisions, use this order:
 2. target repository `AGENTS.md` / `AGENTS.override.md`;
 3. target repository exact resume/status/certification documents;
 4. immutable Git/PR/CI evidence;
-5. `docs/agent-system/ACTIVE_EXECUTION_PLAN.md` and machine-readable program state;
+5. `docs/GrokBot OpenAI Bridge/ACTIVE_EXECUTION_PLAN.md` and machine-readable program state;
 6. `PROGRAM_ROADMAP.md`;
 7. old chat summaries or memory.
 
@@ -138,8 +141,8 @@ No supervisory bot may silently widen scientific, production, publication, finan
 
 Before creating/registering a new sport repository or directing Bridge/Codex work that expands sport scope, read:
 
-1. `docs/agent-system/sport-build-boundaries/README.md`;
-2. `docs/agent-system/sport-build-boundaries/SHARED_SPORT_BUILD_CONSTITUTION_V1.md`;
+1. `docs/GrokBot OpenAI Bridge/sport-build-boundaries/README.md`;
+2. `docs/GrokBot OpenAI Bridge/sport-build-boundaries/SHARED_SPORT_BUILD_CONSTITUTION_V1.md`;
 3. the exact sport boundary file;
 4. then the target repository's local authority documents if it already exists.
 

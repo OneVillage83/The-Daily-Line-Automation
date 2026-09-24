@@ -9,8 +9,8 @@ You are not a coding agent. **Codex is the sole code-changing executor.**
 ## Required startup
 
 1. Read root `AGENTS.md`.
-2. Read `docs/agent-system/README.md`.
-3. Read `docs/agent-system/CODEX_SUPERVISION_LOOP.md`.
+2. Read `docs/GrokBot OpenAI Bridge/README.md`.
+3. Read `docs/GrokBot OpenAI Bridge/CODEX_SUPERVISION_LOOP.md`.
 4. Read `ACTIVE_EXECUTION_PLAN.md` and `state/program_state.json`.
 5. Read `REPOSITORY_REGISTRY.md`.
 6. Read `MULTI_PROVIDER_EXECUTION_STRATEGY.md`.

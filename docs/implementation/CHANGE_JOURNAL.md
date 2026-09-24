@@ -191,7 +191,7 @@ If one work unit contains several logically distinct material changes, record th
 - **Area:** program coordination / documentation / sport expansion guardrails.
 - **Summary:** Added a shared sport build constitution plus program-level build-boundary documents for Daily-MLB, Daily-NFL, Daily-NCAAF, planned Daily-NBA, Daily-NCAAB, Daily-WNBA, Daily-NHL and Daily-Soccer, plus a future-sport template. Linked the pack from the DLADS README and recorded it in the TDLA resume point without changing the current core TDLA milestone.
 - **Reason:** Give the GrokBot-OpenAI-Bridge and DLADS supervisor durable boundaries before sport work is dispatched, preventing scope drift, cross-repository ownership leakage, market contamination of independent forecasts, accidental pregame/live mixing, and copy/rename architectures across sports.
-- **Files/components affected:** `docs/agent-system/sport-build-boundaries/`; `docs/agent-system/README.md`; `docs/implementation/CURRENT_RESUME_POINT.md`; this journal.
+- **Files/components affected:** `docs/GrokBot OpenAI Bridge/sport-build-boundaries/`; `docs/GrokBot OpenAI Bridge/README.md`; `docs/implementation/CURRENT_RESUME_POINT.md`; this journal.
 - **Authority/contract impact:** Coordination guidance only. Existing sport repositories retain local authority. Future sport outlines do not create repositories, certify architecture, or grant Bridge registration/production authority. Daily-Line-Core remains owner of All Bets/EdgeStack after sealed SportDecisionPackages; TDLA remains orchestration-only.
 - **Data/migration impact:** None.
 - **Operational impact:** Before sport expansion, Bridge supervisors now have an explicit mandatory read path and stop conditions. One repository per Codex turn remains unchanged.
@@ -214,3 +214,17 @@ If one work unit contains several logically distinct material changes, record th
 - **Operational impact:** The Bridge now has a sport-native scope document for every current `Daily-*` repository whose purpose is a distinct sport. Shared/core/system repositories are excluded from the sport catalog.
 - **Validation/evidence:** GitHub repository search confirmed the 15 sport repositories. The seven newly added sport repositories are currently empty, allowing architecture-first bootstrapping before implementation.
 - **Next exact step:** No change to TDLA A-11 or any active repo-local resume point. When a sport is selected, bootstrap/read its local authority from the corresponding boundary file in one bounded repository turn.
+
+
+---
+
+## 2026-09-23T23:23:00-07:00 — DLADS directory renamed for GrokBot OpenAI Bridge clarity
+
+- **Change ID:** DLADS-BRIDGE-DIRECTORY-RENAME-V1
+- **Area:** program coordination / path migration / Bridge discoverability.
+- **Summary:** Renamed the complete TDLA coordination directory from `docs/agent-system/` to `docs/GrokBot OpenAI Bridge/`, preserving all DLADS planning, workflow, schemas, program state, and sport-build-boundary content. Added `BRIDGE_START_HERE.md` as the canonical Daily Line Bridge entry point and updated active path references and validation code.
+- **Reason:** Eliminate ambiguity for the GrokBot-OpenAI-Bridge by giving Bridge-facing Daily Line coordination documents one explicit, human-readable home.
+- **Authority impact:** None. This is a path/discoverability migration only. Target repositories retain local architecture/certification authority, one-repository-per-Codex-turn remains unchanged, and TDLA's core resume point is unchanged.
+- **Compatibility:** The old `docs/agent-system/` path is retired and must not be recreated or used as fallback authority.
+- **Validation:** The structural validation script now reads `docs/GrokBot OpenAI Bridge/state/program_state.json`; active root/supervisor/Codex documentation points to the renamed location.
+- **Next exact step:** For Daily Line Bridge coordination, start at `docs/GrokBot OpenAI Bridge/BRIDGE_START_HERE.md`, then follow target-repository local authority.

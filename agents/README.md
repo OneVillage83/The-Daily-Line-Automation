@@ -23,4 +23,4 @@ Current roles:
 - `documentation` — coordination-state/documentation role;
 - `validation-ci` — validation/CI monitor, not a fixer.
 
-All runtime manifests begin `not_published`. Publishing an agent requires the gate in `docs/agent-system/EVALUATION_GATES.md` and the relevant runtime adapter process.
+All runtime manifests begin `not_published`. Publishing an agent requires the gate in `docs/GrokBot OpenAI Bridge/EVALUATION_GATES.md` and the relevant runtime adapter process.

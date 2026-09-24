@@ -77,4 +77,4 @@ Read-only audits may run in parallel. Writes may proceed in parallel only when r
 
 ## Completion handoff
 
-At the end of DL-AGENT-1, replace this file's current milestone section with the exact selected development task and retain a short reconciliation receipt in `docs/agent-system/history/`.
+At the end of DL-AGENT-1, replace this file's current milestone section with the exact selected development task and retain a short reconciliation receipt in `docs/GrokBot OpenAI Bridge/history/`.
