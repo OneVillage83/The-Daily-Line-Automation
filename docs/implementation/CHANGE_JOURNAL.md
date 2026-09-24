@@ -199,3 +199,18 @@ If one work unit contains several logically distinct material changes, record th
 - **Risks/open questions:** Exact future sport repository creation order and detailed local architecture remain owner decisions. NCAAB supports competition namespaces so women's college basketball is not structurally excluded; a later repository split would require an explicit authority decision. Soccer is competition-registry driven and includes women's competitions with independent calibration requirements.
 - **Rollback/recovery:** Remove or supersede this pack only through a documented program-level change; do not silently delete local sport authority references.
 - **Next exact step:** No change to the active TDLA core resume point. When the owner chooses a future sport, use the exact boundary file to bootstrap that sport's local architecture before implementation; otherwise continue currently authorized repository-local work.
+
+
+---
+
+## 2026-09-23T23:23:00-07:00 — Sport boundary catalog expanded to every current Daily sport repo
+
+- **Change ID:** DLADS-SPORT-BOUNDARIES-V1-EXPANSION
+- **Area:** program coordination / sport catalog / documentation correction.
+- **Summary:** Reconciled the GitHub `Daily-*` repository catalog and added dedicated sport build-boundary documents for `Daily-Tennis`, `Daily-NCAAWB`, `Daily-Esports`, `Daily-MMA`, `Daily-Boxing`, `Daily-Golf`, and `Daily-Motorsports`. Confirmed `Daily-NBA`, `Daily-NCAAB`, `Daily-WNBA`, `Daily-NHL`, and `Daily-Soccer` already exist as empty repositories and corrected their boundary-file status accordingly.
+- **Naming/authority correction:** `Daily-NCAAB` is **men's college basketball**. `Daily-NCAAWB` is **women's college basketball**. They are separate sport repositories and separate statistical/production authorities. Generic basketball infrastructure may be shared later only after semantic compatibility is demonstrated; model weights, calibration, market support, Recommendation Gates and certification are not shared by default.
+- **Current sport catalog covered:** MLB, NFL, NCAAF, NBA, WNBA, NCAAB, NCAAWB, NHL, Soccer, Tennis, Golf, MMA, Boxing, Motorsports and Esports.
+- **Authority/contract impact:** Program coordination only. Existing active repos retain local architecture authority; empty repos are not Bridge-authorized merely because a boundary plan exists.
+- **Operational impact:** The Bridge now has a sport-native scope document for every current `Daily-*` repository whose purpose is a distinct sport. Shared/core/system repositories are excluded from the sport catalog.
+- **Validation/evidence:** GitHub repository search confirmed the 15 sport repositories. The seven newly added sport repositories are currently empty, allowing architecture-first bootstrapping before implementation.
+- **Next exact step:** No change to TDLA A-11 or any active repo-local resume point. When a sport is selected, bootstrap/read its local authority from the corresponding boundary file in one bounded repository turn.
