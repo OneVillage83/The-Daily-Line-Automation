@@ -17,15 +17,27 @@ These documents are **coordination guardrails, not replacement architecture**. E
 
 ## Sport files
 
-- `DAILY_MLB_BUILD_BOUNDARY_V1.md` — existing repo; local Daily-MLB authority wins
-- `DAILY_NFL_BUILD_BOUNDARY_V1.md` — existing repo; F-0 through F-24 local authority wins
-- `DAILY_NCAAF_BUILD_BOUNDARY_V1.md` — existing repo; local F-layer architecture/overlay wins
-- `DAILY_NBA_BUILD_BOUNDARY_V1.md` — planned
-- `DAILY_NCAAB_BUILD_BOUNDARY_V1.md` — planned college-basketball architecture
-- `DAILY_WNBA_BUILD_BOUNDARY_V1.md` — planned; separate validation/calibration from NBA
-- `DAILY_NHL_BUILD_BOUNDARY_V1.md` — planned
-- `DAILY_SOCCER_BUILD_BOUNDARY_V1.md` — planned multi-competition architecture
-- `FUTURE_SPORT_TEMPLATE_V1.md` — bootstrap template for any later sport
+The current GitHub sport-repository catalog is:
+
+- `Daily-MLB` -> `DAILY_MLB_BUILD_BOUNDARY_V1.md` — existing active repo; local Daily-MLB authority wins
+- `Daily-NFL` -> `DAILY_NFL_BUILD_BOUNDARY_V1.md` — existing active repo; F-0 through F-24 local authority wins
+- `Daily-NCAAF` -> `DAILY_NCAAF_BUILD_BOUNDARY_V1.md` — existing active repo; local F-layer architecture/overlay wins
+- `Daily-NBA` -> `DAILY_NBA_BUILD_BOUNDARY_V1.md` — existing empty repo
+- `Daily-WNBA` -> `DAILY_WNBA_BUILD_BOUNDARY_V1.md` — existing empty repo
+- `Daily-NCAAB` -> `DAILY_NCAAB_BUILD_BOUNDARY_V1.md` — existing empty repo; **men's college basketball**
+- `Daily-NCAAWB` -> `DAILY_NCAAWB_BUILD_BOUNDARY_V1.md` — existing empty repo; **women's college basketball**
+- `Daily-NHL` -> `DAILY_NHL_BUILD_BOUNDARY_V1.md` — existing empty repo
+- `Daily-Soccer` -> `DAILY_SOCCER_BUILD_BOUNDARY_V1.md` — existing empty repo; multi-competition, including separately validated men's and women's competitions
+- `Daily-Tennis` -> `DAILY_TENNIS_BUILD_BOUNDARY_V1.md` — existing empty repo
+- `Daily-Golf` -> `DAILY_GOLF_BUILD_BOUNDARY_V1.md` — existing empty repo
+- `Daily-MMA` -> `DAILY_MMA_BUILD_BOUNDARY_V1.md` — existing empty repo
+- `Daily-Boxing` -> `DAILY_BOXING_BUILD_BOUNDARY_V1.md` — existing empty repo
+- `Daily-Motorsports` -> `DAILY_MOTORSPORTS_BUILD_BOUNDARY_V1.md` — existing empty repo; series-adapter architecture
+- `Daily-Esports` -> `DAILY_ESPORTS_BUILD_BOUNDARY_V1.md` — existing empty repo; title/patch-adapter architecture
+
+`FUTURE_SPORT_TEMPLATE_V1.md` remains the required bootstrap template if another sport repo is added later.
+
+Shared/core repositories such as `Daily-Data-Core`, `Daily-Model-Core`, `Daily-Line-Core`, validation, website, and automation are intentionally not listed as sports.
 
 ## Required program flow
 
