@@ -133,3 +133,14 @@ Do not jump to a later phase merely because it is easier or more visible.
 ## Safety rule
 
 No supervisory bot may silently widen scientific, production, publication, financial, or destructive authority. If a bot discovers a needed implementation change, it must produce a Codex prompt or escalation—not a code patch.
+
+## Sport build boundary pack
+
+Before creating/registering a new sport repository or directing Bridge/Codex work that expands sport scope, read:
+
+1. `docs/agent-system/sport-build-boundaries/README.md`;
+2. `docs/agent-system/sport-build-boundaries/SHARED_SPORT_BUILD_CONSTITUTION_V1.md`;
+3. the exact sport boundary file;
+4. then the target repository's local authority documents if it already exists.
+
+These program-level files constrain scope but never supersede certified local sport architecture. Their existence does not authorize a future repository for Bridge execution.
