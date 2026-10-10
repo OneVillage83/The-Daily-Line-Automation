@@ -147,3 +147,5 @@ Before creating/registering a new sport repository or directing Bridge/Codex wor
 4. then the target repository's local authority documents if it already exists.
 
 These program-level files constrain scope but never supersede certified local sport architecture. Their existence does not authorize a future repository for Bridge execution.
+
+The [NHL planning guide and Feature Dictionary v0.2](sport-build-boundaries/nhl/README.md) extend the NHL boundary with proposed regular/advanced statistics, source and point-in-time requirements, model-input/output separation, and pending research decisions. This 2026-10-10 documentation checkpoint does not change program priority, repository registration or certification.

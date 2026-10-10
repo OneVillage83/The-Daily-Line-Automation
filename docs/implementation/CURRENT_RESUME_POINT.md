@@ -1,6 +1,7 @@
 # The Daily Line Automation — Current Resume Point
 
-Last updated: 2026-09-17 (America/Los_Angeles)  
+Last updated: 2026-10-10 (America/Los_Angeles)
+
 Authority: This file is the single exact continuation point for unfinished TDLA work. It does not override architecture/certification authority; it tells the next session where to resume.
 
 ## Current core TDLA state
@@ -197,3 +198,18 @@ This is **program coordination guidance only**. It does not alter TDLA's core ce
 # GrokBot OpenAI Bridge directory migration
 
 The former TDLA coordination path `docs/agent-system/` has been retired and renamed to `docs/GrokBot OpenAI Bridge/` so Bridge-facing planning, state, workflow, and sport boundary documents have one unmistakable home. The Bridge must begin with `docs/GrokBot OpenAI Bridge/BRIDGE_START_HERE.md` for Daily Line coordination work. This path migration does not alter TDLA architecture certification or the exact core continuation milestone recorded above.
+
+---
+
+# Supplemental NHL planning checkpoint — Feature Dictionary v0.2
+
+Updated 2026-10-10 under the owner's request to reconcile the existing NHL plan and the new detailed feature dictionary in GitHub. Change ID: `NHL-FEATURE-DICTIONARY-20261010-V0_2`.
+
+- [NHL planning guide](../GrokBot%20OpenAI%20Bridge/sport-build-boundaries/nhl/README.md) connects the original feature families, target inventory, Model Zoo and SB-0 through SB-15 sequence to the detailed proposal.
+- [Feature Dictionary v0.2](../GrokBot%20OpenAI%20Bridge/sport-build-boundaries/nhl/FEATURE_DICTIONARY_V0_2.md) and its [structured source](../GrokBot%20OpenAI%20Bridge/sport-build-boundaries/nhl/FEATURE_DICTIONARY_V0_2.json) preserve all 142 v0.1 field IDs and add the pre-freeze `independent_target_ref` control, for 143 records with 17 attributes each.
+- The revised proposal clarifies partial-xG rejection, actual pre-event scoreboard state, pre-freeze sporting targets versus post-freeze provider mappings, immutable source clocks, reviewed versus unverified source classes, coach identity and rest/target-specific evaluation. The original high-level plan and all deferred research decisions remain traceable.
+- `Daily-NHL` remains empty as verified on 2026-10-10. This checkpoint implements no source adapter, feature pipeline, model or automation and changes no certified authority, Bridge registration or active program priority.
+
+**Next NHL documentation/research step:** build the source coverage and point-in-time acquisition matrix for the core proposed fields, recording source/schema/history/revisions/clocks, identity and exposure reconciliation, access/rights, freshness, and field-level support. Detailed work in `Daily-NHL` requires a separately bounded owner-scoped turn, registration as required, and local SB-0 governance/architecture before implementation. Dictionary definitions and candidate windows are not empirical feature-selection results.
+
+**Exact next core TDLA step remains A-11 Retry / Timeout / Idempotency Architecture.** This NHL checkpoint is a supplemental planning record and does not advance or replace that core milestone.

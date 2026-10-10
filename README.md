@@ -96,6 +96,7 @@ It does **not** own sport intelligence and it does **not** replace Daily-Data-Co
 
 ## Governing documents
 
+- [NHL planning guide and Feature Dictionary v0.2](docs/GrokBot%20OpenAI%20Bridge/sport-build-boundaries/nhl/README.md) — proposed sport planning companion; implementation authority remains in Daily-NHL after its own governance and authorization.
 - `AGENTS.md` — repository operating constitution and mandatory documentation/change-record rules.
 - `docs/architecture/README.md` — architecture index and status.
 - `docs/architecture/A00-A04_AUTOMATION_FOUNDATION_V1.md` + `A00-A04_FOUNDATION_ADDENDUM_V1_1.md` — certified foundation.

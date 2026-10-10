@@ -26,7 +26,7 @@ The current GitHub sport-repository catalog is:
 - `Daily-WNBA` -> `DAILY_WNBA_BUILD_BOUNDARY_V1.md` — existing empty repo
 - `Daily-NCAAB` -> `DAILY_NCAAB_BUILD_BOUNDARY_V1.md` — existing empty repo; **men's college basketball**
 - `Daily-NCAAWB` -> `DAILY_NCAAWB_BUILD_BOUNDARY_V1.md` — existing empty repo; **women's college basketball**
-- `Daily-NHL` -> `DAILY_NHL_BUILD_BOUNDARY_V1.md` — existing empty repo
+- `Daily-NHL` -> [NHL build boundary](DAILY_NHL_BUILD_BOUNDARY_V1.md) — existing empty repo, verified 2026-10-10; [detailed planning guide](nhl/README.md) and [Feature Dictionary v0.2](nhl/FEATURE_DICTIONARY_V0_2.md) are proposed coordination documents
 - `Daily-Soccer` -> `DAILY_SOCCER_BUILD_BOUNDARY_V1.md` — existing empty repo; multi-competition, including separately validated men's and women's competitions
 - `Daily-Tennis` -> `DAILY_TENNIS_BUILD_BOUNDARY_V1.md` — existing empty repo
 - `Daily-Golf` -> `DAILY_GOLF_BUILD_BOUNDARY_V1.md` — existing empty repo
